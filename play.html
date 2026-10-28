@@ -2379,7 +2379,9 @@
   }
   #ab-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
   #ab-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
-  #ab-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+  #ab-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:0; }
+  #ab-modal h3 + p { margin-bottom:0; }
+  #ab-modal p + .ab-note { margin-top:12px; }
   #ab-modal p strong { color:rgba(255,255,255,0.9); font-weight:600; }
   #ab-modal .ab-note {
     font-size:0.78rem; line-height:1.5; color:rgba(255,255,255,0.42);
@@ -3584,7 +3586,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h12m0 0-4-4m4 4-4 4M17 17H5m0 0 4 4m-4-4 4-4"/></svg>
     </div>
     <h3 id="tp-title" data-i18n="tp_title">Changement de lecteur</h3>
-    <p id="tp-p1" data-i18n="tp_p1">Aucun lecteur NETFLOX n'a pu lire ce contenu. Nous poursuivons avec un lecteur de l'onglet <strong>« Autres lecteurs »</strong>.</p>
+    <p id="tp-p1" data-i18n="tp_p1">Aucun lecteur NETFLOX n'a pu lire ce contenu. Nous poursuivons avec un lecteur de l'onglet <strong style="white-space:nowrap">« Autres lecteurs »</strong>.</p>
     <p id="tp-p2" data-i18n="tp_p2">Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.</p>
     <div class="ab-btns">
       <button class="ab-action" id="tp-ok-btn" onclick="closeThirdPartyNotice()" data-i18n="tp_btn">Compris</button>
@@ -4538,7 +4540,7 @@ const I18N = {
   ab_btn_install_edge: { fr: 'Ouvrir dans Edge', en: 'Open in Edge' },
   ab_btn_proceed: { fr: 'J\'ai compris', en: 'Got it' },
   tp_title: { fr: 'Changement de lecteur', en: 'Player change' },
-  tp_p1: { fr: 'Aucun lecteur NETFLOX n\'a pu lire ce contenu. Nous poursuivons avec un lecteur de l\'onglet <strong>« Autres lecteurs »</strong>.', en: 'No NETFLOX player was able to play this content. We are continuing with a player from the <strong>“Other players”</strong> tab.' },
+  tp_p1: { fr: 'Aucun lecteur NETFLOX n\'a pu lire ce contenu. Nous poursuivons avec un lecteur de l\'onglet <strong style="white-space:nowrap">« Autres lecteurs »</strong>.', en: 'No NETFLOX player was able to play this content. We are continuing with a player from the <strong style="white-space:nowrap">“Other players”</strong> tab.' },
   tp_p2: { fr: 'Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.', en: 'You can return to a NETFLOX player at any time from the Sources menu.' },
   tp_btn: { fr: 'Compris', en: 'Got it' },
   ext_title: { fr: 'Extension NETFLOX requise', en: 'NETFLOX extension required' },
@@ -8176,6 +8178,7 @@ function finalizeReconnectionSuccess() {
   // confirmation ci-dessus.
   srcReconnectLastResolvedAt = Date.now();
   hideFreezeFrame();
+  hideSpinner(); // reconnexion résolue : le cercle peut enfin disparaître
 }
 
 function clearHLS() {
@@ -12563,7 +12566,7 @@ function showNotFoundPage(message) {
     : 'This title is no longer available or does not exist. It may have been removed from the catalogue.');
   // On coupe tout ce qui tournait derrière (lecture, popups, spinner).
   try { if (video) video.pause(); } catch (e) {}
-  try { hideSpinner(); } catch (e) {}
+  try { hideSpinner(true); } catch (e) {}
   try { hideSourceErrorPopup(); } catch (e) {}
   try { const f = document.getElementById('embed-frame'); if (f) f.src = 'about:blank'; } catch (e) {}
   let host = document.getElementById('nf-404');
@@ -12768,7 +12771,15 @@ function switchSettingsTab(tab) {
 
 // ── SPINNER / ERROR ──
 function showSpinner() { pw.classList.add('buffering'); showCtrls(); }
-function hideSpinner() { pw.classList.remove('buffering'); }
+// Pendant un cycle de reconnexion (srcReconnectionActive), chaque tentative relance la source :
+// les événements intermédiaires (manifeste lu, canplay, erreur fatale) appelaient hideSpinner(),
+// ce qui faisait réapparaître brièvement l'icône pause entre deux tours de cercle. On garde donc
+// le cercle affiché EN CONTINU tant que la reconnexion n'est pas résolue (force = true pour
+// l'enlever d'office, ex: page 404).
+function hideSpinner(force) {
+  if (!force && srcReconnectionActive) return;
+  pw.classList.remove('buffering');
+}
 function showError(msg) { document.getElementById('error-text').textContent=msg; document.getElementById('error-msg').style.display='flex'; }
 function hideError() { document.getElementById('error-msg').style.display='none'; }
 
@@ -13250,7 +13261,7 @@ function goToNextSourceAfterError() {
   } else {
     // Plus aucune source suivante disponible dans la liste : ticket 404, puis
     // retour automatique à l'accueil du site.
-    hideSpinner();
+    hideSpinner(true);
     showNotFoundPage();
   }
 }
