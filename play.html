@@ -85,6 +85,9 @@
   #gather-backdrop.show { opacity:1; }
   #gather-visual, .gather-copy, #gather-screen .gather-sub { position:relative; z-index:1; }
 
+  /* Survol : le logo grossit légèrement */
+  #gather-target img { transition:scale 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  #gather-target img:hover { scale:1.06; }
   #gather-visual { position:relative; width:76px; height:76px; }
   #gather-glow {
     position:absolute; inset:-16px; border-radius:50%;
@@ -428,6 +431,16 @@
     opacity:0; transform:translateY(-4px); transition:opacity 0.3s, transform 0.3s;
   }
   #player-wrap.cv #title-info { opacity:1; transform:translateY(0); }
+  #media-title img { transition:scale 0.3s cubic-bezier(0.34,1.56,0.64,1); transform-origin:left center; }
+  #media-title img:hover, #media-title img.hov { scale:1.06; }
+  #title-poster { transition:scale 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  #title-poster:hover, #title-poster.hov { scale:1.06; }
+  #up-next-card .up-next-poster { transition:scale 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  #up-next-card .up-next-poster:hover { scale:1.06; }
+  .ap-media img { transition:scale 0.5s cubic-bezier(0.22,1,0.36,1); }
+  .ap-media:hover img { scale:1.05; }
+  .ep-thumb.film-thumb img { transition:scale 0.35s cubic-bezier(0.22,1,0.36,1); }
+  .ep-thumb.film-thumb:hover img { scale:1.07; }
   #title-poster {
     width:76px; height:105px; border-radius:6px; overflow:hidden;
     box-shadow:0 4px 12px rgba(0,0,0,0.5); background:#222;
@@ -788,7 +801,18 @@
     border-radius:10px; padding:0 18px; font-weight:700; cursor:pointer; font-size:0.87rem; transition:background 0.15s;
   }
   .wp-join-btn:hover { background:rgba(255,255,255,0.16); }
-  .wp-join-error { padding:6px 24px 0; color:#f87171; font-size:0.77rem; }
+  .wp-join-error {
+    display:flex; align-items:center; gap:9px; margin:8px 24px 0; padding:9px 12px; border-radius:12px;
+    background:linear-gradient(135deg, rgba(220,38,38,0.2), rgba(220,38,38,0.07));
+    border:1px solid rgba(248,113,113,0.36); color:#ffd5d5; font-size:0.78rem; font-weight:600; line-height:1.4;
+    animation:wp-err-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .wp-join-error::before {
+    content:'!'; width:20px; height:20px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red)); color:#fff;
+    font-size:0.75rem; font-weight:800; box-shadow:0 2px 8px rgba(220,38,38,0.45);
+  }
   .wp-pseudo-input {
     width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14);
     color:#fff; border-radius:10px; padding:11px 14px; font-size:0.92rem; font-family:'Outfit',Arial,sans-serif;
@@ -806,12 +830,34 @@
   .wp-pseudo-field .wp-section-label { margin-bottom:6px; }
   .wp-pseudo-sub { margin:10px 0 0; color:rgba(255,255,255,0.4); font-size:0.76rem; line-height:1.4; }
   .wp-pseudo-error {
-    display:flex; align-items:center; gap:8px; margin:10px 0 0; padding:9px 12px; border-radius:8px;
-    background:rgba(220,38,38,0.16); border:1px solid rgba(220,38,38,0.4); color:#fecaca;
-    font-size:0.79rem; font-weight:600; line-height:1.4;
+    display:flex; align-items:center; gap:10px; margin:10px 0 0; padding:10px 14px 10px 10px; border-radius:12px;
+    background:linear-gradient(135deg, rgba(220,38,38,0.22), rgba(220,38,38,0.07));
+    border:1px solid rgba(248,113,113,0.4); color:#ffd9d9;
+    font-size:0.8rem; font-weight:600; line-height:1.4; text-align:left;
+    box-shadow:0 8px 22px rgba(220,38,38,0.14), inset 0 1px 0 rgba(255,255,255,0.06);
+    animation:wp-err-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
   }
-  .wp-pseudo-error::before { content:'⚠'; font-size:0.9rem; flex-shrink:0; }
-  .wp-pseudo-input.wp-input-error { border-color:#ef4444; background:rgba(220,38,38,0.08); }
+  .wp-pseudo-error::before {
+    content:'!'; width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red)); color:#fff;
+    font-size:0.85rem; font-weight:800; box-shadow:0 3px 10px rgba(220,38,38,0.5);
+  }
+  @keyframes wp-err-in {
+    0%   { opacity:0; transform:translateY(-6px) scale(0.97); }
+    45%  { opacity:1; transform:translateX(-4px); }
+    65%  { transform:translateX(4px); }
+    85%  { transform:translateX(-2px); }
+    100% { opacity:1; transform:translateX(0) scale(1); }
+  }
+  @keyframes wp-input-shake {
+    0%,100% { transform:translateX(0); } 20% { transform:translateX(-5px); }
+    40% { transform:translateX(5px); } 60% { transform:translateX(-3px); } 80% { transform:translateX(3px); }
+  }
+  .wp-pseudo-input.wp-input-error {
+    border-color:#ef4444; background:rgba(220,38,38,0.1);
+    box-shadow:0 0 0 3px rgba(239,68,68,0.2); animation:wp-input-shake 0.38s ease;
+  }
 
   .wp-live-card { margin:18px 20px 0; padding:16px 18px; border-radius:12px; background:rgba(220,38,38,0.08); border:1px solid rgba(220,38,38,0.22); }
   .wp-live-card .wp-status { padding:0; display:flex; align-items:center; color:#fff; font-size:0.85rem; font-weight:600; }
@@ -1136,39 +1182,51 @@
 
   /* ── POPUP "Watch Party terminée" — remplace l'ancien alert() natif ── */
   #wp-ended-overlay {
-    display:none; position:fixed; inset:0; z-index:950;
-    background:rgba(0,0,0,0.6); backdrop-filter:blur(3px);
-    align-items:center; justify-content:center;
+    position:fixed; inset:0; z-index:2000;
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
+    display:none; align-items:center; justify-content:center; padding:20px;
     opacity:0; transition:opacity 0.25s ease;
   }
   #wp-ended-overlay.show { display:flex; }
   #wp-ended-overlay.show.in { opacity:1; }
   #wp-ended-card {
-    width:340px; max-width:88vw;
-    background:rgba(16,16,16,0.98); border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px; padding:28px 26px 22px; text-align:center;
-    box-shadow:0 24px 70px rgba(0,0,0,0.6);
-    transform:translateY(10px) scale(0.96); transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
+    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    font-family:'Outfit',sans-serif; text-align:center;
+    transform:translateY(8px) scale(0.94); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
   }
   #wp-ended-overlay.show.in #wp-ended-card { transform:translateY(0) scale(1); }
   #wp-ended-icon {
     width:52px; height:52px; margin:0 auto 16px; border-radius:50%;
-    background:rgba(220,38,38,0.14); display:flex; align-items:center; justify-content:center;
-    color:var(--red-h);
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(220,38,38,0.35); color:#fff;
   }
-  /* Variante "problème technique" (icône warning) : ambre plutôt que rouge,
-     pour ne pas donner l'impression d'un bannissement. */
-  #wp-ended-card.warn #wp-ended-icon { background:rgba(220,38,38,0.14); color:#f87171; }
-  #wp-ended-card.warn button { background:#dc2626; }
-  #wp-ended-card h3 { font-size:1.08rem; font-weight:700; letter-spacing:-0.01em; margin-bottom:8px; }
-  #wp-ended-card p { color:rgba(255,255,255,0.55); font-size:0.86rem; line-height:1.5; margin-bottom:22px; }
-  #wp-ended-card button {
-    width:100%; background:var(--red); border:none; color:#fff; font-family:'Outfit',sans-serif;
-    font-weight:600; font-size:0.92rem; padding:12px; border-radius:10px;
-    cursor:pointer; transition:background 0.15s, transform 0.15s;
+  #wp-ended-icon svg { width:26px; height:26px; color:#fff; }
+  #wp-ended-card h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
+  #wp-ended-card p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+  #wp-ended-card .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  #wp-ended-card button.ab-action {
+    width:100%; border:none; border-radius:12px; padding:13px 16px;
+    font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
+    cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
   }
-  #wp-ended-card button:hover { background:var(--red-h); }
-  #wp-ended-card button:active { transform:scale(0.97); }
+  #wp-ended-card button.ab-action:active { transform:scale(0.98); }
+  #wp-ended-card button.ab-primary {
+    padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff;
+  }
+  #wp-ended-card button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
+  #wp-ended-card button.ab-primary:active { transform:scale(0.98); }
+  #wp-ended-card button.ab-ghost {
+    background:none; color:rgba(255,255,255,0.55); padding:12px; font-size:0.95rem; font-weight:700;
+    border:1px solid transparent; border-top:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-top:4px; padding-top:16px;
+    transition:color 0.2s, transform 0.15s;
+  }
+  #wp-ended-card button.ab-ghost:hover { color:rgba(255,255,255,0.75); transform:scale(1.03); }
+  #wp-ended-card button.ab-ghost:active { transform:scale(0.98); }
+  #wp-ended-card button.ab-ghost:focus,
+  #wp-ended-card button.ab-ghost:focus-visible { outline:none; }
 
   /* ── POPUP "Le film/épisode est terminé" (hôte en Watch Party, et
      version solo hors Watch Party — mêmes styles, ids différents) ──
@@ -1264,39 +1322,122 @@
     #wp-autoplay-card h3, #solo-autoplay-card h3 { font-size:1.12rem; }
   }
 
-  /* ── POPUP "Rejoindre une Watch Party" (pseudo requis avant de rejoindre via un lien) ── */
+  /* ── POPUP "Rejoindre une Watch Party" (pseudo requis avant de rejoindre via un lien)
+     Même gabarit que les autres popups (#ab-modal / #mc-modal) : 400px max, fond dégradé,
+     icône blanche sur pastille rouge vif. ── */
   #wp-join-prompt-overlay {
-    display:none; position:fixed; inset:0; z-index:950;
-    background:rgba(0,0,0,0.6); backdrop-filter:blur(3px);
-    align-items:center; justify-content:center;
-    opacity:0; transition:opacity 0.25s ease;
+    display:none; position:fixed; inset:0; z-index:2000;
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
+    align-items:center; justify-content:center; padding:20px;
+    opacity:0; transition:opacity 0.4s ease;
   }
   #wp-join-prompt-overlay.show { display:flex; }
   #wp-join-prompt-overlay.show.in { opacity:1; }
+  #wp-join-prompt-card { opacity:0; transform:scale(0.94) translateY(14px); }
+  #wp-join-prompt-overlay.show.in #wp-join-prompt-card { animation:wpjp-card-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.06s both; }
+  @keyframes wpjp-card-in { from { opacity:0; transform:scale(0.94) translateY(14px); } to { opacity:1; transform:scale(1) translateY(0); } }
   #wp-join-prompt-card {
-    width:340px; max-width:88vw;
-    background:rgba(16,16,16,0.98); border:1px solid rgba(255,255,255,0.1);
-    border-radius:16px; padding:28px 26px 22px; text-align:center;
-    box-shadow:0 24px 70px rgba(0,0,0,0.6);
-    transform:translateY(10px) scale(0.96); transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
+    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    font-family:'Outfit',sans-serif; text-align:center;
   }
-  #wp-join-prompt-overlay.show.in #wp-join-prompt-card { transform:translateY(0) scale(1); }
   #wp-join-prompt-icon {
     width:52px; height:52px; margin:0 auto 16px; border-radius:50%;
-    background:rgba(220,38,38,0.14); display:flex; align-items:center; justify-content:center;
-    color:var(--red-h);
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 20px rgba(220,38,38,0.35); color:#fff;
   }
-  #wp-join-prompt-card h3 { font-size:1.08rem; font-weight:700; letter-spacing:-0.01em; margin-bottom:8px; }
-  #wp-join-prompt-card .wp-join-prompt-sub { color:rgba(255,255,255,0.55); font-size:0.86rem; line-height:1.5; margin:0 0 18px; }
-  #wp-join-prompt-card .wp-pseudo-input { margin-bottom:12px; text-align:left; }
-  #wp-join-prompt-card .wp-pseudo-error { text-align:left; margin:0 0 12px; }
+  #wp-join-prompt-icon svg { width:26px; height:26px; color:#fff; }
+  #wp-join-prompt-card h3 { font-size:1.15rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.01em; color:#fff; }
+  #wp-join-prompt-card .wp-join-prompt-sub { color:rgba(255,255,255,0.6); font-size:0.87rem; line-height:1.55; margin:0 0 16px; }
+  /* ── FOND du popup de pseudo : le film / la série qu'on va rejoindre ──
+     Backdrop flouté plein écran, avec l'affiche à gauche et le logo à droite du popup
+     (écrans larges) ou le logo en haut (écrans étroits). Le popup reste celui de base. */
+  #wp-join-bg {
+    position:fixed; inset:0; z-index:1990; display:none; overflow:hidden; pointer-events:none;
+    background:radial-gradient(circle at 50% 42%, rgba(220,38,38,0.10), transparent 60%), #0a0a0a;
+    opacity:0; transition:opacity 0.5s ease;
+  }
+  #wp-join-bg.show { display:block; }
+  #wp-join-bg.in { opacity:1; }
+  #wp-join-bg .wpjp-img {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;
+    opacity:0; transition:opacity 1.8s ease, filter 1.2s ease, transform 1.2s ease;
+  }
+  #wp-join-bg .wpjp-fg { display:contents; }
+  /* Tant que la classification d'âge n'est pas passée : rien d'identifiable (ni fond, ni affiche, ni logo / titre) */
+  #wp-join-bg.locked .wpjp-img { filter:blur(42px); transform:scale(1.15); }
+  #wp-join-bg.locked .wpjp-poster, #wp-join-bg.locked .wpjp-info { filter:blur(48px); }
+  #wp-join-bg .wpjp-poster { transition:filter 1.2s ease, scale 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+  #wp-join-bg .wpjp-info { transition:filter 1.2s ease; }
+  #wp-join-bg .wpjp-logo { transition:opacity 0.6s ease, scale 0.35s cubic-bezier(0.34,1.56,0.64,1); transform-origin:left center; }
+  #wp-join-bg .wpjp-title { transition:scale 0.35s cubic-bezier(0.34,1.56,0.64,1); transform-origin:left center; }
+  /* .hov est posé en JS (le popup de pseudo couvre le fond, donc :hover ne peut pas marcher) */
+  #wp-join-bg .wpjp-poster.hov, #wp-join-bg .wpjp-logo.hov, #wp-join-bg .wpjp-title.hov { scale:1.06; }
+  #wp-join-bg .wpjp-img.ok, #wp-join-bg .wpjp-poster img.ok, #wp-join-bg .wpjp-logo.ok { opacity:1; }
+  #wp-join-bg::after {
+    content:''; position:absolute; inset:0; z-index:1;
+    background:radial-gradient(ellipse 640px 520px at 50% 46%, rgba(0,0,0,0.55), transparent 70%),
+               rgba(5,5,7,0.71);
+  }
+  #wp-join-bg .wpjp-poster {
+    position:absolute; z-index:2; top:50%; right:calc(50% + 240px);
+    width:210px; aspect-ratio:2/3; border-radius:14px; overflow:hidden;
+    background:rgba(255,255,255,0.06);
+    box-shadow:0 34px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.14);
+    animation:wpjp-rise-l 0.9s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+  }
+  #wp-join-bg .wpjp-poster img { width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity 0.6s ease; }
+  #wp-join-bg .wpjp-info {
+    position:absolute; z-index:2; top:50%; left:calc(50% + 240px); width:260px;
+    display:flex; flex-direction:column; align-items:flex-start; gap:18px;
+    animation:wpjp-rise-r 0.9s cubic-bezier(0.22,1,0.36,1) 0.2s both;
+  }
+  #wp-join-bg .wpjp-logo {
+    display:block; max-width:100%; max-height:96px; width:auto; height:auto; object-fit:contain; object-position:left center;
+    filter:drop-shadow(0 6px 20px rgba(0,0,0,0.8)); opacity:0; transition:opacity 0.6s ease;
+  }
+  #wp-join-bg .wpjp-title {
+    font-size:2rem; font-weight:800; color:#fff; line-height:1.1; letter-spacing:-0.03em;
+    text-shadow:0 4px 24px rgba(0,0,0,0.8);
+    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; word-break:break-word;
+  }
+  #wp-join-bg .wpjp-ep {
+    display:inline-flex; align-items:center; gap:9px; font-size:0.82rem; font-weight:700; letter-spacing:0.02em; color:#fff;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+    border-radius:24px; padding:8px 16px; backdrop-filter:blur(8px);
+  }
+  #wp-join-bg .wpjp-ep::before { content:''; width:3px; height:13px; border-radius:2px; background:var(--red-h); }
+  @keyframes wpjp-rise-l { from { opacity:0; transform:translate(-30px,-50%); } to { opacity:1; transform:translate(0,-50%); } }
+  @keyframes wpjp-rise-r { from { opacity:0; transform:translate(30px,-50%); } to { opacity:1; transform:translate(0,-50%); } }
+  @keyframes wpjp-rise-t { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+  /* Écrans étroits : pas de place sur les côtés -> le logo passe en haut, centré, l'affiche disparaît */
+  @media (max-width:1099px) {
+    #wp-join-bg .wpjp-poster { display:none; }
+    #wp-join-bg .wpjp-info {
+      top:clamp(22px, 6vh, 64px); left:0; right:0; width:auto; align-items:center; text-align:center; gap:12px;
+      animation-name:wpjp-rise-t;
+    }
+    #wp-join-bg .wpjp-logo { max-height:60px; max-width:80%; object-position:center; transform-origin:center; }
+    #wp-join-bg .wpjp-title { transform-origin:center; }
+    #wp-join-bg .wpjp-title { font-size:1.4rem; -webkit-line-clamp:2; padding:0 20px; }
+    #wp-join-bg .wpjp-ep { font-size:0.76rem; padding:6px 14px; }
+  }
+  @media (max-width:1099px) and (max-height:640px) { #wp-join-bg .wpjp-info { display:none; } }
+  /* Quand le fond du film est là, le popup n'a plus besoin de flouter la page derrière */
+  #wp-join-bg.show ~ #wp-join-prompt-overlay { background:rgba(0,0,0,0.12); backdrop-filter:none; }
+  #wp-join-bg.show ~ #mc-overlay { background:rgba(0,0,0,0.3); backdrop-filter:none; }
+  #wp-join-prompt-card .wp-pseudo-input { margin-bottom:12px; text-align:left; padding:13px 16px; font-size:0.95rem; border-radius:12px; }
+  #wp-join-prompt-card .wp-pseudo-error { margin:0 0 12px; }
   #wp-join-prompt-card button.wp-join-prompt-confirm {
     width:100%; background:var(--red); border:none; color:#fff; font-family:'Outfit',sans-serif;
-    font-weight:600; font-size:0.92rem; padding:12px; border-radius:10px;
-    cursor:pointer; transition:background 0.15s, transform 0.15s;
+    font-weight:700; font-size:1rem; padding:16px; border-radius:12px;
+    cursor:pointer; transition:background 0.2s, transform 0.15s; margin-top:2px;
   }
-  #wp-join-prompt-card button.wp-join-prompt-confirm:hover { background:var(--red-h); }
-  #wp-join-prompt-card button.wp-join-prompt-confirm:active { transform:scale(0.97); }
+  #wp-join-prompt-card button.wp-join-prompt-confirm:hover { background:var(--red-h); transform:scale(1.03); }
+  #wp-join-prompt-card button.wp-join-prompt-confirm:active { transform:scale(0.98); }
+  #wp-join-prompt-card button.wp-join-prompt-confirm:disabled { opacity:0.7; cursor:default; transform:none; }
 
   /* volume */
   .volume-wrap { display:flex; align-items:center; gap:6px; }
@@ -2171,6 +2312,11 @@
     display:none; align-items:center; justify-content:center; padding:20px;
   }
   #mc-overlay.open { display:flex; }
+  /* Sortie en fondu (évite que le popup disparaisse d'un coup quand on enchaîne sur le pseudo) */
+  #mc-overlay.closing { animation:mc-fade-out 0.32s ease forwards; pointer-events:none; }
+  #mc-overlay.closing #mc-modal { animation:mc-modal-out 0.32s cubic-bezier(0.4,0,1,1) forwards; }
+  @keyframes mc-fade-out { to { opacity:0; } }
+  @keyframes mc-modal-out { to { opacity:0; transform:scale(0.95) translateY(-10px); } }
   #mc-modal {
     width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
     border:1px solid rgba(255,255,255,0.1); border-radius:20px;
@@ -2272,6 +2418,41 @@
   #ab-modal button.ab-ghost:active { transform:scale(0.98); }
   #ab-modal button.ab-ghost:focus,
   #ab-modal button.ab-ghost:focus-visible { outline:none; }
+
+  /* ── POPUP "BASCULE VERS UN LECTEUR TIERS" (source en erreur -> changement auto vers « Autres lecteurs ») ── */
+  #tp-overlay {
+    position:fixed; inset:0; z-index:2100;
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
+    display:none; align-items:center; justify-content:center; padding:20px;
+    opacity:0; transition:opacity 0.25s ease;
+  }
+  #tp-overlay.open { display:flex; }
+  #tp-overlay.open.in { opacity:1; }
+  #tp-modal {
+    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
+    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    font-family:'Outfit',sans-serif; text-align:center;
+  }
+  #tp-modal .ab-icon {
+    width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
+  }
+  #tp-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
+  #tp-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
+  #tp-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+  #tp-modal p strong { color:rgba(255,255,255,0.9); font-weight:600; }
+  #tp-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  #tp-modal button.ab-action {
+    width:100%; border:none; border-radius:12px; padding:16px 16px;
+    font-family:'Outfit',sans-serif; font-weight:700; font-size:1rem;
+    background:var(--red); color:#fff; cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
+  }
+  #tp-modal button.ab-action:hover { background:var(--red-h); transform:scale(1.03); }
+  #tp-modal button.ab-action:active { transform:scale(0.98); }
 
   /* ── POPUP "EXTENSION NETFLOX REQUISE" (403 finepulfe) ── */
   #ext-overlay {
@@ -2402,38 +2583,77 @@
   #wp-ext-warn-modal button.ab-ghost:focus,
   #wp-ext-warn-modal button.ab-ghost:focus-visible { outline:none; }
 
-  /* ── POPUP "AUCUN LECTEUR DANS LA LANGUE CHOISIE" ── */
-  #nolang-overlay {
+  /* ── POPUPS "LANGUE / SOURCE INDISPONIBLE" (nolang + nosource, style commun) ── */
+  #nolang-overlay, #nosource-overlay {
     position:fixed; inset:0; z-index:2000;
-    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
+    background:radial-gradient(ellipse 70% 50% at 50% 35%, rgba(220,38,38,0.16), transparent 70%), rgba(0,0,0,0.82);
+    backdrop-filter:blur(14px) saturate(125%); -webkit-backdrop-filter:blur(14px) saturate(125%);
     display:none; align-items:center; justify-content:center; padding:20px;
   }
-  #nolang-overlay.open { display:flex; }
-  #nolang-modal {
-    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
-    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
-    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
-    animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    font-family:'Outfit',sans-serif; text-align:center;
+  #nolang-overlay.open, #nosource-overlay.open { display:flex; animation:nx-fade 0.25s ease both; }
+  #nolang-modal, #nosource-modal {
+    position:relative; width:100%; max-width:420px; overflow:hidden;
+    background:linear-gradient(165deg, #212125 0%, #131315 65%);
+    border:1px solid rgba(255,255,255,0.09); border-radius:26px;
+    padding:38px 28px 24px; text-align:center; font-family:'Outfit',sans-serif;
+    box-shadow:0 40px 90px rgba(0,0,0,0.75), 0 0 90px -24px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation:nx-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-  #nolang-modal .ab-icon {
-    width:52px; height:52px; border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
+  #nolang-modal::before, #nosource-modal::before {
+    content:''; position:absolute; top:0; left:50%; width:62%; height:2px; transform:translateX(-50%);
+    background:linear-gradient(90deg, transparent, var(--red-h), transparent);
+  }
+  #nolang-modal::after, #nosource-modal::after {
+    content:''; position:absolute; top:-90px; left:50%; width:260px; height:180px; transform:translateX(-50%);
+    background:radial-gradient(closest-side, rgba(220,38,38,0.28), transparent); pointer-events:none;
+  }
+  #nolang-modal > *, #nosource-modal > * { position:relative; z-index:1; }
+  #nolang-modal .nx-icon, #nosource-modal .nx-icon {
+    position:relative; width:70px; height:70px; border-radius:50%; margin:0 auto 20px;
     display:flex; align-items:center; justify-content:center;
-    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
+    background:radial-gradient(circle at 30% 28%, var(--red-h), var(--red) 70%);
+    box-shadow:0 12px 30px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
   }
-  #nolang-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
-  #nolang-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
-  #nolang-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:4px; }
-  #nolang-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
-  #nolang-modal button.ab-action {
-    width:100%; border:none; border-radius:12px; padding:13px 16px;
-    font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
-    cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
+  #nolang-modal .nx-icon::after, #nosource-modal .nx-icon::after {
+    content:''; position:absolute; inset:-7px; border-radius:50%;
+    border:1.5px solid rgba(239,68,68,0.55); animation:nx-ring 2.2s ease-out infinite;
   }
-  #nolang-modal button.ab-action:active { transform:scale(0.98); }
-  #nolang-modal button.ab-primary { padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff; }
-  #nolang-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
+  #nolang-modal .nx-icon svg, #nosource-modal .nx-icon svg { width:32px; height:32px; color:#fff; }
+  #nolang-modal h3, #nosource-modal h3 {
+    font-size:1.3rem; font-weight:800; margin-bottom:10px; letter-spacing:-0.02em; color:#fff;
+  }
+  #nolang-modal p, #nosource-modal p {
+    font-size:0.9rem; line-height:1.6; color:rgba(255,255,255,0.62); margin:0 auto; max-width:340px;
+  }
+  .nx-route { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:20px 0 2px; }
+  .nx-route:empty { display:none; }
+  .nx-chip {
+    padding:7px 15px; border-radius:999px; font-size:0.78rem; font-weight:600; letter-spacing:0.01em;
+    border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.85);
+  }
+  .nx-chip.off { color:rgba(255,255,255,0.38); border-color:rgba(255,255,255,0.07); text-decoration:line-through; text-decoration-color:rgba(239,68,68,0.8); }
+  .nx-chip.on  { color:#fff; background:rgba(220,38,38,0.18); border-color:rgba(239,68,68,0.55); box-shadow:0 0 18px -4px rgba(220,38,38,0.55); }
+  .nx-arrow { width:20px; height:20px; color:var(--red-h); flex:none; animation:nx-nudge 1.4s ease-in-out infinite; }
+  #nolang-modal .ab-btns, #nosource-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:24px; }
+  #nolang-modal button.ab-action, #nosource-modal button.ab-action {
+    width:100%; border:none; border-radius:14px; cursor:pointer; text-align:center;
+    font-family:'Outfit',sans-serif; transition:transform 0.15s, box-shadow 0.2s, filter 0.2s;
+  }
+  #nolang-modal button.ab-primary, #nosource-modal button.ab-primary {
+    padding:16px; font-size:1rem; font-weight:700; color:#fff;
+    background:linear-gradient(135deg, var(--red-h), var(--red));
+    box-shadow:0 12px 26px -8px rgba(220,38,38,0.7), inset 0 1px 0 rgba(255,255,255,0.22);
+  }
+  #nolang-modal button.ab-primary:hover, #nosource-modal button.ab-primary:hover { transform:translateY(-1px) scale(1.02); filter:brightness(1.08); }
+  #nolang-modal button.ab-action:active, #nosource-modal button.ab-action:active { transform:scale(0.98); }
+  @keyframes nx-fade  { from{opacity:0;} to{opacity:1;} }
+  @keyframes nx-pop   { from{opacity:0; transform:scale(0.9) translateY(18px);} to{opacity:1; transform:scale(1) translateY(0);} }
+  @keyframes nx-ring  { 0%{transform:scale(0.9); opacity:0.9;} 100%{transform:scale(1.5); opacity:0;} }
+  @keyframes nx-nudge { 0%,100%{transform:translateX(0);} 50%{transform:translateX(4px);} }
+  @media (prefers-reduced-motion: reduce) {
+    #nolang-overlay.open, #nosource-overlay.open, #nolang-modal, #nosource-modal,
+    #nolang-modal .nx-icon::after, #nosource-modal .nx-icon::after, .nx-arrow { animation:none; }
+  }
 
   /* ── POPUP "PETIT PROBLÈME TECHNIQUE" (source en erreur -> changement auto) ── */
   #src-error-overlay {
@@ -2552,38 +2772,6 @@
   #unreleased-modal button.ab-primary { padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff; }
   #unreleased-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
 
-  /* ── POPUP "AUCUNE SOURCE DISPONIBLE" (ni française ni anglaise) — même style que "film récent" ── */
-  #nosource-overlay {
-    position:fixed; inset:0; z-index:2000;
-    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
-    display:none; align-items:center; justify-content:center; padding:20px;
-  }
-  #nosource-overlay.open { display:flex; }
-  #nosource-modal {
-    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
-    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
-    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
-    animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    font-family:'Outfit',sans-serif; text-align:center;
-  }
-  #nosource-modal .ab-icon {
-    width:52px; height:52px; border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
-    display:flex; align-items:center; justify-content:center;
-    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
-  }
-  #nosource-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
-  #nosource-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
-  #nosource-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:4px; }
-  #nosource-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
-  #nosource-modal button.ab-action {
-    width:100%; border:none; border-radius:12px; padding:13px 16px;
-    font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
-    cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
-  }
-  #nosource-modal button.ab-action:active { transform:scale(0.98); }
-  #nosource-modal button.ab-primary { padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff; }
-  #nosource-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
 
   /* ── ICÔNES SVG DES BOUTONS DE POPUP ──
      Dessinées en pseudo-élément (masque SVG), à droite du texte et centrées dessus : elles suivent la couleur du texte et
@@ -2734,7 +2922,7 @@
     <span class="load-lang-label" data-i18n="load_lang_label">Langue par défaut</span>
     <div class="lang-pref-toggle" id="load-lang-toggle">
       <button class="lang-pref-btn" data-lang="fr" data-i18n="lang_fr">Français</button>
-      <button class="lang-pref-btn" data-lang="en" data-i18n="lang_en">Anglais</button>
+      <button class="lang-pref-btn" data-lang="en" data-i18n="lang_en">Version Originale</button>
     </div>
   </div>
 
@@ -3327,17 +3515,22 @@
     </div>
     <h3 id="wp-ended-title" data-i18n="watchparty_ended_title">Watch Party terminée</h3>
     <p id="wp-ended-msg" data-i18n="watchparty_ended">L'hôte a terminé la Watch Party.</p>
-    <button onclick="wpCloseEndedPopup()" data-i18n="watchparty_ended_ok">Compris</button>
+    <div class="ab-btns">
+      <button class="ab-action ab-primary" onclick="wpCloseEndedPopup()" data-i18n="watchparty_ended_ok">Compris</button>
+      <button class="ab-action ab-ghost" onclick="window.location.href=NETFLOX_HOME_URL" data-i18n="watchparty_ended_home">Retourner à l'accueil</button>
+    </div>
   </div>
 </div>
 
+<!-- FOND du popup de pseudo : le film / la série qu'on s'apprête à rejoindre (backdrop flouté + affiche + logo) -->
+<div id="wp-join-bg"></div>
 <div id="wp-join-prompt-overlay" onclick="if(event.target===this) wpCancelJoinPrompt()">
   <div id="wp-join-prompt-card">
     <div id="wp-join-prompt-icon">
       <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </div>
-    <h3 data-i18n="watchparty_join_prompt_title">Rejoindre la Watch Party</h3>
-    <p class="wp-join-prompt-sub" data-i18n="watchparty_pseudo_sub">Nécessaire pour créer une Watch Party ou en rejoindre une.</p>
+    <h3 data-i18n="watchparty_join_prompt_title">Tu es invité à une Watch Party</h3>
+    <p class="wp-join-prompt-sub" data-i18n="watchparty_join_prompt_sub">Choisis un pseudo pour que les autres te reconnaissent dans le salon.</p>
     <input type="text" id="wp-join-prompt-input" class="wp-pseudo-input" maxlength="20" autocomplete="off"
       data-i18n-placeholder="watchparty_pseudo_label" placeholder="Ton pseudo"
       onkeydown="if(event.key==='Enter') wpConfirmJoinPrompt()">
@@ -3368,6 +3561,7 @@
     <h3 id="ab-title" data-i18n="ab_title">Attention aux publicités</h3>
     <p id="ab-p1" data-i18n="ab_p1">Les lecteurs de l'onglet <strong>« Autres lecteurs »</strong> sont fournis par des sites tiers et peuvent afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n'est pas responsable de leur contenu.</p>
     <p data-i18n="ab_p2">Si une pub s'ouvre : <strong>ne cliquez sur rien</strong>, fermez simplement l'onglet ou la fenêtre et revenez sur le site.</p>
+    <p data-i18n="ab_p3">Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.</p>
 
     <div class="ab-note" data-i18n="ab_note">Un adblocker est conseillé pour limiter les pubs, mais il ne les supprimera pas toutes à 100%. Pour les connaisseurs, nous conseillons aussi de mettre votre DNS sur dns.adguard.com, qui bloque une bonne partie des pubs directement au niveau du réseau.</div>
     <div class="ab-note-mobile" id="ab-note-mobile-wrap" style="display:none;">
@@ -3379,6 +3573,21 @@
       <button id="ab-install-btn" class="ab-action ab-primary pi pi-download" onclick="openAdblockInstallLink()" data-i18n="ab_btn_install">Installer un adblocker</button>
       <button id="ab-install-edge-btn" class="ab-action ab-primary pi pi-external" onclick="openEdgeInstallLink()" data-i18n="ab_btn_install_edge" style="display:none;">Ouvrir dans Edge</button>
       <button id="ab-proceed-btn" class="ab-action ab-ghost pi pi-check" onclick="confirmAdblockAndProceed()" data-i18n="ab_btn_proceed">J'ai compris</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP "BASCULE VERS UN LECTEUR TIERS" (changement auto de source vers « Autres lecteurs ») -->
+<div id="tp-overlay">
+  <div id="tp-modal">
+    <div class="ab-icon">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h12m0 0-4-4m4 4-4 4M17 17H5m0 0 4 4m-4-4 4-4"/></svg>
+    </div>
+    <h3 id="tp-title" data-i18n="tp_title">Changement de lecteur</h3>
+    <p id="tp-p1" data-i18n="tp_p1">Aucun lecteur NETFLOX n'a pu lire ce contenu. Nous poursuivons avec un lecteur de l'onglet <strong>« Autres lecteurs »</strong>.</p>
+    <p id="tp-p2" data-i18n="tp_p2">Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.</p>
+    <div class="ab-btns">
+      <button class="ab-action" id="tp-ok-btn" onclick="closeThirdPartyNotice()" data-i18n="tp_btn">Compris</button>
     </div>
   </div>
 </div>
@@ -3448,11 +3657,10 @@
 <!-- POPUP "AUCUN LECTEUR DANS LA LANGUE CHOISIE" -->
 <div id="nolang-overlay">
   <div id="nolang-modal">
-    <div class="ab-icon">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
-    </div>
+    <div class="nx-icon" id="nolang-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18"/></svg></div>
     <h3 id="nolang-title">Langue non disponible</h3>
     <p id="nolang-text"></p>
+    <div class="nx-route" id="nolang-route"></div>
     <div class="ab-btns">
       <button class="ab-action ab-primary pi pi-check" onclick="closeNoLangPopup()" data-i18n="btn_understood">Compris</button>
     </div>
@@ -3493,11 +3701,10 @@
 <!-- POPUP "AUCUNE SOURCE DISPONIBLE" (ni française ni anglaise) -->
 <div id="nosource-overlay">
   <div id="nosource-modal">
-    <div class="ab-icon">
-      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="6" width="13" height="12" rx="2"/><path d="m15 10 6-3.5v11L15 14"/><path d="m3 3 18 18"/></svg>
-    </div>
+    <div class="nx-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="6" width="13" height="12" rx="2"/><path d="m15 10 6-3.5v11L15 14"/><path d="m3 3 18 18"/></svg></div>
     <h3 id="nosource-title">Aucune source disponible</h3>
     <p id="nosource-text"></p>
+    <div class="nx-route" id="nosource-route"></div>
     <div class="ab-btns">
       <button class="ab-action ab-primary pi pi-check" onclick="closeNoAnySourcePopup()" data-i18n="btn_understood">Compris</button>
     </div>
@@ -3567,12 +3774,20 @@ const gatherScreen = document.getElementById('gather-screen');
 // avec un filtre très sombre par-dessus (on doit à peine deviner l'image). Apparition en fondu
 // (transition CSS sur .show), jamais d'un coup. On vérifie que l'image charge avant de l'appliquer ;
 // si elle échoue (ou qu'il n'y a pas de backdrop), on laisse le fond noir par défaut.
-function setGatherBackdrop(backdropPath) {
+function setGatherBackdrop(backdropPath, instant) {
   const el = document.getElementById('gather-backdrop');
   if (!backdropPath) {
     el.classList.remove('show');
     el.style.backgroundImage = '';
     return;
+  }
+  if (instant) {
+    // Même image que le fond du popup précédent (déjà en cache) : pas de fondu depuis le noir.
+    el.style.transition = 'none';
+    el.style.backgroundImage = `url('https://image.tmdb.org/t/p/w1280${backdropPath}')`;
+    el.classList.add('show');
+    void el.offsetWidth;
+    el.style.transition = '';
   }
   const url = `${TMDB_STILL}${backdropPath}`;
   const test = new Image();
@@ -3627,7 +3842,11 @@ function showGatherScreen() {
   eyebrow.textContent = preferredLang === 'fr' ? 'Préparation du flux pour' : 'Preparing your stream for';
   target.innerHTML = '<span class="gather-target-dots"><span></span><span></span><span></span></span>';
   document.getElementById('gather-episode').innerHTML = '';
-  setGatherBackdrop(null); // pas encore de titre connu : on repart du fond noir par défaut
+  // Si un fond de film est déjà affiché derrière un popup (classification / pseudo), l'écran de recherche
+  // de flux reprend EXACTEMENT la même image tout de suite : le fond ne disparaît plus pour réapparaître.
+  const presetBackdrop = wpJoinBgPresetPath();
+  setGatherBackdrop(presetBackdrop, !!presetBackdrop); // sinon : pas encore de titre connu, fond noir par défaut
+  wpJoinBgHandoff();
   gatherTargetToken++; // invalide un éventuel préchargement de logo encore en vol d'un cycle précédent
 
   clearInterval(gatherMsgInterval);
@@ -3677,7 +3896,10 @@ async function updateGatherTarget(info, season=null, episode=null) {
 
   // On précharge le logo AVANT de jouer l'animation d'entrée : comme ça le logo apparaît déjà
   // chargé, en même temps que l'animation, au lieu de "popper" par-dessus une fois l'entrée finie.
-  const logoOk = info.logoPath ? await preloadImage(`${TMDB_IMG}${info.logoPath}`) : false;
+  const gLogoPath = info.logoPath || info.fallbackLogoPath || null;
+  const gLogoW = info.logoPath ? info.logoWidth : info.fallbackLogoWidth;
+  const gLogoH = info.logoPath ? info.logoHeight : info.fallbackLogoHeight;
+  const logoOk = gLogoPath ? await preloadImage(`${TMDB_IMG}${gLogoPath}`) : false;
   if (myToken !== gatherTargetToken) return; // un titre plus récent a pris le relais entre-temps
 
   setGatherBackdrop(info.backdropPath); // a déjà son propre fondu, pas besoin d'attendre
@@ -3692,7 +3914,7 @@ async function updateGatherTarget(info, season=null, episode=null) {
 
   const subBeforeTop = document.getElementById('gather-sub').getBoundingClientRect().top;
 
-  if (logoOk) target.innerHTML = gatherTargetLogoHTML(info.title, info.logoPath, info.logoWidth, info.logoHeight);
+  if (logoOk) target.innerHTML = gatherTargetLogoHTML(info.title, gLogoPath, gLogoW, gLogoH);
   else target.textContent = info.title;
   epBadge.innerHTML = isTV
     ? `${sLabel} ${season} <span class="dot"></span> ${eLabel} ${episode}`
@@ -3927,7 +4149,11 @@ function decideAssetLang(displayTitle, enTitle, originalLang) {
   if (preferredLang === 'en') return 'en';
   if (originalLang === 'fr') return 'fr';
   if (displayTitle && enTitle) {
-    return stripLeadingArticle(displayTitle) === stripLeadingArticle(enTitle) ? 'en' : 'fr';
+    const a = stripLeadingArticle(displayTitle), b = stripLeadingArticle(enTitle);
+    // Identique, OU titre fr = titre anglais + un sous-titre français (ex. « The Rookie : Le Flic de Los
+    // Angeles ») : TMDB y mélange les affiches France et Québec, toutes taguées « fr » et impossibles à
+    // distinguer -> on reste sur l'anglais pour que l'affiche et le logo concordent.
+    return (a === b || (b.length >= 4 && a.startsWith(b + ' '))) ? 'en' : 'fr';
   }
   return 'fr'; // titre anglais indisponible : on ignore la langue d'origine
 }
@@ -3960,17 +4186,18 @@ async function tmdbFetchJson(url, attempts = 3) {
   return null; // échec temporaire (non mis en cache)
 }
 
-// Titre ANGLAIS (en-US), uniquement pour comparer avec le titre français affiché.
+// Détails ANGLAIS (en-US) : titre (pour le comparer au titre français affiché) + affiche par défaut
+// en-US (repli quand le titre est le même en fr et en anglais mais qu'aucune affiche n'est taguée « en »).
 // Renvoie null en cas d'échec (jamais mis en cache).
 const enTitleCache = new Map();
-async function getEnglishTitle(id, type) {
+async function getEnglishDetails(id, type) {
   const key = `${type}-${id}`;
   if (enTitleCache.has(key)) return enTitleCache.get(key);
   const d = await tmdbFetchJson(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=en-US`);
   if (!d) return null;
-  const t = d.title || d.name || '';
-  enTitleCache.set(key, t);
-  return t;
+  const out = { title: d.title || d.name || '', poster: d.poster_path || null };
+  enTitleCache.set(key, out);
+  return out;
 }
 
 // Images brutes (fr / en / sans langue uniquement : jamais la langue d'origine), partagées par
@@ -4001,27 +4228,48 @@ async function getTitleAssetsForLang(id, type, displayTitle, originalLang) {
   const result = { posterPath: null, logoPath: null };
   const load = () => Promise.all([
     getRawImages(id, type),
-    preferredLang === 'en' ? Promise.resolve('') : getEnglishTitle(id, type)
+    preferredLang === 'en' ? Promise.resolve({ title: '', poster: null }) : getEnglishDetails(id, type)
   ]);
-  let [data, enTitle] = await load();
-  if (!data || enTitle === null) { await new Promise(r => setTimeout(r, 1200)); [data, enTitle] = await load(); }
-  if (!data || enTitle === null) return result; // échec temporaire : rien en cache, la prochaine demande réessaiera
+  let [data, en] = await load();
+  if (!data || en === null) { await new Promise(r => setTimeout(r, 1200)); [data, en] = await load(); }
+  if (!data || en === null) return result; // échec temporaire : rien en cache, la prochaine demande réessaiera
   try {
     const posters = data.posters || [];
     const logos = data.logos || [];
-    const lang = decideAssetLang(displayTitle, enTitle, originalLang);
+    const lang = decideAssetLang(displayTitle, en.title, originalLang);
 
-    // Affiche AVEC texte, strictement dans la langue choisie (même principe que le logo).
-    // Pas d'affiche sans texte ni d'autre langue : s'il n'y en a pas, posterPath reste null et
-    // l'appelant garde l'affiche par défaut déjà récupérée via l'appel principal.
-    const bestPoster = posters.find(p => p.iso_639_1 === lang);
+    // Parmi les visuels d'une langue, TMDB en héberge parfois plusieurs (titre France ET titre Québec
+    // sont tous deux taguées « fr ») : on préfère celui de France, sinon un qui n'est pas du Canada.
+    const pickLang = (arr) => {
+      const same = arr.filter(x => x.iso_639_1 === lang);
+      return same.find(x => x.iso_3166_1 === 'FR') || same.find(x => x.iso_3166_1 !== 'CA') || same[0];
+    };
+
+    // Affiche AVEC texte, strictement dans la langue choisie. S'il n'y en a pas, posterPath reste null
+    // et l'appelant garde l'affiche par défaut déjà récupérée via l'appel principal.
+    const bestPoster = pickLang(posters);
     if (bestPoster) result.posterPath = bestPoster.file_path;
+    // Titre identique en fr et en anglais mais aucune affiche taguée « en » : affiche par défaut en-US
+    // (au lieu de retomber sur l'affiche fr-FR).
+    else if (lang === 'en' && en.poster) result.posterPath = en.poster;
 
-    const bestLogo = logos.find(l => l.iso_639_1 === lang);
+    // Logo : strictement dans la langue choisie (un logo neutre, sans langue, n'est accepté que pour 'en').
+    // Pas de logo dans cette langue -> pas de logo (le titre écrit sert de repli).
+    let bestLogo = pickLang(logos);
+    if (!bestLogo && lang === 'en') bestLogo = logos.find(l => !l.iso_639_1);
     if (bestLogo) {
       result.logoPath = bestLogo.file_path;
       result.logoWidth = bestLogo.width;
       result.logoHeight = bestLogo.height;
+    } else {
+      // Aucun logo dans la langue choisie : on garde quand même un logo « de secours » (l'autre langue,
+      // fr / en seulement) que SEUL l'écran de recherche de flux utilise — il n'y a pas d'affiche à côté,
+      // donc pas d'incohérence visible. Ailleurs (affiche + logo ensemble), on reste sur le titre écrit.
+      const order = lang === 'fr' ? ['en', ''] : ['fr'];
+      for (const l of order) {
+        const f = logos.find(x => (x.iso_639_1 || '') === l);
+        if (f) { result.fallbackLogoPath = f.file_path; result.fallbackLogoWidth = f.width; result.fallbackLogoHeight = f.height; break; }
+      }
     }
   } catch (e) { /* pas de visuel dispo : on garde ce qui était déjà chargé */ }
   posterLangCache.set(key, result);
@@ -4034,10 +4282,10 @@ const TV_ICON_HTML = '<svg class="src-icon" viewBox="0 0 24 24" fill="none" stro
 // Ordre + noms des lecteurs connus (sert au tri ET à l'affichage)
 const KNOWN_HOSTS = [
   ['frembed','Frembed'],
-  ['vidzy.cc','Vidzy'],
   ['uqload.is','Uqload'],
   ['uqload.cx','Uqload'],
   ['uqload','Uqload'],
+  ['vidzy.cc','Vidzy'],
   ['lecteurvideo.com','Lecteur vidéo'],
   ['doodstream','Doodstream'],
   ['dood.','Doodstream'],
@@ -4062,8 +4310,6 @@ const KNOWN_HOSTS = [
   ['smoothpre.com','Smoothpre'],
   ['sandratableother.com','Sandratableother'],
   ['jessicayeahcatch.com','Jessicayeahcatch'],
-  ['vidking.net','Vidking'],
-  ['peachify.top','Peachify'],
   ['viduki.net','Viduki'],
   ['videasy.to','Videasy'],
   ['filmu.in','Filmu'],
@@ -4110,7 +4356,7 @@ const I18N = {
   load_subtitle: { fr: 'Lecteur vidéo universel — HLS, M3U8, MP4, WebM et plus', en: 'Universal video player — HLS, M3U8, MP4, WebM and more' },
   load_lang_label: { fr: 'Langue par défaut', en: 'Default language' },
   lang_fr: { fr: 'Français', en: 'French' },
-  lang_en: { fr: 'Anglais', en: 'English' },
+  lang_en: { fr: 'Version Originale', en: 'Original Version' },
   movie_input_ph: { fr: 'ID TMDB du film (ex. 424)', en: 'Movie TMDB ID (e.g. 424)' },
   series_input_ph: { fr: 'ID TMDB de la série (ex. 1399)', en: 'Series TMDB ID (e.g. 1399)' },
   season_ph: { fr: 'Saison', en: 'Season' },
@@ -4195,7 +4441,7 @@ const I18N = {
   loop_toast_off: { fr: 'Lecture en boucle désactivée', en: 'Loop playback disabled' },
   source_changed_toast: { fr: 'Source changée : {source}', en: 'Source changed: {source}' },
   source_selected_fr: { fr: 'Source française sélectionnée : {source}', en: 'French source selected: {source}' },
-  source_selected_en: { fr: 'Source anglaise sélectionnée : {source}', en: 'English source selected: {source}' },
+  source_selected_en: { fr: 'Source en version originale sélectionnée : {source}', en: 'Original version source selected: {source}' },
   watchparty_left_toast: { fr: 'Tu as quitté la Watch Party', en: 'You left the Watch Party' },
   watchparty_closed_toast: { fr: 'Watch Party fermée', en: 'Watch Party closed' },
   watchparty_title: { fr: 'Watch Party', en: 'Watch Party' },
@@ -4218,6 +4464,7 @@ const I18N = {
   watchparty_ended: { fr: 'L\'hôte a terminé la Watch Party.', en: 'The host ended the Watch Party.' },
   watchparty_ended_title: { fr: 'Watch Party terminée', en: 'Watch Party ended' },
   watchparty_ended_ok: { fr: 'Compris', en: 'Got it' },
+  watchparty_ended_home: { fr: 'Retourner à l\'accueil', en: 'Back to home' },
   watchparty_or: { fr: 'ou', en: 'or' },
   watchparty_join_label: { fr: 'Rejoindre avec un code', en: 'Join with a code' },
   watchparty_join_placeholder: { fr: 'CODE', en: 'CODE' },
@@ -4228,7 +4475,8 @@ const I18N = {
   watchparty_pseudo_label: { fr: 'Ton pseudo', en: 'Your name' },
   watchparty_pseudo_sub: { fr: 'Nécessaire pour créer une Watch Party ou en rejoindre une.', en: 'Needed both to create or join a Watch Party.' },
   watchparty_pseudo_required: { fr: 'Entre un pseudo pour continuer.', en: 'Enter a name to continue.' },
-  watchparty_join_prompt_title: { fr: 'Rejoindre la Watch Party', en: 'Join the Watch Party' },
+  watchparty_join_prompt_title: { fr: 'Tu es invité à une Watch Party', en: "You're invited to a Watch Party" },
+  watchparty_join_prompt_sub: { fr: 'Choisis un pseudo pour que les autres te reconnaissent dans le salon.', en: 'Pick a name so everyone can recognize you in the room.' },
   watchparty_members_label: { fr: 'Membres', en: 'Members' },
   watchparty_chat_title: { fr: 'Chat', en: 'Chat' },
   watchparty_spam_blocked: { fr: 'Spam interdit', en: 'No spamming' },
@@ -4282,12 +4530,17 @@ const I18N = {
   ab_auto_title: { fr: 'Source externe à NETFLOX', en: 'Source external to NETFLOX' },
   ab_auto_p1: { fr: 'La source a changé automatiquement : vous êtes maintenant sur une <strong>source externe à NETFLOX</strong>, qui peut afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n\'est pas responsable de leur contenu.', en: 'The source changed automatically: you are now on a <strong>source external to NETFLOX</strong>, which may show ads (pop-up, new tab, redirect). NETFLOX is not responsible for their content.' },
   ab_p2: { fr: 'Si une pub s\'ouvre : <strong>ne cliquez sur rien</strong>, fermez simplement l\'onglet ou la fenêtre et revenez sur le site.', en: 'If an ad opens: <strong>don\'t click on anything</strong>, just close the tab or window and come back to the site.' },
+  ab_p3: { fr: 'Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.', en: 'You can return to a NETFLOX player at any time from the Sources menu.' },
   ab_note: { fr: 'Un adblocker est conseillé pour limiter les pubs, mais il ne les supprimera pas toutes à 100%. Pour les connaisseurs, nous conseillons aussi de mettre votre DNS sur dns.adguard.com, qui bloque une bonne partie des pubs directement au niveau du réseau.', en: 'An adblocker is recommended to cut down on ads, though it won\'t block 100% of them. For advanced users, we also recommend setting your DNS to dns.adguard.com, which blocks a good share of ads at the network level.' },
   ab_note_mobile_nonff: { fr: 'À noter que sur mobile et tablette, l\'installation d\'un adblocker n\'est possible qu\'avec <strong>Firefox</strong> ou <strong>Edge</strong>.', en: 'Note that on mobile and tablet, installing an adblocker is only possible with <strong>Firefox</strong> or <strong>Edge</strong>.' },
   ab_btn_install: { fr: 'Installer un adblocker', en: 'Install an adblocker' },
   ab_btn_install_firefox: { fr: 'Ouvrir dans Firefox', en: 'Open in Firefox' },
   ab_btn_install_edge: { fr: 'Ouvrir dans Edge', en: 'Open in Edge' },
   ab_btn_proceed: { fr: 'J\'ai compris', en: 'Got it' },
+  tp_title: { fr: 'Changement de lecteur', en: 'Player change' },
+  tp_p1: { fr: 'Aucun lecteur NETFLOX n\'a pu lire ce contenu. Nous poursuivons avec un lecteur de l\'onglet <strong>« Autres lecteurs »</strong>.', en: 'No NETFLOX player was able to play this content. We are continuing with a player from the <strong>“Other players”</strong> tab.' },
+  tp_p2: { fr: 'Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.', en: 'You can return to a NETFLOX player at any time from the Sources menu.' },
+  tp_btn: { fr: 'Compris', en: 'Got it' },
   ext_title: { fr: 'Extension NETFLOX requise', en: 'NETFLOX extension required' },
   ext_p1: { fr: 'Pour accéder à cette source et profiter d\'une meilleure expérience, l\'extension NETFLOX doit être installée sur votre navigateur.', en: 'To access this source and enjoy a better experience, the NETFLOX extension needs to be installed on your browser.' },
   ext_benefit_1: { fr: 'Films et séries en qualité 1080p, jusqu\'à la 4K', en: 'Movies and shows in 1080p quality, up to 4K' },
@@ -4410,10 +4663,17 @@ function setPreferredLang(lang) {
     btn.classList.toggle('active', btn.dataset.lang === preferredLang);
   });
   if (currentSources.length) {
+    // BUG FIX : le tri change l'ordre du tableau, or l'invariant du code est
+    // « index === s.id === currentSourceIndex ». Sans remise à jour des id et
+    // de l'index courant, un clic sur une source (ex: finepulfe en anglais)
+    // lançait currentSources[id] = une AUTRE source (souvent la française).
+    const activeSource = currentSources[currentSourceIndex] || null;
     currentSources.sort((a, b) => {
       if (a.lang !== b.lang) return a.lang === preferredLang ? -1 : 1;
       return sortRank(a) - sortRank(b);
     });
+    currentSources.forEach((s, i) => { s.id = i; });
+    if (activeSource) currentSourceIndex = currentSources.indexOf(activeSource);
   }
   // Si on est hôte d'une Watch Party active, on répercute la langue choisie
   // dans le salon pour que les invités qui (re)rejoignent en tiennent compte.
@@ -4515,9 +4775,11 @@ async function fetchTMDBInfo(id, typeHint) {
           type:'movie',
           title: m.title || m.original_title || `TMDB ${id}`,
           posterPath,
+          langPosterPath: assets.posterPath || m.poster_path || null, // affiche choisie selon la logique fr/en de l'accueil
           logoPath: assets.logoPath,
           logoWidth: assets.logoWidth,
           logoHeight: assets.logoHeight,
+        fallbackLogoPath: assets.fallbackLogoPath, fallbackLogoWidth: assets.fallbackLogoWidth, fallbackLogoHeight: assets.fallbackLogoHeight,
           backdropPath: m.backdrop_path || null,
           overview: m.overview || '',
           runtime: m.runtime || null,
@@ -4556,9 +4818,11 @@ async function fetchTMDBInfo(id, typeHint) {
         type:'tv',
         title: t.name || t.original_name || `TMDB ${id}`,
         posterPath,
+        langPosterPath: assets.posterPath || t.poster_path || null, // idem (sans l'affiche de saison 1)
         logoPath: assets.logoPath,
         logoWidth: assets.logoWidth,
         logoHeight: assets.logoHeight,
+        fallbackLogoPath: assets.fallbackLogoPath, fallbackLogoWidth: assets.fallbackLogoWidth, fallbackLogoHeight: assets.fallbackLogoHeight,
         backdropPath: t.backdrop_path || null,
         overview: t.overview || '',
         runtime,
@@ -4605,7 +4869,10 @@ function wzPickCert(list, isTv) {
 
 // Retourne 18, 16, ou null (pas de restriction connue ou contenu moins
 // sensible : pas de popup).
+const ageCertCache = new Map();
 async function fetchAgeCertification(id, type) {
+  const ck = `${type === 'movie' ? 'movie' : 'tv'}-${id}`;
+  if (ageCertCache.has(ck)) return ageCertCache.get(ck);
   try {
     const isTv = type !== 'movie';
     const url = isTv
@@ -4615,9 +4882,13 @@ async function fetchAgeCertification(id, type) {
     if (!res.ok) return null;
     const data = await res.json();
     const pick = wzPickCert(data.results || [], isTv);
-    if (!pick) return null;
-    const lvl = wzCertToLevel(pick.cert);
-    return lvl >= 18 ? 18 : lvl >= 16 ? 16 : null;
+    let out = null;
+    if (pick) {
+      const lvl = wzCertToLevel(pick.cert);
+      out = lvl >= 18 ? 18 : lvl >= 16 ? 16 : null;
+    }
+    ageCertCache.set(ck, out); // un échec réseau n'est jamais mis en cache
+    return out;
   } catch (e) {}
   return null;
 }
@@ -4625,10 +4896,49 @@ async function fetchAgeCertification(id, type) {
 // Vérifie la classification d'âge et met en file le popup d'avertissement
 // (priorité la plus haute : il s'affiche toujours en premier, avant le
 // popup "film récent" par exemple) s'il s'agit d'un contenu -16 ou -18.
+// Hors Watch Party : le popup de classification (-16 / -18) s'affiche AVANT l'écran de recherche de flux,
+// par-dessus le fond du film (backdrop + affiche + logo + titre totalement floutés tant qu'on n'a pas
+// cliqué sur « Continuer »). Renvoie false si l'utilisateur annule.
+async function soloClassificationGate(id, type, season, episode) {
+  if (wpIsHost || wpIsGuest) return true; // en Watch Party, le flux habituel reste en place
+  type = type === 'tv' ? 'tv' : 'movie';
+  const key = `${type}-${id}`;
+  if (wpMatureAckedKey === key) return true; // déjà validé juste avant (pseudo de Watch Party)
+  const joinBgEl = document.getElementById('wp-join-bg');
+  if (joinBgEl && joinBgEl.classList.contains('show') && wpJoinPromptData && String(wpJoinPromptData.media.id) === String(id)) return true; // Watch Party : fond déjà en place
+  wpSetJoinBgLocked(true);
+  wpShowJoinBgVeil();
+  const age = await fetchAgeCertification(id, type);
+  if (!age) { wpHideJoinBgInstant(); wpSetJoinBgLocked(false); return true; }
+
+  // Juste le fond du film, flouté, derrière le popup (pas d'affiche / logo / titre ici).
+  const quick = await wpFetchQuickInfo(id, type);
+  if (quick.backdrop) wpEnsureBgImg(`https://image.tmdb.org/t/p/w1280${quick.backdrop}`);
+  wpShowJoinBg();
+  mcAgeLimit = age;
+  mcLastAction = null;
+  wpMatureAckedKey = key; // checkMatureContentWarning ne le remontrera pas une 2e fois
+  await showMatureContentPopup(age, type, quick.title || (preferredLang === 'fr' ? 'ce contenu' : 'this title'));
+  if (mcLastAction === 'cancel') {
+    wpMatureAckedKey = null;
+    setTimeout(wpHideJoinBg, 1500); // « Annuler » quitte la page ; filet de sécurité si on reste ici
+    return false;
+  }
+  // « Continuer » : le fond reste en place ; showGatherScreen() reprend la même image (flou levé) puis
+  // retire le fond du popup. Filet de sécurité si la recherche de flux ne démarre jamais.
+  setTimeout(() => {
+    if (!gatherScreen.classList.contains('show')) { wpSetJoinBgLocked(false); wpHideJoinBg(); }
+  }, 6000);
+  return true;
+}
+
 let mcAgeLimit = null;
+let mcLastAction = null;      // 'continue' | 'cancel' (dernier choix dans le popup d'avertissement)
+let wpMatureAckedKey = null;  // film déjà validé AVANT le pseudo (Watch Party via lien) : pas de 2e popup
 async function checkMatureContentWarning(info, id, type) {
   if (!info) return;
   type = type === 'tv' ? 'tv' : 'movie';
+  if (wpMatureAckedKey && wpMatureAckedKey === `${type}-${id}`) { wpMatureAckedKey = null; return; }
   const ageLimit = await fetchAgeCertification(id, type);
   if (!ageLimit) return;
   mcAgeLimit = ageLimit;
@@ -4661,18 +4971,30 @@ function showMatureContentPopup(ageLimit, type, title) {
 }
 
 function mcContinue() {
-  document.getElementById('mc-overlay').classList.remove('open');
+  mcLastAction = 'continue';
+  const mcOv = document.getElementById('mc-overlay');
+  mcOv.classList.add('closing');
+  setTimeout(() => mcOv.classList.remove('open', 'closing'), 330);
   if (typeof mcResolve === 'function') { const r = mcResolve; mcResolve = null; r(); }
 }
 
+// « Annuler » dans l'avertissement de classification : on quitte tout de suite, SANS passer par la
+// confirmation « quitter la Watch Party ? » de goBack(). On quitte quand même proprement le salon.
+function mcQuitDirect() {
+  const viaLink = !!(wpJoinViaLink || wpArrivedViaLink);
+  try {
+    if (wpIsHost) stopWatchParty();
+    else if (wpIsGuest) leaveWatchParty();
+  } catch (e) { console.error(e); }
+  if (viaLink) { window.location.href = 'https://netfloxxx.github.io'; return; }
+  performGoBack();
+}
+
 function mcCancel() {
+  mcLastAction = 'cancel';
   document.getElementById('mc-overlay').classList.remove('open');
   if (typeof mcResolve === 'function') { const r = mcResolve; mcResolve = null; r(); }
-  // On route par goBack() (et non un window.history.back() "brut" qui pouvait
-  // ne rien faire ou quitter le site selon l'historique du navigateur) : ça
-  // gère aussi correctement les cas Watch Party hôte/invité,
-  // exactement comme le vrai bouton retour du lecteur.
-  goBack();
+  mcQuitDirect();
 }
 
 // ── MÉTADONNÉES SAISONS (séries) ──
@@ -5037,6 +5359,8 @@ async function loadMovieByTMDB() {
   document.getElementById('episode-input').value = '';
   lastRequestedSite = 'https://netfloxxx.github.io/#f' + id;
 
+  if (!(await soloClassificationGate(id, 'movie'))) return;
+
   setStatus(preferredLang === 'fr' ? 'Recherche du film…' : 'Searching for the movie…');
   showGatherScreen();
   const info = await fetchTMDBInfo(id, 'movie');
@@ -5086,6 +5410,8 @@ async function loadSeriesByTMDB() {
   lastRequestedSite = 'https://netfloxxx.github.io/#s' + id + '-' + parseInt(season, 10) + '-' + parseInt(episode, 10);
 
   document.getElementById('movie-input').value = '';
+
+  if (!(await soloClassificationGate(id, 'tv', season, episode))) return;
 
   setStatus(preferredLang === 'fr' ? 'Recherche de la série…' : 'Searching for the series…');
   showGatherScreen();
@@ -5234,7 +5560,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // Nouvelles sources directes (Vidzy / Uqload, flux m3u8) via le nouveau Cloudflare
     // Worker "code-exe" : ce ne sont PAS des embeds, on les place donc dans l'onglet
     // "Lecteur NETFLOX" (comme les autres flux directs) — VF -> onglet français,
-    // VO/VOSTFR -> onglet anglais, dans l'ordre Vidzy puis Uqload puis les autres.
+    // VO/VOSTFR -> onglet anglais, dans l'ordre Uqload puis Vidzy puis les autres.
     try {
       const codeExeSources = await fetchCodeExeSources(id, type, season, episode);
       processed.push(...codeExeSources);
@@ -5281,21 +5607,10 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
         lang: 'fr',
         isDirect: false,
         hostname: 'frembed.bar',
-        known: matchKnownHost('frembed.bar')
+        known: matchKnownHost('frembed.bar'),
+        manual: true // lecteur de secours construit en dur, pas une vraie source trouvée
       });
     }
-
-    // Nouvelle source VO (Vidking) ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
-    const vidkingUrl = type === 'tv'
-      ? `https://www.vidking.net/embed/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?autoPlay=true&nextEpisode=true&episodeSelector=true`
-      : `https://www.vidking.net/embed/movie/${encodeURIComponent(id)}?autoPlay=true&nextEpisode=true&episodeSelector=true`;
-    processed.push({
-      url: vidkingUrl,
-      lang: 'en',
-      isDirect: false,
-      hostname: 'vidking.net',
-      known: matchKnownHost('vidking.net')
-    });
 
     // Nouvelle source VO (Videasy) ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
     const videasyUrl = type === 'tv'
@@ -5306,7 +5621,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       lang: 'en',
       isDirect: false,
       hostname: 'videasy.to',
-      known: matchKnownHost('videasy.to')
+      known: matchKnownHost('videasy.to'),
+      manual: true
     });
 
     // Nouvelle source VO (Filmu) ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
@@ -5318,19 +5634,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       lang: 'en',
       isDirect: false,
       hostname: 'filmu.in',
-      known: matchKnownHost('filmu.in')
-    });
-
-    // Nouvelle source VO (Peachify) ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
-    const peachifyUrl = type === 'tv'
-      ? `https://peachify.top/embed/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?accent=E50914`
-      : `https://peachify.top/embed/movie/${encodeURIComponent(id)}`;
-    processed.push({
-      url: peachifyUrl,
-      lang: 'en',
-      isDirect: false,
-      hostname: 'peachify.top',
-      known: matchKnownHost('peachify.top')
+      known: matchKnownHost('filmu.in'),
+      manual: true
     });
 
     // Nouvelle source VO (Viduki) — 4 serveurs — ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
@@ -5345,7 +5650,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
         lang: 'en',
         isDirect: false,
         hostname: 'viduki.net',
-        known: matchKnownHost('viduki.net')
+        known: matchKnownHost('viduki.net'),
+        manual: true
       });
     }
 
@@ -5389,11 +5695,18 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // Si aucun lecteur du tout n'a été trouvé, dans aucune langue, pour ce contenu :
     // popup dans le même style que les autres (nolang-overlay), pas de bascule possible.
     // Priorité "unavailable" : après "film récent", avant "petit problème technique".
-    if (processed.length === 0) {
-      enqueuePopup(POPUP_PRIORITY.unavailable, async () => {
-        await showNoAnySourcePopup();
-        showNotFoundPage(preferredLang === 'fr' ? 'Source introuvable pour ce contenu.' : 'No source found for this title.');
-      });
+    // BUG FIX : les lecteurs de secours ajoutés en dur (Frembed, Videasy, Filmu,
+    // Viduki — marqués "manual") sont TOUJOURS présents, donc processed n'était
+    // jamais vide et les popups « aucune source » ne s'affichaient jamais. On ne
+    // compte que les vraies sources trouvées par les Workers.
+    const realSources = processed.filter(s => !s.manual);
+    if (realSources.length === 0) {
+      hideGatherScreen();
+      pw.classList.remove('pw-enter');
+      pw.style.display = 'none';
+      await showNoAnySourcePopup();
+      showNotFoundPage(preferredLang === 'fr' ? 'Source introuvable pour ce contenu.' : 'No source found for this title.');
+      return false;
     }
 
     // ── Bascule automatique de langue si AUCUN lecteur (ni NETFLOX ni Autres) ──
@@ -5403,8 +5716,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     let langSwitchedFrom = null;
     {
       const otherLangCheck = preferredLang === 'fr' ? 'en' : 'fr';
-      const hasPreferred = processed.some(s => s.lang === preferredLang);
-      const hasOther = processed.some(s => s.lang === otherLangCheck);
+      const hasPreferred = realSources.some(s => s.lang === preferredLang);
+      const hasOther = realSources.some(s => s.lang === otherLangCheck);
       if (!hasPreferred && hasOther) {
         langSwitchedFrom = preferredLang;
         preferredLang = otherLangCheck;
@@ -5579,9 +5892,9 @@ function isDualAudioSource(url) {
 // Endpoint racine avec query params : ?id=...&type=movie  ou  ?id=...&type=tv&season=...&episode=...
 // Réponse attendue : { vo: [{url,type,cached}...], vf: [...], vostfr: [...] }
 // Ce sont des flux m3u8 directs (pas des embeds) : vf -> onglet NETFLOX français,
-// vo/vostfr -> onglet NETFLOX anglais, triés Vidzy puis Uqload/Oqload puis les autres.
+// vo/vostfr -> onglet NETFLOX anglais, triés Uqload/Oqload puis Vidzy puis les autres.
 const CODE_EXE_API_BASE = 'https://netfloxxx.code-exe-67.workers.dev';
-const CODE_EXE_HOST_ORDER = ['vidzy.cc', 'uqload', 'oqload'];
+const CODE_EXE_HOST_ORDER = ['uqload', 'oqload', 'vidzy.cc'];
 
 function codeExeHostRank(url) {
   let h = '';
@@ -5968,7 +6281,7 @@ function renderCloudflareSources() {
     // Party si rejointe via un code tapé à la main) passe en premier.
     const sectionLang = wpGuestSourceLangPriority || preferredLang;
     const langLabelFr = preferredLang === 'fr' ? 'Français' : 'French';
-    const langLabelEn = preferredLang === 'fr' ? 'Anglais' : 'English';
+    const langLabelEn = preferredLang === 'fr' ? 'Version Originale' : 'Original Version';
     const langOrder = sectionLang === 'en'
       ? [['en', langLabelEn], ['fr', langLabelFr]]
       : [['fr', langLabelFr], ['en', langLabelEn]];
@@ -6165,7 +6478,7 @@ function wpAttachLockedRow(el) {
 // qui étaient jusque-là écrits en dur en français dans assignDisplayNames().
 // Les noms de lecteurs connus (Uqload, etc.) ne sont eux jamais traduits.
 // Message du toast de changement de source : dit clairement si la source sélectionnée
-// est française ou anglaise (« Source anglaise sélectionnée : Vidking »).
+// est française ou anglaise (« Source anglaise sélectionnée : Videasy »).
 function sourceChangedToastText(s) {
   const key = s && s.lang === 'fr' ? 'source_selected_fr'
             : s && s.lang === 'en' ? 'source_selected_en'
@@ -6185,7 +6498,7 @@ function renderFlatRow(s) {
   const locked = wpSourceIsLocked(s);
   row.className = 'src-row' + (s.id === currentSourceIndex ? ' active' : '') + (locked ? ' wp-locked' : '');
   const kind = s.isDirect ? (/m3u8/i.test(s.url) ? 'M3U8' : 'DIRECT') : 'EMBED';
-  const is1080 = (s.isDirect && isDualAudioSource(s.url)) || (!s.isDirect && /vidking\.net|filmu\.in|videasy\.to/i.test(s.hostname || ''));
+  const is1080 = (s.isDirect && isDualAudioSource(s.url)) || (!s.isDirect && /filmu\.in|videasy\.to/i.test(s.hostname || ''));
   const kindHTML = is1080
     ? `<span class="src-kind-tag">1080p - 4K</span><span class="src-kind-sep">·</span><span class="src-kind-tag">${kind}</span>`
     : `<span class="src-kind-tag">${kind}</span>`;
@@ -7445,7 +7758,7 @@ function renderEpisodeList(episodes) {
     row.innerHTML = `
       <div class="ep-thumb">${thumb ? `<img src="${thumb}" alt="" onerror="posterImgError(this)">` : DEFAULT_POSTER_HTML}</div>
       <div class="ep-info">
-        <div class="ep-meta">S${selectedPanelSeason} E${ep.episode_number}${isActive ? inProgressLabel : ''}</div>
+        <div class="ep-meta">${preferredLang === 'fr' ? 'Saison' : 'Season'} ${selectedPanelSeason} ${preferredLang === 'fr' ? 'Épisode' : 'Episode'} ${ep.episode_number}${isActive ? inProgressLabel : ''}</div>
         <div class="ep-title">${ep.episode_number}. ${escapeHTML(ep.name || '')}</div>
         ${ep.overview ? `<div class="ep-overview">${escapeHTML(ep.overview)}</div><button class="ep-overview-toggle" onclick="event.stopPropagation(); toggleOverview(this);">${moreLabel}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>` : ''}
       </div>
@@ -8262,7 +8575,7 @@ function toggleFullscreen() {
 const FS_RELOCATE_IDS = [
   'wp-leave-overlay', 'wp-hostclose-overlay',
   'wp-join-prompt-overlay', 'ab-overlay', 'ext-overlay', 'wp-ext-warn-overlay',
-  'nolang-overlay', 'src-error-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'mc-overlay'
+  'nolang-overlay', 'src-error-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'mc-overlay', 'tp-overlay'
 ];
 const fsRelocateAnchors = new Map();
 
@@ -8787,6 +9100,30 @@ document.addEventListener('click', e => {
   if (chevron) chevron.classList.remove('open');
 }, true);
 
+// Place directement la source en cours en vue dans un panneau de sources (sans animation) :
+// bascule sur le bon sous-onglet (Lecteur NETFLOX / Autres lecteurs), déplie sa langue
+// si elle était repliée, puis centre la ligne active dans la zone défilante.
+function revealActiveSourceInPanel(panel) {
+  try {
+    const cur = currentSources[currentSourceIndex];
+    if (!cur) return;
+    const wantTab = cur.isDirect ? 'netflox' : 'autres';
+    let rerender = false;
+    if (collapsedLangs.has(cur.lang)) { collapsedLangs.delete(cur.lang); rerender = true; }
+    if (sourceSubTab[cur.lang] !== wantTab) { sourceSubTab[cur.lang] = wantTab; rerender = true; }
+    if (rerender) renderCloudflareSources();
+    const els = panel.querySelectorAll('.src-row.active, .src-subrow.active');
+    for (const el of els) {
+      if (!el.offsetParent) continue; // pane non affiché (autre onglet du panneau)
+      const box = el.closest('.settings-content');
+      if (!box) continue;
+      const br = box.getBoundingClientRect(), er = el.getBoundingClientRect();
+      box.scrollTop += (er.top - br.top) - (box.clientHeight / 2 - er.height / 2);
+      break;
+    }
+  } catch (e) { console.error('revealActiveSourceInPanel', e); }
+}
+
 // ── SETTINGS SIDEBAR (gear pivote d'un cran à l'ouverture) ──
 function toggleSettings() {
   const panel = document.getElementById('settings-panel');
@@ -8807,6 +9144,7 @@ function toggleSettings() {
     document.getElementById('watchparty-scrim').classList.remove('open');
     document.getElementById('watchparty-btn').classList.remove('open');
     const openNow = () => {
+      revealActiveSourceInPanel(panel); // la source en cours est déjà en vue à l'ouverture (pas de défilement visible)
       panel.classList.add('open'); scrim.classList.add('open'); btn.classList.add('open');
       requestAnimationFrame(() => refreshTabUnderlines(panel));
     };
@@ -8843,6 +9181,7 @@ function toggleSourcesPanel() {
     document.getElementById('watchparty-scrim').classList.remove('open');
     document.getElementById('watchparty-btn').classList.remove('open');
     const openNow = () => {
+      revealActiveSourceInPanel(panel); // la source en cours est déjà en vue à l'ouverture (pas de défilement visible)
       panel.classList.add('open'); scrim.classList.add('open'); btn.classList.add('open');
       requestAnimationFrame(() => refreshTabUnderlines(panel));
     };
@@ -11790,8 +12129,174 @@ function wpGuestBlocked() {
 // (via Firebase, avec repli sur l'URL).
 let wpPendingJoinCode = null;
 
+// Affiche le film / la série qu'on est sur le point de rejoindre dans le popup
+// de pseudo, et met son titre dans le nom de l'onglet.
+let wpJoinPromptData = null; // { code, type, media, info, docTitle }
+function wpPreloadImg(url, ms) {
+  return new Promise(res => {
+    if (!url) return res(false);
+    const im = new Image();
+    const t = setTimeout(() => res(false), ms || 4000);
+    im.onload = () => { clearTimeout(t); res(true); };
+    im.onerror = () => { clearTimeout(t); res(false); };
+    im.src = url;
+  });
+}
+// Titre + fond (1 requête légère) : sert au popup de classification, affiché avant même que le chargement
+// complet soit prêt (le fond flouté est déjà là derrière).
+async function wpFetchQuickInfo(id, type) {
+  try {
+    const d = await tmdbFetchJson(`${TMDB_BASE}/${type}/${id}?api_key=${TMDB_KEY}&language=${preferredLang === 'en' ? 'en-US' : 'fr-FR'}`);
+    return { title: (d && (d.title || d.name)) || '', backdrop: (d && d.backdrop_path) || null, poster: (d && d.poster_path) || null };
+  } catch (e) { return { title: '', backdrop: null, poster: null }; }
+}
+// Film / série du salon : d'abord ce que contient le salon, sinon les paramètres du lien.
+function wpGetJoinMedia(room) {
+  if (room && room.media && room.media.id) return room.media;
+  const params = window.wpUrlParams || new URLSearchParams('');
+  if (params.get('wpType') && params.get('wpId')) {
+    return { type: params.get('wpType'), id: params.get('wpId'), season: params.get('wpSeason'), episode: params.get('wpEpisode') };
+  }
+  return null;
+}
+// Image de fond (backdrop) : créée une seule fois, réutilisée telle quelle si l'URL est la même
+// (pas de clignotement quand le chargement complet arrive après l'aperçu flouté).
+let wpJoinBgBackdropPath = null; // chemin TMDB du backdrop actuellement affiché en fond
+function wpJoinBgPresetPath() {
+  const bg = document.getElementById('wp-join-bg');
+  return (bg && bg.classList.contains('show') && wpJoinBgBackdropPath) || null;
+}
+// L'écran de recherche de flux démarre avec la même image : on lève le flou puis on retire le fond du popup.
+function wpJoinBgHandoff() {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg || !bg.classList.contains('show')) return;
+  wpSetJoinBgLocked(false);
+  setTimeout(wpHideJoinBg, 450);
+}
+function wpEnsureBgImg(url) {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg || !url) return;
+  const m = String(url).match(/\/w1280(\/.+)$/);
+  if (m) wpJoinBgBackdropPath = m[1];
+  const cur = bg.querySelector('.wpjp-img');
+  if (cur && cur.dataset.url === url) return;
+  if (cur) cur.remove();
+  const im = document.createElement('img');
+  im.className = 'wpjp-img'; im.alt = ''; im.dataset.url = url;
+  im.onload = () => im.classList.add('ok');
+  im.onerror = () => im.remove();
+  im.src = url;
+  bg.insertBefore(im, bg.firstChild);
+}
+// Verrou : tant qu'il est actif, le fond / l'affiche / le logo sont totalement floutés et le titre
+// n'apparaît pas dans l'onglet. On le lève une fois la classification d'âge passée.
+function wpSetJoinBgLocked(on) {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg) return;
+  bg.classList.toggle('locked', !!on);
+  if (!on && wpJoinPromptData && wpJoinPromptData.docTitle) document.title = wpJoinPromptData.docTitle;
+}
+function wpShowJoinBg() {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg || !bg.innerHTML) return;
+  bg.classList.add('show');
+  requestAnimationFrame(() => requestAnimationFrame(() => bg.classList.add('in')));
+}
+// Voile sombre INSTANTANÉ (sans fondu) : sert à la vérification de classification en solo, pour ne jamais
+// laisser voir l'écran de saisie / le lecteur derrière pendant la requête. Repart sans fondu s'il n'y a pas
+// de restriction (l'écran de recherche de flux, sombre lui aussi, prend aussitôt le relais).
+function wpShowJoinBgVeil() {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg) return;
+  bg.innerHTML = '';
+  wpJoinPromptData = null;
+  bg.style.transition = 'none';
+  bg.classList.add('show', 'in');
+  void bg.offsetWidth;
+  requestAnimationFrame(() => { bg.style.transition = ''; });
+}
+function wpHideJoinBgInstant() {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg) return;
+  bg.style.transition = 'none';
+  bg.classList.remove('in', 'show');
+  void bg.offsetWidth;
+  requestAnimationFrame(() => { bg.style.transition = ''; });
+}
+let wpJoinBgSuppressCode = null; // fond déjà refermé pour ce chargement : ne pas le ré-afficher quand le chargement complet arrive
+function wpHideJoinBg() {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg) return;
+  bg.classList.remove('in');
+  setTimeout(() => { if (!bg.classList.contains('in')) bg.classList.remove('show'); }, 520);
+}
+// Charge le film / la série du salon (affiche + logo choisis avec la même logique que l'accueil),
+// l'affiche en fond flouté derrière le popup et met son titre dans le nom de l'onglet.
+let wpJoinPromptInflight = null; // { code, promise }
+function wpLoadJoinPromptMedia(code, room) {
+  if (wpJoinPromptInflight && wpJoinPromptInflight.code === code) return wpJoinPromptInflight.promise;
+  const promise = wpLoadJoinPromptMediaImpl(code, room).finally(() => { wpJoinPromptInflight = null; });
+  wpJoinPromptInflight = { code, promise };
+  return promise;
+}
+async function wpLoadJoinPromptMediaImpl(code, room) {
+  const bg = document.getElementById('wp-join-bg');
+  if (!bg) return null;
+  if (wpJoinPromptData && wpJoinPromptData.code === code) {
+    if (wpJoinPromptData.docTitle && !bg.classList.contains('locked')) document.title = wpJoinPromptData.docTitle;
+    if (wpJoinBgSuppressCode !== code) wpShowJoinBg();
+    return wpJoinPromptData;
+  }
+  try {
+    let media = wpGetJoinMedia(room);
+    if (!media) {
+      try {
+        const snap = await window.wpGet(window.wpRef(window.wpDB, `watchparties/${code}/media`));
+        if (snap.exists()) media = snap.val();
+      } catch (e) {}
+    }
+    if (!media || !media.id) throw new Error('no media');
+    const isTv = media.type === 'tv';
+    const info = await fetchTMDBInfo(media.id, isTv ? 'tv' : 'movie');
+    if (!info) throw new Error('no info');
+    const fr = preferredLang === 'fr';
+    const hasEp = isTv && media.season && media.episode;
+    const posterUrl = info.langPosterPath ? `https://image.tmdb.org/t/p/w500${info.langPosterPath}` : null;
+    const logoUrl = info.logoPath ? `https://image.tmdb.org/t/p/w500${info.logoPath}` : null;
+    const bgUrl = info.backdropPath ? `https://image.tmdb.org/t/p/w1280${info.backdropPath}` : null; // même backdrop que le chargement flux
+
+    const epText = hasEp ? (fr ? `Saison ${media.season} · Épisode ${media.episode}` : `Season ${media.season} · Episode ${media.episode}`) : '';
+    const tiny = info.logoHeight && info.logoHeight < 56; // logo d'origine minuscule : agrandi (comme l'accueil)
+    const safeTitle = escapeHTML(info.title);
+    // Chaque image apparaît en fondu dès qu'elle est chargée : on n'attend rien pour afficher le fond.
+    // Logo introuvable -> le titre écrit prend sa place.
+    const titleHtml = logoUrl
+      ? `<img class="wpjp-logo" src="${logoUrl}" alt="${safeTitle}"${tiny ? ' style="height:72px;max-height:96px;"' : ''} onload="this.classList.add('ok')" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'wpjp-title',textContent:this.alt}))">`
+      : `<div class="wpjp-title">${safeTitle}</div>`;
+    wpEnsureBgImg(bgUrl);
+    let fg = bg.querySelector('.wpjp-fg');
+    if (!fg) { fg = document.createElement('div'); fg.className = 'wpjp-fg'; bg.appendChild(fg); }
+    fg.innerHTML =
+      (posterUrl ? `<div class="wpjp-poster"><img src="${posterUrl}" alt="" onload="this.classList.add('ok')" onerror="this.parentNode.remove()"></div>` : '') +
+      `<div class="wpjp-info">${titleHtml}${epText ? `<span class="wpjp-ep">${escapeHTML(epText)}</span>` : ''}</div>`;
+
+    const docTitle = hasEp
+      ? (fr ? `${info.title} : Saison ${media.season} · Épisode ${media.episode}` : `${info.title}: Season ${media.season} · Episode ${media.episode}`)
+      : info.title;
+    wpJoinPromptData = { code, type: isTv ? 'tv' : 'movie', media, info, docTitle };
+    if (!bg.classList.contains('locked')) document.title = docTitle; // sinon : après la classification
+    if (wpJoinBgSuppressCode !== code) wpShowJoinBg();
+    return wpJoinPromptData;
+  } catch (e) {
+    const fgx = bg.querySelector('.wpjp-fg');
+    if (fgx) fgx.remove();
+    return null;
+  }
+}
+
 function wpShowJoinPrompt(code) {
   wpPendingJoinCode = code;
+  wpLoadJoinPromptMedia(code); // (re)met le fond du film derrière le popup
   const overlay = document.getElementById('wp-join-prompt-overlay');
   const input = document.getElementById('wp-join-prompt-input');
   const errorEl = document.getElementById('wp-join-prompt-error');
@@ -11805,9 +12310,15 @@ function wpShowJoinPrompt(code) {
 }
 
 function wpCloseJoinPrompt() {
+  // Le fond du film reste en place : showGatherScreen() reprend la même image puis le retire.
+  // Filet de sécurité : si rien ne le relaie (erreur, salon fermé...), on le retire au bout de 8 s.
+  setTimeout(() => {
+    const ovl = document.getElementById('wp-join-prompt-overlay');
+    if (!ovl.classList.contains('show')) { wpSetJoinBgLocked(false); wpHideJoinBg(); }
+  }, 8000);
   const overlay = document.getElementById('wp-join-prompt-overlay');
   overlay.classList.remove('in');
-  setTimeout(() => overlay.classList.remove('show'), 250);
+  setTimeout(() => overlay.classList.remove('show'), 420);
 }
 
 // Utilisé quand on ferme le popup de pseudo (annulation, ou après une
@@ -11964,9 +12475,71 @@ function wpPrefetchHostLangThenShowPrompt(code) {
       if (room.lang === 'en' || room.lang === 'fr') wpSyncPreferredLangFromHost(room.lang);
     }
 
+    // Le fond du film (flou) + le titre de l'onglet se chargent en parallèle, sans jamais retarder
+    // les popups. Puis, si le film est -16 / -18, le popup de classification s'affiche TOUJOURS
+    // avant la demande de pseudo.
+    const roomMedia = wpGetJoinMedia(room);
+    wpSetJoinBgLocked(true); // fond / affiche / logo / titre floutés tant que la classification n'est pas passée
+    wpLoadJoinPromptMedia(code, room);
+    if (roomMedia && roomMedia.id) {
+      const mType = roomMedia.type === 'tv' ? 'tv' : 'movie';
+      const [age, quick] = await Promise.all([
+        fetchAgeCertification(roomMedia.id, mType),
+        wpFetchQuickInfo(roomMedia.id, mType)
+      ]);
+      const qTitle = quick.title;
+      // Le fond (flouté) est déjà là derrière le popup de classification, sans attendre le chargement complet.
+      if (quick.backdrop) { wpEnsureBgImg(`https://image.tmdb.org/t/p/w1280${quick.backdrop}`); wpShowJoinBg(); }
+      if (age) {
+        mcAgeLimit = age;
+        mcLastAction = null;
+        wpMatureAckedKey = `${mType}-${roomMedia.id}`; // évite de le re-montrer une fois dans le film
+        await showMatureContentPopup(age, mType, qTitle || (preferredLang === 'fr' ? 'ce contenu' : 'this title'));
+        if (mcLastAction === 'cancel') return; // « Annuler » : on quitte, pas de pseudo
+        wpSetJoinBgLocked(false);                       // le fond se dévoile pendant le fondu du popup d'âge...
+        await new Promise(r => setTimeout(r, 340));     // ...puis le pseudo arrive en douceur, pas d'un coup
+      }
+    }
+    wpSetJoinBgLocked(false); // classification passée (ou pas de restriction) : le fond se dévoile
+
     wpShowJoinPrompt(code);
   });
 }
+
+// Lecteur : affiche + logo en haut à gauche. Le survol est repéré par les coordonnées de la souris
+// (et non par :hover seul) pour fonctionner même si un calque transparent recouvre la zone.
+window.addEventListener('DOMContentLoaded', () => {
+  const pw = document.getElementById('player-wrap');
+  if (!pw) return;
+  const els = () => document.querySelectorAll('#title-poster, #media-title img');
+  const clear = () => els().forEach(el => el.classList.remove('hov'));
+  pw.addEventListener('mousemove', (e) => {
+    if (!pw.classList.contains('cv')) return clear();
+    els().forEach(el => {
+      const r = el.getBoundingClientRect();
+      el.classList.toggle('hov', e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+    });
+  });
+  pw.addEventListener('mouseleave', clear);
+});
+
+// Survol de l'affiche / du logo en arrière-plan du popup de pseudo : le popup couvre tout l'écran,
+// donc on repère la souris par ses coordonnées et on pose .hov (léger agrandissement).
+window.addEventListener('DOMContentLoaded', () => {
+  const ov = document.getElementById('wp-join-prompt-overlay');
+  const bg = document.getElementById('wp-join-bg');
+  if (!ov || !bg) return;
+  const clear = () => bg.querySelectorAll('.hov').forEach(el => el.classList.remove('hov'));
+  ov.addEventListener('mousemove', (e) => {
+    if (bg.classList.contains('locked')) return clear();
+    bg.querySelectorAll('.wpjp-poster, .wpjp-logo, .wpjp-title').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      el.classList.toggle('hov', inside);
+    });
+  });
+  ov.addEventListener('mouseleave', clear);
+});
 
 window.addEventListener('DOMContentLoaded', () => {
   const code = (window.wpUrlParams || new URLSearchParams('')).get('wp');
@@ -12121,7 +12694,7 @@ window.addEventListener('popstate', () => {
 
 // ── barre de soulignement glissante, partagée par toutes les barres d'onglets
 // (.settings-tabs) : Paramètres, Sous-titres, et les sous-onglets de Sources ──
-function updateTabUnderline(tabsEl, fromRect) {
+function updateTabUnderline(tabsEl, fromRect, instant) {
   if (!tabsEl) return;
   let underline = tabsEl.querySelector('.tab-underline');
   const isNew = !underline;
@@ -12154,12 +12727,23 @@ function updateTabUnderline(tabsEl, fromRect) {
     return;
   }
 
+  // instant : placement direct, sans glissement (ouverture d'un menu / resize) —
+  // le soulignement doit apparaître d'emblée sous l'onglet actif.
+  if (instant) {
+    underline.style.transition = 'none';
+    underline.style.left = targetLeft + 'px';
+    underline.style.width = targetWidth + 'px';
+    underline.classList.add('show');
+    void underline.offsetWidth; // force le reflow avant de rétablir la transition
+    underline.style.transition = '';
+    return;
+  }
   underline.style.left = targetLeft + 'px';
   underline.style.width = targetWidth + 'px';
   underline.classList.add('show');
 }
 function refreshTabUnderlines(root) {
-  (root || document).querySelectorAll('.settings-tabs').forEach(t => updateTabUnderline(t));
+  (root || document).querySelectorAll('.settings-tabs').forEach(t => updateTabUnderline(t, null, true));
 }
 window.addEventListener('resize', () => refreshTabUnderlines());
 
@@ -12638,12 +13222,30 @@ function goToNextSourceAfterError() {
     if (nextSource && !nextSource.isDirect) {
       sourceSubTab[nextSource.lang] = 'autres';
     }
+    // BUG FIX : la liste est triée par langue (FR puis VO, ou l'inverse). Quand
+    // tous les lecteurs d'une langue ont échoué, passer à l'index suivant nous
+    // faisait changer de langue SANS aucun avertissement. On prévient maintenant.
+    const prevLang = currentSources[currentSourceIndex] && currentSources[currentSourceIndex].lang;
+    const crossesLang = !!(nextSource && prevLang && nextSource.lang !== prevLang);
     selectCloudflareSource(nextId, { bypassLock: true });
+    if (crossesLang) {
+      enqueuePopup(POPUP_PRIORITY.unavailable, () => showNoSourceInLangPopup(prevLang, nextSource.lang, { fallback: true }));
+    }
     showActionToast(sourceChangedToastText(currentSources[nextId]));
     // Source externe : on prévient tout de suite (popup "source externe + pubs",
     // même logique que le popup adblocker) au lieu d'attendre l'ouverture du panneau.
     if (nextSource && !nextSource.isDirect) {
-      setTimeout(() => openAdblockPopup(() => {}, { auto: true }), 400);
+      // Ordre voulu : « Oups, petit problème technique » (déjà passé) -> popup
+      // « bascule vers un lecteur tiers » -> popup adblocker. On attend la fin du
+      // fondu de la popup d'erreur pour ne pas les superposer.
+      enqueuePopup(POPUP_PRIORITY.srcError, () => new Promise(resolve => {
+        setTimeout(() => {
+          showThirdPartyNotice(() => {
+            resolve();
+            setTimeout(() => openAdblockPopup(() => {}, { auto: true }), 350);
+          });
+        }, 450);
+      }));
     }
   } else {
     // Plus aucune source suivante disponible dans la liste : ticket 404, puis
@@ -12651,6 +13253,22 @@ function goToNextSourceAfterError() {
     hideSpinner();
     showNotFoundPage();
   }
+}
+
+// ── POPUP "BASCULE VERS UN LECTEUR TIERS" ──
+let tpNoticeCallback = null;
+function showThirdPartyNotice(onClose) {
+  tpNoticeCallback = typeof onClose === 'function' ? onClose : null;
+  const overlay = document.getElementById('tp-overlay');
+  if (!overlay) { if (tpNoticeCallback) { const cb = tpNoticeCallback; tpNoticeCallback = null; cb(); } return; }
+  overlay.classList.add('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('in')));
+}
+function closeThirdPartyNotice() {
+  const overlay = document.getElementById('tp-overlay');
+  overlay.classList.remove('in');
+  setTimeout(() => overlay.classList.remove('open'), 250);
+  if (tpNoticeCallback) { const cb = tpNoticeCallback; tpNoticeCallback = null; cb(); }
 }
 
 // ── POPUP AVERTISSEMENT "AUTRES LECTEURS" (pubs) ──
@@ -13478,6 +14096,7 @@ function showNoAnySourcePopup() {
   document.getElementById('nosource-text').textContent = fr
     ? "Aucune source, ni française ni anglaise, n'est disponible pour ce contenu pour le moment. Il n'a peut-être pas encore été ajouté, ou il a été retiré. Réessayez plus tard."
     : 'No source, in French or in English, is available for this content at the moment. It may not have been added yet, or it may have been removed. Please try again later.';
+  document.getElementById('nosource-route').innerHTML = nxChip(fr ? 'Français' : 'French', 'off') + nxChip(fr ? 'Version originale' : 'Original version', 'off');
   document.getElementById('nosource-overlay').classList.add('open');
   return new Promise(resolve => { noAnySourceResolve = resolve; });
 }
@@ -13490,19 +14109,41 @@ function closeNoAnySourcePopup() {
   }
 }
 
+// Petits helpers pour les "puces" (FR ✕ → VO) affichées dans les popups de langue.
+const NX_ICON_GLOBE = '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18"/></svg>';
+const NX_ICON_PLAYER = '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>';
+const NX_ARROW = '<svg class="nx-arrow" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+function nxChip(label, kind) { return `<span class="nx-chip ${kind || ''}">${label}</span>`; }
+function nxRoute(fromLabel, toLabel) { return nxChip(fromLabel, 'off') + NX_ARROW + nxChip(toLabel, 'on'); }
+
 // ── POPUP "AUCUNE SOURCE DANS LA LANGUE SÉLECTIONNÉE" (bascule automatique) ──
-// Affiché quand la langue choisie n'a aucun lecteur du tout, mais que l'autre
-// langue en a : on bascule automatiquement dessus, et on prévient l'utilisateur.
-function showNoSourceInLangPopup(fromLang, toLang) {
-  const fromLabel = fromLang === 'fr' ? 'français' : 'anglais';
-  const toLabelFr = toLang === 'fr' ? 'français' : 'anglais';
-  const toLabelEn = toLang === 'fr' ? 'French' : 'English';
-  const text = fromLang === 'fr'
-    ? `Aucune source n'est disponible en français pour ce contenu. Vous allez être basculé en ${toLabelFr}.`
-    : `No source is available in English for this content. You will be switched to ${toLabelEn}.`;
-  const title = fromLang === 'fr' ? 'Langue non disponible' : 'Language not available';
+// Affiché quand la langue choisie n'a aucun lecteur (hors lecteurs de secours
+// ajoutés en dur) mais que l'autre langue en a : on bascule automatiquement
+// dessus, et on prévient l'utilisateur. Aussi utilisé (opts.fallback) quand,
+// en cours de lecture, tous les lecteurs d'une langue ont échoué et que la
+// bascule automatique passe sur l'autre langue — avant, ce passage était silencieux.
+function showNoSourceInLangPopup(fromLang, toLang, opts) {
+  const fr = fromLang === 'fr';
+  const fallback = !!(opts && opts.fallback);
+  const lbl = (l) => fr ? (l === 'fr' ? 'Français' : 'Version originale') : (l === 'fr' ? 'French' : 'Original version');
+  const toLabelTxt = fr ? (toLang === 'fr' ? 'français' : 'version originale') : (toLang === 'fr' ? 'French' : 'the original version');
+  const fromLabelTxt = fr ? (fromLang === 'fr' ? 'française' : 'originale') : (fromLang === 'fr' ? 'French' : 'original-version');
+  let title, text;
+  if (fallback) {
+    title = fr ? 'Passage en ' + toLabelTxt : 'Switching to ' + toLabelTxt;
+    text = fr
+      ? `Aucune source ${fromLabelTxt} n'a pu être lue pour ce contenu. Nous passons automatiquement en ${toLabelTxt}.`
+      : `No ${fromLabelTxt} source could be played for this content. We are automatically switching to ${toLabelTxt}.`;
+  } else {
+    title = fr ? 'Langue non disponible' : 'Language not available';
+    text = fr
+      ? `Aucune source n'est disponible en ${fromLang === 'fr' ? 'français' : 'version originale'} pour ce contenu. Vous allez être basculé en ${toLabelTxt}.`
+      : `No source is available in ${fromLang === 'fr' ? 'French' : 'the original version'} for this content. You will be switched to ${toLabelTxt}.`;
+  }
+  document.getElementById('nolang-icon').innerHTML = NX_ICON_GLOBE;
   document.getElementById('nolang-title').textContent = title;
   document.getElementById('nolang-text').textContent = text;
+  document.getElementById('nolang-route').innerHTML = nxRoute(lbl(fromLang), lbl(toLang));
   nolangProceedCallback = null;
   document.getElementById('nolang-overlay').classList.add('open');
   return new Promise(resolve => { nolangResolve = resolve; });
@@ -13510,7 +14151,7 @@ function showNoSourceInLangPopup(fromLang, toLang) {
 
 // ── POPUP "AUCUN LECTEUR NETFLOX DANS LA LANGUE CHOISIE" ──
 // (le cas "aucun lecteur du tout" est géré en amont par une bascule de langue
-// automatique et silencieuse, voir plus haut dans le chargement des sources)
+// automatique, voir plus haut dans le chargement des sources)
 let nolangProceedCallback = null;
 let nolangResolve = null; // résout la file de popups quand ce popup (partagé entre 3 cas) se ferme
 
@@ -13519,8 +14160,10 @@ function showNoNetfloxPopup(lang, onClose) {
     ? "Aucun lecteur NETFLOX n'est disponible en français pour ce contenu. Vous allez être basculé sur l'onglet « Autres lecteurs »."
     : "No NETFLOX player is available in English for this content. You will be switched to the \"Other players\" tab.";
   const title = lang === 'fr' ? 'Aucun lecteur NETFLOX en français' : 'No NETFLOX player in English';
+  document.getElementById('nolang-icon').innerHTML = NX_ICON_PLAYER;
   document.getElementById('nolang-title').textContent = title;
   document.getElementById('nolang-text').textContent = text;
+  document.getElementById('nolang-route').innerHTML = nxRoute('NETFLOX', lang === 'fr' ? 'Autres lecteurs' : 'Other players');
   nolangProceedCallback = (typeof onClose === 'function') ? onClose : null;
   document.getElementById('nolang-overlay').classList.add('open');
   return new Promise(resolve => { nolangResolve = resolve; });
