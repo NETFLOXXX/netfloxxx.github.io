@@ -2366,40 +2366,40 @@
   #ab-modal {
     width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
     border:1px solid rgba(255,255,255,0.1); border-radius:20px;
-    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    padding:20px 22px 16px; max-height:calc(100vh - 32px); overflow-y:auto; box-shadow:0 30px 70px rgba(0,0,0,0.7);
     animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
     font-family:'Outfit',sans-serif; text-align:center;
   }
   @keyframes ab-pop { from{ opacity:0; transform:scale(0.94) translateY(8px);} to{ opacity:1; transform:scale(1) translateY(0);} }
   #ab-modal .ab-icon {
-    width:52px; height:52px; border-radius:50%;
+    width:42px; height:42px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
     display:flex; align-items:center; justify-content:center;
-    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
+    margin:0 auto 10px; box-shadow:0 6px 16px rgba(220,38,38,0.35);
   }
-  #ab-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
-  #ab-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
-  #ab-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:0; }
+  #ab-modal .ab-icon svg { width:22px; height:22px; color:#fff; }
+  #ab-modal h3 { font-size:1.05rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.01em; color:#fff; }
+  #ab-modal p { font-size:0.82rem; line-height:1.45; color:rgba(255,255,255,0.6); margin-bottom:0; }
   #ab-modal h3 + p { margin-bottom:0; }
-  #ab-modal p + .ab-note { margin-top:12px; }
+  #ab-modal p + .ab-note { margin-top:10px; }
   #ab-modal p strong { color:rgba(255,255,255,0.9); font-weight:600; }
   #ab-modal .ab-note {
-    font-size:0.78rem; line-height:1.5; color:rgba(255,255,255,0.42);
+    font-size:0.72rem; line-height:1.4; color:rgba(255,255,255,0.42);
     background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);
-    border-radius:12px; padding:11px 14px; margin:14px 0 6px;
+    border-radius:10px; padding:8px 12px; margin:10px 0 2px;
   }
   #ab-modal .ab-note-mobile {
     display:flex; align-items:flex-start; gap:9px; text-align:left;
-    font-size:0.78rem; line-height:1.5; color:rgba(255,255,255,0.6);
+    font-size:0.74rem; line-height:1.4; color:rgba(255,255,255,0.6);
     background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2);
-    border-radius:12px; padding:11px 14px; margin:8px 0 6px;
+    border-radius:10px; padding:8px 12px; margin:6px 0 2px;
   }
   #ab-modal .ab-note-mobile svg {
     width:17px; height:17px; margin-top:1px; color:var(--red-h); flex-shrink:0;
   }
   #ab-modal .ab-note-mobile span { color:rgba(255,255,255,0.62); }
   #ab-modal .ab-note-mobile strong { color:#fff; font-weight:600; }
-  #ab-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  #ab-modal .ab-btns { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
   #ab-modal button.ab-action {
     width:100%; border:none; border-radius:12px; padding:13px 16px;
     font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
@@ -2407,13 +2407,13 @@
   }
   #ab-modal button.ab-action:active { transform:scale(0.98); }
   #ab-modal button.ab-primary {
-    padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff;
+    padding:13px 16px; font-size:0.95rem; font-weight:700; background:var(--red); color:#fff;
   }
   #ab-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
   #ab-modal button.ab-primary:active { transform:scale(0.98); }
   #ab-modal button.ab-ghost {
-    background:none; color:rgba(255,255,255,0.55); padding:12px; font-size:0.95rem; font-weight:700;
-    border:1px solid transparent; border-top:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-top:4px; padding-top:16px;
+    background:none; color:rgba(255,255,255,0.55); padding:8px; font-size:0.9rem; font-weight:700;
+    border:1px solid transparent; border-top:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-top:2px; padding-top:12px;
     transition: color 0.2s, transform 0.15s;
   }
   #ab-modal button.ab-ghost:hover { color:rgba(255,255,255,0.75); transform:scale(1.03); }
