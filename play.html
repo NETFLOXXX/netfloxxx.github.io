@@ -470,7 +470,7 @@
       linear-gradient(0deg, rgba(0,0,0,0.53) 0%, transparent 40%);
   }
   #ambient-panel {
-    position:absolute; left:0; top:0; bottom:0; width:min(48%, 580px);
+    position:absolute; left:0; top:0; bottom:0; width:min(54%, 720px);
     display:flex; flex-direction:column; justify-content:center; gap:14px;
     padding:0 6% 0 60px;
     opacity:0; transform:translateX(-26px);
@@ -495,16 +495,23 @@
   #ambient-logo { font-family:'Outfit',sans-serif; font-size:2.1rem; font-weight:800; letter-spacing:-0.02em; color:#fff; line-height:1.1; text-shadow:0 2px 18px rgba(0,0,0,0.5); }
   #ambient-logo img { max-width:340px; max-height:120px; width:auto; height:auto; object-fit:contain; display:block; filter:drop-shadow(0 2px 18px rgba(0,0,0,0.5)); }
   #ambient-meta {
-    font-family:'Outfit',sans-serif; font-size:0.78rem; font-weight:700; color:rgba(255,255,255,0.65);
-    text-transform:uppercase; letter-spacing:0.09em; margin-top:10px;
+    font-family:'Outfit',sans-serif; font-size:0.9rem; font-weight:700; color:rgba(255,255,255,0.65);
+    text-transform:uppercase; letter-spacing:0.09em; margin-top:12px;
   }
   #ambient-overview {
     font-family:'Outfit',sans-serif; font-style:normal; font-weight:400;
     font-size:1.02rem; line-height:1.55; color:rgba(255,255,255,0.82);
-    max-width:460px; margin-top:8px; padding-left:14px; border-left:2px solid rgba(255,255,255,0.25);
+    max-width:100%; margin-top:10px; padding-left:14px; border-left:2px solid rgba(255,255,255,0.25);
     display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden;
   }
   #ambient-overview:empty, #ambient-meta:empty { display:none; }
+  /* Temps « position / durée » : à côté de l'année (film) ; sur sa propre ligne sous « Saison · Épisode » (série). */
+  #ambient-meta .ambient-sep { font-style:normal; opacity:0.5; margin:0 4px; }
+  #ambient-meta .ap-time {
+    font-variant-numeric:tabular-nums; letter-spacing:0.04em; color:rgba(255,255,255,0.85);
+  }
+  #ambient-meta .ap-time em { font-style:normal; font-weight:500; color:rgba(255,255,255,0.45); }
+  #ambient-meta .ap-time.ap-block { display:block; margin-top:6px; }
   /* Watch Party hors plein écran : le panneau ambiance devient étroit (chat à
      droite) — on réduit logo/texte/image proportionnellement pour que ça reste
      bien proportionné plutôt que massif dans l'espace restreint. On NE touche
@@ -513,7 +520,7 @@
   body.wp-room-active:not(.wp-fullscreen) #ambient-badge { font-size:0.64rem; }
   body.wp-room-active:not(.wp-fullscreen) #ambient-logo { font-size:1.5rem; }
   body.wp-room-active:not(.wp-fullscreen) #ambient-logo img { max-width:230px; max-height:80px; }
-  body.wp-room-active:not(.wp-fullscreen) #ambient-meta { font-size:0.68rem; margin-top:6px; }
+  body.wp-room-active:not(.wp-fullscreen) #ambient-meta { font-size:0.74rem; margin-top:6px; }
   @media (max-width:720px) {
     #ambient-panel { width:100%; padding:0 24px; align-items:flex-start; }
     #ambient-overview { -webkit-line-clamp:4; max-width:none; }
@@ -881,6 +888,7 @@
   .wp-action-btn.wp-danger { border-color:rgba(220,38,38,0.35); color:#f87171; margin-bottom:20px; }
   .wp-action-btn.wp-danger:hover { background:rgba(220,38,38,0.14); }
   .wp-conn-error { margin:14px 20px 0; padding:11px 14px; border-radius:10px; background:rgba(220,38,38,0.12); border:1px solid rgba(220,38,38,0.3); color:#fca5a5; font-size:0.78rem; line-height:1.5; }
+
 
   /* ── Écrans hauts (17" et +) : le panneau Watch Party est en position:absolute
      top:0/bottom:0 donc il prend toute la hauteur dispo, mais son contenu garde
@@ -2366,40 +2374,40 @@
   #ab-modal {
     width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
     border:1px solid rgba(255,255,255,0.1); border-radius:20px;
-    padding:20px 22px 16px; max-height:calc(100vh - 32px); overflow-y:auto; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
     animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
     font-family:'Outfit',sans-serif; text-align:center;
   }
   @keyframes ab-pop { from{ opacity:0; transform:scale(0.94) translateY(8px);} to{ opacity:1; transform:scale(1) translateY(0);} }
   #ab-modal .ab-icon {
-    width:42px; height:42px; border-radius:50%;
+    width:52px; height:52px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
     display:flex; align-items:center; justify-content:center;
-    margin:0 auto 10px; box-shadow:0 6px 16px rgba(220,38,38,0.35);
+    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
   }
-  #ab-modal .ab-icon svg { width:22px; height:22px; color:#fff; }
-  #ab-modal h3 { font-size:1.05rem; font-weight:700; margin-bottom:8px; letter-spacing:-0.01em; color:#fff; }
-  #ab-modal p { font-size:0.82rem; line-height:1.45; color:rgba(255,255,255,0.6); margin-bottom:0; }
+  #ab-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
+  #ab-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
+  #ab-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:0; }
   #ab-modal h3 + p { margin-bottom:0; }
-  #ab-modal p + .ab-note { margin-top:10px; }
+  #ab-modal p + .ab-note { margin-top:12px; }
   #ab-modal p strong { color:rgba(255,255,255,0.9); font-weight:600; }
   #ab-modal .ab-note {
-    font-size:0.72rem; line-height:1.4; color:rgba(255,255,255,0.42);
+    font-size:0.78rem; line-height:1.5; color:rgba(255,255,255,0.42);
     background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);
-    border-radius:10px; padding:8px 12px; margin:10px 0 2px;
+    border-radius:12px; padding:11px 14px; margin:14px 0 6px;
   }
   #ab-modal .ab-note-mobile {
     display:flex; align-items:flex-start; gap:9px; text-align:left;
-    font-size:0.74rem; line-height:1.4; color:rgba(255,255,255,0.6);
+    font-size:0.78rem; line-height:1.5; color:rgba(255,255,255,0.6);
     background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.2);
-    border-radius:10px; padding:8px 12px; margin:6px 0 2px;
+    border-radius:12px; padding:11px 14px; margin:8px 0 6px;
   }
   #ab-modal .ab-note-mobile svg {
     width:17px; height:17px; margin-top:1px; color:var(--red-h); flex-shrink:0;
   }
   #ab-modal .ab-note-mobile span { color:rgba(255,255,255,0.62); }
   #ab-modal .ab-note-mobile strong { color:#fff; font-weight:600; }
-  #ab-modal .ab-btns { display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  #ab-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
   #ab-modal button.ab-action {
     width:100%; border:none; border-radius:12px; padding:13px 16px;
     font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
@@ -2407,13 +2415,13 @@
   }
   #ab-modal button.ab-action:active { transform:scale(0.98); }
   #ab-modal button.ab-primary {
-    padding:13px 16px; font-size:0.95rem; font-weight:700; background:var(--red); color:#fff;
+    padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff;
   }
   #ab-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
   #ab-modal button.ab-primary:active { transform:scale(0.98); }
   #ab-modal button.ab-ghost {
-    background:none; color:rgba(255,255,255,0.55); padding:8px; font-size:0.9rem; font-weight:700;
-    border:1px solid transparent; border-top:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-top:2px; padding-top:12px;
+    background:none; color:rgba(255,255,255,0.55); padding:12px; font-size:0.95rem; font-weight:700;
+    border:1px solid transparent; border-top:1px solid rgba(255,255,255,0.07); border-radius:12px; margin-top:4px; padding-top:16px;
     transition: color 0.2s, transform 0.15s;
   }
   #ab-modal button.ab-ghost:hover { color:rgba(255,255,255,0.75); transform:scale(1.03); }
@@ -2966,7 +2974,7 @@
 <div id="player-wrap">
   <video id="video" playsinline x-webkit-airplay="allow" disableRemotePlayback></video>
   <canvas id="freeze-frame"></canvas>
-  <iframe id="embed-frame" src="about:blank" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  <iframe id="embed-frame" src="about:blank" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
   <div class="overlay-gradient"></div>
   <div class="overlay-top"></div>
   <div id="subtitle-overlay" class="hidden"></div>
@@ -4284,14 +4292,15 @@ const TV_ICON_HTML = '<svg class="src-icon" viewBox="0 0 24 24" fill="none" stro
 // Ordre + noms des lecteurs connus (sert au tri ET à l'affichage)
 const KNOWN_HOSTS = [
   ['frembed','Frembed'],
+  ['blinkflux.lol','Blinkflux'],
   ['uqload.is','Uqload'],
   ['uqload.cx','Uqload'],
   ['uqload','Uqload'],
   ['vidzy.cc','Vidzy'],
-  ['lecteurvideo.com','Lecteur vidéo'],
+  ['voe','Voe'],
+  ['lecteurvideo.com','Lecteurvideo'],
   ['doodstream','Doodstream'],
   ['dood.','Doodstream'],
-  ['voe','Voe'],
   ['vidmoly.biz','Vidmoly'],
   ['vidmoly.me','Vidmoly'],
   ['lulustream.com','Lulustream'],
@@ -4300,12 +4309,11 @@ const KNOWN_HOSTS = [
   ['fsvid.lol','Fsvideo'],
   ['savefiles.com','Savefiles'],
   ['veev.to','Veev'],
-  ['emmmmbed.com','Lecteur vidéo'],
+  ['emmmmbed.com','Emmmmbed'],
   ['kakaflix.lol','Kakaflix'],
   ['playmogo.com','Playmogo'],
   ['flemmix.upns.pro','Flemmix'],
   ['marcus.p2pstream.vip','Marcus'],
-  ['blinkflux.lol','Blinkflux'],
   ['hanerix.com','Hanerix'],
   ['web.nxsha.app','Natacha'],
   ['xshotcok.com','Xshotcok'],
@@ -4314,7 +4322,7 @@ const KNOWN_HOSTS = [
   ['jessicayeahcatch.com','Jessicayeahcatch'],
   ['viduki.net','Viduki'],
   ['videasy.to','Videasy'],
-  ['filmu.in','Filmu'],
+  ['vidly.pro','Vidly'],
 ];
 
 let currentSources = [];      // liste à plat, index === id
@@ -5452,6 +5460,7 @@ async function loadSeriesByTMDB() {
       if (currentTitleInfo) {
         currentTitleInfo.episodeOverview = ep.overview || '';
         currentTitleInfo.episodeStillPath = ep.still_path || null;
+        currentTitleInfo.episodeName = ep.name || '';
       }
     }
   } catch (e) {}
@@ -5627,17 +5636,22 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       manual: true
     });
 
-    // Nouvelle source VO (Filmu) ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
-    const filmuUrl = type === 'tv'
-      ? `https://embed.filmu.in/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`
-      : `https://embed.filmu.in/movie/${encodeURIComponent(id)}`;
-    processed.push({
-      url: filmuUrl,
-      lang: 'en',
-      isDirect: false,
-      hostname: 'filmu.in',
-      known: matchKnownHost('filmu.in'),
-      manual: true
+    // Nouvelle source 1080p-4K (Vidly) avec sélecteur audio : ajoutée manuellement dans
+    // « Autres lecteurs », en FR et en VO (le sélecteur audio permet de choisir la langue).
+    //   Film  -> https://vidly.pro/movie/{id}?color=fc0808&autoplay=1
+    //   Série -> https://vidly.pro/tv/{id}/{saison}/{episode}?color=fc0808&autoplay=1
+    ['fr', 'en'].forEach(vLang => {
+      const vidlyUrl = type === 'tv'
+        ? `https://vidly.pro/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?color=fc0808&autoplay=1`
+        : `https://vidly.pro/movie/${encodeURIComponent(id)}?color=fc0808&autoplay=1`;
+      processed.push({
+        url: vidlyUrl,
+        lang: vLang,
+        isDirect: false,
+        hostname: 'vidly.pro',
+        known: matchKnownHost('vidly.pro'),
+        manual: true
+      });
     });
 
     // Nouvelle source VO (Viduki) — 4 serveurs — ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
@@ -5673,18 +5687,25 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // test "aucune entrée trouvée". On l'insère explicitement JUSTE APRÈS la (les)
     // source(s) finepulfe de la même langue, pour qu'elle soit toujours en 2e
     // position — après finepulfe, avant tous les autres flux (vidzy, uqload…) — quel que soit leur ordre de push dans le tableau "processed".
+    // Ordre des flux directs d'une langue : finepulfe, uqload, vidzy, PUIS les
+    // sources net-flox (dont Voe), toujours après vidzy, puis les autres.
     [...netfloxEarlySources].reverse().forEach(netSrc => {
-      let insertAt = -1;
-      for (let i = processed.length - 1; i >= 0; i--) {
-        const s = processed[i];
-        if (s.lang === netSrc.lang && s.isDirect && isFinepulfeHost(s.hostname)) {
-          insertAt = i + 1;
-          break;
+      const hostHas = (s, frag) => (s.hostname || '').toLowerCase().includes(frag);
+      const lastIdx = pred => {
+        for (let i = processed.length - 1; i >= 0; i--) {
+          const s = processed[i];
+          if (s.lang === netSrc.lang && s.isDirect && pred(s)) return i;
         }
-      }
-      if (insertAt === -1) {
-        // Pas de finepulfe dans cette langue : on place net-flox en tête des
-        // flux directs de cette langue (donc toujours avant "les autres").
+        return -1;
+      };
+      let ref = lastIdx(s => hostHas(s, 'vidzy'));
+      if (ref === -1) ref = lastIdx(s => hostHas(s, 'uqload') || hostHas(s, 'oqload'));
+      if (ref === -1) ref = lastIdx(s => isFinepulfeHost(s.hostname));
+      let insertAt;
+      if (ref !== -1) {
+        insertAt = ref + 1;
+      } else {
+        // Aucun de ces flux dans cette langue : en tête des flux directs de la langue.
         insertAt = processed.findIndex(s => s.lang === netSrc.lang && s.isDirect);
         if (insertAt === -1) insertAt = processed.length;
       }
@@ -5697,7 +5718,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // Si aucun lecteur du tout n'a été trouvé, dans aucune langue, pour ce contenu :
     // popup dans le même style que les autres (nolang-overlay), pas de bascule possible.
     // Priorité "unavailable" : après "film récent", avant "petit problème technique".
-    // BUG FIX : les lecteurs de secours ajoutés en dur (Frembed, Videasy, Filmu,
+    // BUG FIX : les lecteurs de secours ajoutés en dur (Frembed, Videasy,
     // Viduki — marqués "manual") sont TOUJOURS présents, donc processed n'était
     // jamais vide et les popups « aucune source » ne s'affichaient jamais. On ne
     // compte que les vraies sources trouvées par les Workers.
@@ -5894,7 +5915,7 @@ function isDualAudioSource(url) {
 // Endpoint racine avec query params : ?id=...&type=movie  ou  ?id=...&type=tv&season=...&episode=...
 // Réponse attendue : { vo: [{url,type,cached}...], vf: [...], vostfr: [...] }
 // Ce sont des flux m3u8 directs (pas des embeds) : vf -> onglet NETFLOX français,
-// vo/vostfr -> onglet NETFLOX anglais, triés Uqload/Oqload puis Vidzy puis les autres.
+// vo/vostfr -> onglet NETFLOX anglais, triés Uqload/Oqload, Vidzy puis les autres.
 const CODE_EXE_API_BASE = 'https://netfloxxx.code-exe-67.workers.dev';
 const CODE_EXE_HOST_ORDER = ['uqload', 'oqload', 'vidzy.cc'];
 
@@ -6172,8 +6193,24 @@ function sortRank(s) {
     if (isFinepulfeHost(s.hostname)) return -2000;
     return -1000;
   }
+  // Vidly (1080p-4K) : toujours le TOUT PREMIER lecteur de l'onglet Anglais / Autres lecteurs.
+  if (s.lang === 'en' && /(^|\.)vidly\.pro$/i.test(s.hostname || '')) return -1;
   if (s.known) return s.known.index;
   return 999;
+}
+
+// « www.voe.sx » -> « Voe » ; « player.exemple.co.uk » -> « Exemple » (nom de domaine sans extension)
+function hostBaseName(hostname) {
+  let parts = String(hostname || '').toLowerCase().replace(/^www\./, '').split('.').filter(Boolean);
+  if (!parts.length) return '';
+  let name;
+  if (parts.length === 1) name = parts[0];
+  else {
+    const sld = parts[parts.length - 2];
+    name = (parts.length >= 3 && ['co', 'com', 'org', 'net', 'gov', 'ac'].includes(sld) && parts[parts.length - 1].length === 2)
+      ? parts[parts.length - 3] : sld;
+  }
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 // Attribue les noms : Lecteur 1 / Lecteur 2 pour les flux directs (onglet Lecteur NETFLOX),
@@ -6195,7 +6232,15 @@ function assignDisplayNames(list) {
       s.subLabel = `${s.known.name} ${kc[s.known.name]}`;
     } else {
       c.unknown++;
-      s.displayName = c.unknown === 1 ? 'Lecteur vidéo' : `Lecteur vidéo ${c.unknown}`;
+      // Nom = nom de domaine sans l'extension (ex: « voe.sx » -> « Voe »). Plusieurs lecteurs
+      // du même nom sont regroupés sous un même menu déroulant (voir buildOtherGroups) :
+      // « Waav 1 », « Waav 2 »… en sous-onglets.
+      const base = hostBaseName(s.hostname) || 'Lecteur vidéo';
+      const uk = knownCounters[s.lang];
+      uk['#' + base] = (uk['#' + base] || 0) + 1;
+      s.displayName = base;
+      s.groupName = base;
+      s.subLabel = `${base} ${uk['#' + base]}`;
     }
   });
 }
@@ -6212,9 +6257,10 @@ function buildOtherGroups(langKey) {
   const knownMap = new Map();
 
   list.forEach(s => {
-    if (s.known) {
-      let g = knownMap.get(s.known.name);
-      if (!g) { g = { type:'group', name:s.known.name, items:[] }; knownMap.set(s.known.name, g); groups.push(g); }
+    const gname = s.known ? s.known.name : s.groupName;
+    if (gname) {
+      let g = knownMap.get(gname);
+      if (!g) { g = { type:'group', name:gname, items:[] }; knownMap.set(gname, g); groups.push(g); }
       g.items.push(s);
     } else {
       groups.push({ type:'flat', item:s });
@@ -6489,7 +6535,7 @@ function sourceChangedToastText(s) {
 }
 
 function sourceLabel(s) {
-  if (preferredLang === 'fr' || s.known) return s.displayName;
+  if (preferredLang === 'fr' || s.known || !s.isDirect) return s.displayName;
   const numMatch = /(\d+)$/.exec(s.displayName);
   if (s.isDirect) return numMatch ? `Player ${numMatch[1]}` : 'Player';
   return numMatch ? `Video player ${numMatch[1]}` : 'Video player';
@@ -6500,7 +6546,7 @@ function renderFlatRow(s) {
   const locked = wpSourceIsLocked(s);
   row.className = 'src-row' + (s.id === currentSourceIndex ? ' active' : '') + (locked ? ' wp-locked' : '');
   const kind = s.isDirect ? (/m3u8/i.test(s.url) ? 'M3U8' : 'DIRECT') : 'EMBED';
-  const is1080 = (s.isDirect && isDualAudioSource(s.url)) || (!s.isDirect && /filmu\.in|videasy\.to/i.test(s.hostname || ''));
+  const is1080 = (s.isDirect && isDualAudioSource(s.url)) || (!s.isDirect && /videasy\.to|vidly\.pro/i.test(s.hostname || ''));
   const kindHTML = is1080
     ? `<span class="src-kind-tag">1080p - 4K</span><span class="src-kind-sep">·</span><span class="src-kind-tag">${kind}</span>`
     : `<span class="src-kind-tag">${kind}</span>`;
@@ -7585,6 +7631,7 @@ async function playEpisode(season, episode) {
       if (currentTitleInfo) {
         currentTitleInfo.episodeOverview = ep.overview || '';
         currentTitleInfo.episodeStillPath = ep.still_path || null;
+        currentTitleInfo.episodeName = ep.name || '';
       }
     }
   } catch (e) {}
@@ -8886,9 +8933,21 @@ function buildAmbientContent() {
     logoEl.textContent = info.title || '';
   }
 
-  metaEl.textContent = (info.type === 'tv' && info.season && info.episode)
+  // Ligne 1 : année (film) ou « Saison X · Épisode Y · Titre de l'épisode » (série).
+  // Ligne 2 : progression « position / durée totale », sur sa propre ligne en dessous.
+  let metaBase = (info.type === 'tv' && info.season && info.episode)
     ? (preferredLang === 'fr' ? `Saison ${info.season} · Épisode ${info.episode}` : `Season ${info.season} · Episode ${info.episode}`)
     : ((info.releaseDate || info.firstAirDate || '').slice(0, 4));
+  if (info.type === 'tv' && info.season && info.episode && info.episodeName) metaBase += ` : ${info.episodeName}`;
+  const dur = video.duration;
+  const hasProgress = isFinite(dur) && dur > 0;
+  const isEpisodeMeta = info.type === 'tv' && info.season && info.episode;
+  metaEl.innerHTML = escapeHTML(metaBase)
+    + (hasProgress
+        ? (isEpisodeMeta
+            ? `<span class="ap-time ap-block">${escapeHTML(fmt(video.currentTime || 0))} <em>/ ${escapeHTML(fmt(dur))}</em></span>`
+            : ` <i class="ambient-sep">·</i> <span class="ap-time">${escapeHTML(fmt(video.currentTime || 0))} <em>/ ${escapeHTML(fmt(dur))}</em></span>`)
+        : '');
 
   // Pour une série : synopsis + image de l'épisode précis en cours (pas de la
   // saison/série) quand on les a ; sinon on retombe sur ceux de la série.
@@ -8984,6 +9043,14 @@ document.getElementById('bottom-bar').addEventListener('mouseleave', () => {
 
 pw.addEventListener('mousemove', (e) => { if (playerLocked) { showLockHint(); return; } if (overUpNext) return; showCtrls(); resetIdleTimer(); });
 pw.addEventListener('touchstart', () => { if (playerLocked) { showLockHint(); return; } if (pw.classList.contains('cv')) hideCtrls(); else showCtrls(); resetIdleTimer(); }, {passive:true});
+// BUG FIX : faire défiler (molette / barre de défilement d'un menu) sans bouger la souris n'était pas
+// compté comme une activité : le mode ambiance se lançait au bout de 10 s par-dessus le menu. La
+// molette et tout défilement (capture, car « scroll » ne remonte pas) relancent donc le compte à rebours.
+['wheel', 'scroll'].forEach(evt => document.addEventListener(evt, () => {
+  if (playerLocked) return;
+  try { if (typeof playerVisible === 'function' && !playerVisible()) return; } catch (err) {}
+  resetIdleTimer();
+}, { passive: true, capture: true }));
 
 // Survol de la carte "À suivre" : on fige l'état des contrôles tel qu'il était
 // à l'entrée (affichés restent affichés, cachés restent cachés), sans jamais
@@ -13266,6 +13333,60 @@ function goToNextSourceAfterError() {
   }
 }
 
+
+// ── AJUSTEMENT AUTOMATIQUE DE TOUS LES POPUPS À LA TAILLE DE L'ÉCRAN ──
+// Un popup garde sa taille d'origine tant qu'il tient avec une marge de sécurité autour
+// (jamais collé aux bords) ; sinon il est réduit proportionnellement, jusqu'à un plancher
+// pour rester lisible. On utilise la propriété CSS « scale » (indépendante de « transform »),
+// donc les animations d'ouverture/fermeture existantes ne sont pas touchées.
+const POPUP_FIT_MARGIN = 18;      // px minimum entre un popup et chaque bord de l'écran
+const POPUP_FIT_MIN_SCALE = 0.55; // jamais plus petit que 55 %
+const POPUP_FIT_OVERLAYS = [
+  'wp-autoplay-overlay', 'solo-autoplay-overlay', 'wp-leave-overlay', 'wp-hostclose-overlay',
+  'wp-ended-overlay', 'wp-join-prompt-overlay', 'mc-overlay', 'ab-overlay', 'tp-overlay',
+  'ext-overlay', 'wp-ext-warn-overlay', 'nolang-overlay', 'src-error-overlay',
+  'recent-overlay', 'nosource-overlay', 'unreleased-overlay'
+];
+function fitPopupToScreen(overlay) {
+  const modal = overlay && overlay.firstElementChild;
+  if (!modal) return;
+  const w = modal.offsetWidth, h = modal.offsetHeight;
+  if (!w || !h) return; // popup caché : rien à mesurer
+  const avail = n => Math.max(0, n - 2 * POPUP_FIT_MARGIN);
+  const scale = Math.max(POPUP_FIT_MIN_SCALE, Math.min(1, avail(window.innerHeight) / h, avail(window.innerWidth) / w));
+  // On ne touche au style que si la valeur change (évite de relancer l'observateur en boucle).
+  const next = scale >= 0.999 ? '' : String(Math.round(scale * 1000) / 1000);
+  if ((modal.style.getPropertyValue('scale') || '') === next) return;
+  if (next) modal.style.setProperty('scale', next); else modal.style.removeProperty('scale');
+}
+function fitAllVisiblePopups() {
+  POPUP_FIT_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) fitPopupToScreen(o); });
+}
+(function initPopupFit() {
+  const queued = new WeakSet();
+  const schedule = o => {
+    if (queued.has(o)) return;
+    queued.add(o);
+    requestAnimationFrame(() => { queued.delete(o); fitPopupToScreen(o); });
+  };
+  const mo = new MutationObserver(muts => muts.forEach(m => {
+    const el = m.target.nodeType === 1 ? m.target : m.target.parentElement;
+    if (!el) return;
+    const overlay = el.closest('[id$="-overlay"]');
+    if (!overlay) return;
+    if (m.type === 'attributes' && m.attributeName === 'style' && el === overlay.firstElementChild) return; // notre propre réglage
+    schedule(overlay);
+  }));
+  POPUP_FIT_OVERLAYS.forEach(id => {
+    const o = document.getElementById(id);
+    if (!o) return;
+    // classe/style de l'overlay (ouverture) + contenu de la carte (texte/boutons qui changent la hauteur)
+    mo.observe(o, { attributes: true, attributeFilter: ['class', 'style'], childList: true, subtree: true, characterData: true });
+  });
+  window.addEventListener('resize', fitAllVisiblePopups);
+  window.addEventListener('orientationchange', () => setTimeout(fitAllVisiblePopups, 200));
+})();
+
 // ── POPUP "BASCULE VERS UN LECTEUR TIERS" ──
 let tpNoticeCallback = null;
 function showThirdPartyNotice(onClose) {
@@ -13549,6 +13670,7 @@ async function openAdblockPopup(onProceed, opts) {
   refreshAdblockButtonsUI(detected);
   document.getElementById('ab-overlay').classList.add('open');
 }
+
 
 function confirmAdblockAndProceed() {
   abPopupAlreadyShown = true;
