@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fast HLS Player</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b0b10;color:#f5f5f7}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px}
+main{width:min(100%,1000px)}h1{font-size:clamp(22px,4vw,32px);margin:0 0 7px}p{color:#a7a7b4;margin:0 0 18px}
+form{display:flex;gap:8px;margin-bottom:12px}input{min-width:0;flex:1;background:#171720;border:1px solid #353544;border-radius:10px;padding:13px;color:#fff;font-size:15px;outline:none}input:focus{border-color:#9b5cff}
+button{border:0;border-radius:10px;padding:0 18px;background:#8b5cf6;color:white;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+video{width:100%;max-height:72vh;background:#000;border-radius:12px;display:block}
+#status{min-height:24px;margin-top:10px;font-size:13px;color:#bdbdcc}small{display:block;color:#777786;margin-top:8px}
+@media(max-width:600px){form{flex-direction:column}button{padding:13px}}
+</style>
+</head>
+<body><main>
+<h1>Fast HLS Player</h1>
+<p>Colle une URL de flux M3U8 pour lancer la lecture.</p>
+<form id="form"><input id="url" type="url" placeholder="https://exemple.com/playlist.m3u8" autocomplete="url" required><button id="play" type="submit">Lire</button></form>
+<video id="video" controls playsinline crossorigin="anonymous"></video>
+<div id="status" role="status">Prêt.</div>
+<small>La lecture dépend des autorisations CORS et de l’accessibilité du flux. N’utilise que des flux auxquels tu as droit d’accéder.</small>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+<script>
+const form=document.querySelector('#form'),input=document.querySelector('#url'),video=document.querySelector('#video'),status=document.querySelector('#status'),button=document.querySelector('#play');
+let hls=null;
+function say(t){status.textContent=t}
+function stop(){if(hls){hls.destroy();hls=null}video.pause();video.removeAttribute('src');video.load()}
+form.addEventListener('submit',e=>{
+ e.preventDefault();
+ const url=input.value.trim();
+ if(!/^https?:\\/\\//i.test(url)){say('Entre une URL HTTP(S) valide.');return}
+ stop();button.disabled=true;say('Chargement du flux…');
+ if(window.Hls&&Hls.isSupported()){
+  hls=new Hls({enableWorker:true,lowLatencyMode:false,backBufferLength:30});
+  hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
+  hls.on(Hls.Events.MANIFEST_PARSED,(_,data)=>{
+   say('Flux chargé — '+(data.levels.length>1?data.levels.length+' qualités disponibles':'lecture prête')+'.');
+   button.disabled=false;
+   video.play().catch(()=>say('Flux chargé. Appuie sur ▶ pour démarrer.'));
+  });
+  hls.on(Hls.Events.ERROR,(_,data)=>{
+   if(!data.fatal){say('Lecture : '+data.details);return}
+   button.disabled=false;
+   const map={networkError:'Erreur réseau/CORS : le serveur bloque peut-être la requête.',mediaError:'Erreur de décodage du flux.',otherError:'Erreur du lecteur.'};
+   say(map[data.type]||('Erreur fatale : '+data.details));
+  });
+  hls.attachMedia(video);
+ }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+  video.src=url;video.addEventListener('loadedmetadata',()=>{button.disabled=false;say('Flux chargé.');video.play().catch(()=>say('Appuie sur ▶ pour démarrer.'))},{once:true});
+  video.addEventListener('error',()=>{button.disabled=false;say('Impossible de lire le flux directement dans ce navigateur.')},{once:true});
+ }else{button.disabled=false;say('Ce navigateur ne prend pas en charge HLS.')}
+});
+</script>
+</body></html>
