@@ -153,7 +153,7 @@
     text-align:center; max-width:320px; min-height:1.2em;
     padding:7px 16px; border-radius:20px;
     background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-    transition:opacity 0.35s cubic-bezier(0.22,1,0.36,1), transform 0.35s cubic-bezier(0.22,1,0.36,1);
+    transition:opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1);
     /* Le gap général du conteneur (28px) est pensé pour l'espace rond↔texte : on le resserre ici
        pour retrouver le même espacement que celui entre l'eyebrow et le logo/titre (9px). */
     margin-top:-10px;
@@ -456,6 +456,8 @@
     transition:opacity 0.9s cubic-bezier(0.22,1,0.36,1);
   }
   #player-wrap.ambient #ambient-mode { opacity:1; }
+  /* Mode ambiance réservé au lecteur Netflox : jamais sur les « autres lecteurs » (embeds). */
+  #player-wrap.embed-mode #ambient-mode { display:none !important; }
   #ambient-backdrop {
     position:absolute; inset:0; background-size:cover; background-position:center 30%;
     filter:brightness(0.55) saturate(1.05);
@@ -776,13 +778,21 @@
   @keyframes wpPulse { 0%,100%{ opacity:1; } 50%{ opacity:0.35; } }
 
   /* ── WATCH PARTY PANEL — refonte visuelle ── */
-  .wp-hero { display:flex; flex-direction:column; align-items:center; text-align:center; padding:20px 24px 8px; }
-  .wp-hero-icon {
-    width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:linear-gradient(145deg, rgba(220,38,38,0.22), rgba(220,38,38,0.06));
-    border:1px solid rgba(220,38,38,0.3); color:var(--red-h); margin-bottom:13px;
+  .wp-hero {
+    position:relative; overflow:hidden; display:flex; flex-direction:row; align-items:center; text-align:left; gap:16px;
+    margin:20px 20px 6px; padding:18px 18px;
+    border-radius:16px; border:none;
+    background:rgba(255,255,255,0.045);
+    box-shadow:none;
   }
-  .wp-hero p { color:rgba(255,255,255,0.5); font-size:0.84rem; line-height:1.48; max-width:280px; }
+  .wp-hero-icon {
+    position:relative; width:50px; height:50px; flex:0 0 50px; border-radius:15px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(145deg, #ff3b47, #e11d2a); /* rouge vif */
+    border:1px solid rgba(255,255,255,0.22); color:#fff; margin:0; /* logo blanc */
+    box-shadow:0 8px 20px rgba(239,28,40,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .wp-hero-icon svg { stroke:#fff; width:22px; height:22px; }
+  .wp-hero p { position:relative; flex:1; min-width:0; color:rgba(255,255,255,0.74); font-size:0.86rem; line-height:1.6; max-width:none; margin:0; }
   .wp-section { padding:15px 24px 0; }
   .wp-section-label { font-size:0.72rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:9px; }
   .wp-primary-btn {
@@ -793,7 +803,7 @@
   }
   .wp-primary-btn:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(220,38,38,0.4); }
   .wp-primary-btn:active { transform:translateY(0); }
-  .wp-divider { display:flex; align-items:center; gap:10px; margin:15px 24px 10px; color:rgba(255,255,255,0.32); font-size:0.71rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
+  .wp-divider { display:flex; align-items:center; gap:10px; margin:22px 24px 16px; color:rgba(255,255,255,0.32); font-size:0.71rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; }
   .wp-divider::before, .wp-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
   .wp-join-row { display:flex; gap:8px; padding:0 24px; margin-top:9px; }
   .wp-code-input {
@@ -885,8 +895,15 @@
   .wp-status strong { color:#fff; }
   .wp-action-btn { display:block; width:calc(100% - 40px); margin:16px 20px 0; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14); color:#fff; border-radius:10px; padding:11px 14px; font-size:0.85rem; font-weight:600; cursor:pointer; text-align:center; transition:background 0.15s; }
   .wp-action-btn:hover { background:rgba(255,255,255,0.14); }
-  .wp-action-btn.wp-danger { border-color:rgba(220,38,38,0.35); color:#f87171; margin-bottom:20px; }
-  .wp-action-btn.wp-danger:hover { background:rgba(220,38,38,0.14); }
+  .wp-action-btn.wp-danger {
+    display:block; text-align:center;
+    background:linear-gradient(135deg, #dc2626, #ef4444); border:none; color:#fff;
+    font-weight:700; letter-spacing:0.01em; padding:13px 14px; margin-bottom:20px;
+    box-shadow:0 6px 18px rgba(220,38,38,0.35);
+    transition:transform 0.15s, box-shadow 0.15s, filter 0.15s;
+  }
+  .wp-action-btn.wp-danger:hover { background:linear-gradient(135deg, #e11d2a, #f35a5a); transform:translateY(-1px); box-shadow:0 8px 22px rgba(220,38,38,0.5); }
+  .wp-action-btn.wp-danger:active { transform:translateY(0); filter:brightness(0.95); }
   .wp-conn-error { margin:14px 20px 0; padding:11px 14px; border-radius:10px; background:rgba(220,38,38,0.12); border:1px solid rgba(220,38,38,0.3); color:#fca5a5; font-size:0.78rem; line-height:1.5; }
 
 
@@ -901,15 +918,15 @@
       display:flex; flex-direction:column; justify-content:space-evenly;
       min-height:100%;
     }
-    #watchparty-panel .wp-hero { padding:28px 24px 12px; }
-    #watchparty-panel .wp-hero-icon { width:64px; height:64px; margin-bottom:18px; }
-    #watchparty-panel .wp-hero-icon svg { width:26px; height:26px; }
-    #watchparty-panel .wp-hero p { font-size:0.95rem; max-width:320px; line-height:1.55; }
+    #watchparty-panel .wp-hero { padding:22px 20px; gap:18px; margin:24px 20px 8px; }
+    #watchparty-panel .wp-hero-icon { width:58px; height:58px; flex-basis:58px; border-radius:17px; margin:0; }
+    #watchparty-panel .wp-hero-icon svg { width:25px; height:25px; }
+    #watchparty-panel .wp-hero p { font-size:0.95rem; max-width:none; line-height:1.62; }
     #watchparty-panel .wp-pseudo-shared { padding:18px 24px 26px; }
     #watchparty-panel .wp-primary-btn { padding:16px 16px; font-size:1rem; }
     #watchparty-panel .wp-code-input { padding:14px; font-size:1.15rem; }
     #watchparty-panel .wp-join-btn { padding:0 22px; font-size:0.92rem; }
-    #watchparty-panel .wp-divider { margin:0 24px; }
+    #watchparty-panel .wp-divider { margin:8px 24px 12px; }
     #watchparty-panel .wp-live-card { padding:20px 22px; }
     #watchparty-panel .wp-code-display { padding:18px; }
     #watchparty-panel .wp-code-display .wp-code-value { font-size:1.7rem; }
@@ -1518,6 +1535,31 @@
   }
   .dl-row b { color:rgba(255,255,255,0.72); font-weight:600; }
 
+  /* Fermeture animée commune : ces popups passaient de display:flex à display:none d'un coup (« sec »).
+     Le script ajoute .nx-closing pendant ~0,3 s à la fermeture, quelle que soit la façon de fermer
+     (clic, Entrée, Échap…). */
+  @keyframes nx-overlay-out { from { opacity:1; } to { opacity:0; } }
+  @keyframes nx-modal-out { from { opacity:1; transform:none; } to { opacity:0; transform:scale(0.94) translateY(8px); } }
+  .nx-closing { display:flex !important; pointer-events:none !important; animation:nx-overlay-out 0.28s ease forwards !important; }
+  .nx-closing > * { animation:nx-modal-out 0.28s cubic-bezier(0.4,0,1,1) forwards !important; }
+  /* Carte « lien direct » (nouvelle API) : infos + boutons d'action */
+  .dl-card.dl-card-v2 { cursor:default; }
+  .dl-card-v2 .dl-host span.dl-title-wrap { white-space:normal; overflow:visible; text-overflow:clip; line-height:1.35; }
+  .dl-card-v2 .dl-title-ep { font-weight:600; color:rgba(255,255,255,0.7); }
+  .dl-file { margin-top:6px; font-size:0.78rem; color:rgba(255,255,255,0.5); word-break:break-all; }
+  .dl-actions { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .dl-btn {
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    padding:11px 14px; border-radius:11px; font-size:0.88rem; font-weight:700; text-decoration:none;
+    color:#fff; background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.14);
+    transition:background 0.15s, transform 0.1s; cursor:pointer;
+  }
+  .dl-btn:hover { background:rgba(255,255,255,0.16); }
+  .dl-btn:active { transform:scale(0.98); }
+  .dl-btn svg { width:17px; height:17px; flex-shrink:0; }
+  .dl-btn-primary { background:var(--red-h, #ef4444); border-color:transparent; }
+  .dl-btn-primary:hover { background:var(--red-h, #ef4444); filter:brightness(1.1); }
+
   .dl-empty {
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; color:rgba(255,255,255,0.4); font-size:0.86rem; line-height:1.55;
@@ -1662,7 +1704,7 @@
   .lang-section { margin:2px 0; }
   .lang-header {
     display:flex; align-items:center; justify-content:space-between;
-    padding:13px 20px; margin:3px 12px; cursor:pointer;
+    padding:11px 20px; margin:3px 12px; cursor:pointer;
     font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
     color:#fff; border-radius:10px; transition:background .15s, color .15s;
   }
@@ -1673,6 +1715,20 @@
   }
   .lang-section.collapsed .lang-triangle { transform:rotate(-90deg); }
   .lang-body { overflow:hidden; }
+  /* En-tête de section = design d'origine (titre à gauche, triangle à droite) + une ligne discrète « total · netflox · autres » */
+  .lang-head-left { display:flex; flex-direction:column; align-items:flex-start; gap:6px; min-width:0; }
+  .lang-head-title { line-height:1.2; }
+  .lang-meta {
+    display:flex; align-items:center; flex-wrap:wrap; gap:3px 7px; line-height:1.1;
+    font-size:0.66rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+    color:rgba(255,255,255,0.4); white-space:nowrap;
+  }
+  .lang-meta b { font-weight:800; letter-spacing:0; color:rgba(255,255,255,0.85); margin-right:3px; }
+  .lang-meta-total b { color:#fff; }
+  .lang-meta-colon { margin:0 -1px 0 -3px; opacity:0.7; }
+  .lang-meta-item.nx b { color:var(--red-h); }
+  .lang-meta-sep { opacity:0.5; }
+  .lang-meta-item.zero { opacity:0.5; }
   .lang-section.collapsed .lang-body { display:none; }
 
   .src-row {
@@ -2463,6 +2519,41 @@
   }
   #tp-modal button.ab-action:hover { background:var(--red-h); transform:scale(1.03); }
   #tp-modal button.ab-action:active { transform:scale(0.98); }
+
+  /* ── POPUP « AUTRES LANGUES » (information avant lecture) ── */
+  #ml-overlay {
+    position:fixed; inset:0; z-index:2100;
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
+    display:none; align-items:center; justify-content:center; padding:20px;
+    opacity:0; transition:opacity 0.25s ease;
+  }
+  #ml-overlay.open { display:flex; }
+  #ml-overlay.open.in { opacity:1; }
+  #ml-modal {
+    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
+    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    font-family:'Outfit',sans-serif; text-align:center;
+  }
+  #ml-modal .ab-icon {
+    width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
+  }
+  #ml-modal .ab-icon svg { width:26px; height:26px; color:#fff; }
+  #ml-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
+  #ml-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:12px; }
+  #ml-modal p strong { color:rgba(255,255,255,0.9); font-weight:600; }
+  #ml-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  #ml-modal button.ab-action {
+    width:100%; border:none; border-radius:12px; padding:16px 16px;
+    font-family:'Outfit',sans-serif; font-weight:700; font-size:1rem;
+    background:var(--red); color:#fff; cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
+  }
+  #ml-modal button.ab-action:hover { background:var(--red-h); transform:scale(1.03); }
+  #ml-modal button.ab-action:active { transform:scale(0.98); }
 
   /* ── POPUP "EXTENSION NETFLOX REQUISE" (403 finepulfe) ── */
   #ext-overlay {
@@ -3587,6 +3678,20 @@
   </div>
 </div>
 
+<!-- POPUP « AUTRES LANGUES » (information avant de lancer une source de l'onglet Autres langues) -->
+<div id="ml-overlay">
+  <div id="ml-modal">
+    <div class="ab-icon">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>
+    </div>
+    <h3 id="ml-title" data-i18n="ml_title">Contenu multilingue</h3>
+    <p id="ml-p1" data-i18n="ml_p1"></p>
+    <div class="ab-btns">
+      <button class="ab-action" id="ml-ok-btn" onclick="closeMultiLangNotice()" data-i18n="ml_btn">Compris</button>
+    </div>
+  </div>
+</div>
+
 <!-- POPUP "BASCULE VERS UN LECTEUR TIERS" (changement auto de source vers « Autres lecteurs ») -->
 <div id="tp-overlay">
   <div id="tp-modal">
@@ -3822,12 +3927,59 @@ function preloadImage(url) {
     img.src = url;
   });
 }
-function gatherTargetLogoHTML(text, logoPath, logoWidth, logoHeight) {
+// Précharge le logo ET mesure sa luminosité (pixels opaques uniquement) : certains logos TMDB (ex. Saw)
+// sont quasi noirs et deviennent invisibles sur le fond sombre de l'écran de recherche -> on les passe
+// en blanc. Timeout de 6 s : une image lente/bloquée ne doit jamais laisser un trou à la place du titre.
+// Retourne { ok, dark, unknown } — unknown = analyse impossible (CORS) : on met juste un halo clair.
+function loadLogoForGather(url, timeoutMs = 6000) {
+  return new Promise(resolve => {
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; clearTimeout(t); resolve(v); } };
+    const t = setTimeout(() => finish({ ok:false }), timeoutMs);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        if (!img.naturalWidth || !img.naturalHeight) throw new Error('no intrinsic size'); // ex. SVG sans taille
+        const w = 64, h = Math.max(1, Math.round(64 * (img.naturalHeight / img.naturalWidth)));
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently:true });
+        ctx.drawImage(img, 0, 0, w, h);
+        const d = ctx.getImageData(0, 0, w, h).data;
+        let sum = 0, n = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i+3] < 40) continue; // transparent : on ignore
+          sum += (0.2126*d[i] + 0.7152*d[i+1] + 0.0722*d[i+2]) / 255;
+          n++;
+        }
+        const avg = n ? sum / n : 1;
+        finish({ ok:true, dark: avg < 0.42, unknown:false });
+      } catch (e) { finish({ ok:true, dark:false, unknown:true }); } // canvas "tainted"
+    };
+    img.onerror = () => {
+      // Échec avec CORS : on retente sans, juste pour savoir si l'image s'affiche
+      const i2 = new Image();
+      i2.onload = () => finish({ ok:true, dark:false, unknown:true });
+      i2.onerror = () => finish({ ok:false });
+      i2.src = url;
+    };
+    img.src = url;
+  });
+}
+function gatherTargetLogoHTML(text, logoPath, logoWidth, logoHeight, logoMeta) {
   const aspect = (logoWidth && logoHeight) ? logoWidth / logoHeight : 3;
   const isTall = aspect < 1.6;
   const maxH = isTall ? 92 : 64;
   const maxW = isTall ? 220 : 440;
-  return `<img src="${TMDB_IMG}${logoPath}" alt="${escapeHTML(text)}" style="max-height:${maxH}px;max-width:${maxW}px;width:auto;height:auto;display:block;margin:0 auto;object-fit:contain;">`;
+  // Dimensions EXPLICITES : un SVG sans taille intrinsèque (ou une image sans width/height) avec
+  // width:auto;height:auto s'écrase à 0 px -> "trou" à la place du logo. On calcule la taille nous-mêmes.
+  let dispH = maxH, dispW = Math.round(maxH * aspect);
+  if (dispW > maxW) { dispW = maxW; dispH = Math.round(maxW / aspect); }
+  let filter = 'drop-shadow(0 2px 14px rgba(0,0,0,0.5))';
+  if (logoMeta && logoMeta.dark) filter = 'brightness(0) invert(1) drop-shadow(0 2px 14px rgba(0,0,0,0.5))';
+  else if (logoMeta && logoMeta.unknown) filter = 'drop-shadow(0 0 10px rgba(255,255,255,0.35)) drop-shadow(0 2px 14px rgba(0,0,0,0.5))';
+  const enc = encodeURIComponent(text || '');
+  return `<img src="${TMDB_IMG}${logoPath}" alt="${escapeHTML(text)}" width="${dispW}" height="${dispH}" style="width:${dispW}px;height:${dispH}px;max-width:100%;display:block;margin:0 auto;object-fit:contain;filter:${filter};" onerror="this.parentElement.textContent=decodeURIComponent('${enc}')">`;
 }
 
 // ── GATHER SCREEN — affiché pendant que toutes les requêtes (TMDB, sources,
@@ -3852,6 +4004,9 @@ function showGatherScreen() {
   eyebrow.textContent = preferredLang === 'fr' ? 'Préparation du flux pour' : 'Preparing your stream for';
   target.innerHTML = '<span class="gather-target-dots"><span></span><span></span><span></span></span>';
   document.getElementById('gather-episode').innerHTML = '';
+  // Un updateGatherTarget interrompu (titre plus récent / nouveau cycle) peut avoir laissé opacity:0 / animation:none
+  // en inline : sans ce reset, les points et le titre restent invisibles -> "trou".
+  [target, document.getElementById('gather-episode')].forEach(el => { el.style.opacity = ''; el.style.animation = ''; });
   // Si un fond de film est déjà affiché derrière un popup (classification / pseudo), l'écran de recherche
   // de flux reprend EXACTEMENT la même image tout de suite : le fond ne disparaît plus pour réapparaître.
   const presetBackdrop = wpJoinBgPresetPath();
@@ -3873,8 +4028,8 @@ function showGatherScreen() {
   gatherMsgInterval = setInterval(() => {
     i = (i + 1) % messages.length;
     sub.classList.add('fade');
-    setTimeout(() => { sub.textContent = messages[i]; sub.classList.remove('fade'); }, 350);
-  }, 1900);
+    setTimeout(() => { sub.textContent = messages[i]; sub.classList.remove('fade'); }, 550);
+  }, 4200); // messages plus lents (avant : 1900 ms)
 
   gatherScreen.classList.remove('hide');
   gatherScreen.classList.add('show', 'enter');
@@ -3909,7 +4064,8 @@ async function updateGatherTarget(info, season=null, episode=null) {
   const gLogoPath = info.logoPath || info.fallbackLogoPath || null;
   const gLogoW = info.logoPath ? info.logoWidth : info.fallbackLogoWidth;
   const gLogoH = info.logoPath ? info.logoHeight : info.fallbackLogoHeight;
-  const logoOk = gLogoPath ? await preloadImage(`${TMDB_IMG}${gLogoPath}`) : false;
+  const logoMeta = gLogoPath ? await loadLogoForGather(`${TMDB_IMG}${gLogoPath}`) : { ok:false };
+  const logoOk = !!logoMeta.ok;
   if (myToken !== gatherTargetToken) return; // un titre plus récent a pris le relais entre-temps
 
   setGatherBackdrop(info.backdropPath); // a déjà son propre fondu, pas besoin d'attendre
@@ -3924,8 +4080,16 @@ async function updateGatherTarget(info, season=null, episode=null) {
 
   const subBeforeTop = document.getElementById('gather-sub').getBoundingClientRect().top;
 
-  if (logoOk) target.innerHTML = gatherTargetLogoHTML(info.title, gLogoPath, gLogoW, gLogoH);
-  else target.textContent = info.title;
+  if (logoOk) target.innerHTML = gatherTargetLogoHTML(info.title, gLogoPath, gLogoW, gLogoH, logoMeta);
+  else target.textContent = info.title || '';
+  // Filet de sécurité : si le logo n'occupe aucune place (image vide / SVG cassé), on affiche le titre écrit
+  if (logoOk) {
+    const li = target.querySelector('img');
+    if (li) {
+      const check = () => { if (myToken === gatherTargetToken && target.contains(li) && (li.getBoundingClientRect().width < 4 || li.getBoundingClientRect().height < 4)) target.textContent = info.title || ''; };
+      setTimeout(check, 150);
+    }
+  }
   epBadge.innerHTML = isTV
     ? `${sLabel} ${season} <span class="dot"></span> ${eLabel} ${episode}`
     : '';
@@ -4293,6 +4457,7 @@ const TV_ICON_HTML = '<svg class="src-icon" viewBox="0 0 24 24" fill="none" stro
 const KNOWN_HOSTS = [
   ['frembed','Frembed'],
   ['blinkflux.lol','Blinkflux'],
+  ['embedorigin','Embedorigin'], // embedorigin.* (extension variable) : toujours juste sous Blinkflux
   ['uqload.is','Uqload'],
   ['uqload.cx','Uqload'],
   ['uqload','Uqload'],
@@ -4414,6 +4579,10 @@ const I18N = {
   download_loading_title: { fr: 'Recherche des liens…', en: 'Looking for links…' },
   download_none_title: { fr: 'Aucun lien disponible', en: 'No link available' },
   download_none_sub: { fr: 'Aucune option de téléchargement n\'a été trouvée pour ce contenu.', en: 'No download option was found for this content.' },
+  download_btn_download: { fr: 'Télécharger', en: 'Download' },
+  download_btn_loadix: { fr: 'Ouvrir sur Loadix', en: 'Open on Loadix' },
+  download_server_n: { fr: 'Serveur {n}', en: 'Server {n}' },
+  download_file: { fr: 'Fichier', en: 'File' },
   download_error_title: { fr: 'Erreur de chargement', en: 'Loading error' },
   download_error_sub: { fr: 'Impossible de récupérer les liens de téléchargement. Réessaie plus tard.', en: 'Couldn\'t retrieve the download links. Please try again later.' },
   play_btn_title: { fr: 'Lecture', en: 'Play' },
@@ -4547,6 +4716,10 @@ const I18N = {
   ab_btn_install_firefox: { fr: 'Ouvrir dans Firefox', en: 'Open in Firefox' },
   ab_btn_install_edge: { fr: 'Ouvrir dans Edge', en: 'Open in Edge' },
   ab_btn_proceed: { fr: 'J\'ai compris', en: 'Got it' },
+  lang_other_languages: { fr: 'Autres langues', en: 'Other languages' },
+  ml_title: { fr: 'Contenu multilingue', en: 'Multilingual content' },
+  ml_p1: { fr: 'Ce lecteur vous permet de regarder ce contenu dans de nombreuses langues : <strong>français, anglais, espagnol, allemand, italien, portugais, polonais, japonais</strong> et bien d\'autres encore.<br>Une fois la lecture lancée, choisissez votre langue grâce au sélecteur audio du lecteur.', en: 'This player lets you watch this content in many languages: <strong>French, English, Spanish, German, Italian, Portuguese, Polish, Japanese</strong> and many more.<br>Once playback has started, choose your language using the player\'s audio selector.' },
+  ml_btn: { fr: 'Compris', en: 'Got it' },
   tp_title: { fr: 'Changement de lecteur', en: 'Player change' },
   tp_p1: { fr: 'Aucun lecteur NETFLOX n\'a pu lire ce contenu. Nous poursuivons avec un lecteur de l\'onglet <strong style="white-space:nowrap">« Autres lecteurs »</strong>.', en: 'No NETFLOX player was able to play this content. We are continuing with a player from the <strong style="white-space:nowrap">“Other players”</strong> tab.' },
   tp_p2: { fr: 'Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.', en: 'You can return to a NETFLOX player at any time from the Sources menu.' },
@@ -4679,7 +4852,7 @@ function setPreferredLang(lang) {
     // lançait currentSources[id] = une AUTRE source (souvent la française).
     const activeSource = currentSources[currentSourceIndex] || null;
     currentSources.sort((a, b) => {
-      if (a.lang !== b.lang) return a.lang === preferredLang ? -1 : 1;
+      if (a.lang !== b.lang) return langSortRank(a.lang, preferredLang) - langSortRank(b.lang, preferredLang);
       return sortRank(a) - sortRank(b);
     });
     currentSources.forEach((s, i) => { s.id = i; });
@@ -5482,6 +5655,11 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
   setStatus(preferredLang === 'fr' ? 'Recherche des sources…' : 'Searching for sources…');
   showEpisodeFields(true);
 
+  // Worker restless-resonance : lancé en parallèle dès maintenant (ne ralentit pas les autres sources).
+  // fetchRestlessWorkerSources ne rejette jamais : au pire elle renvoie [].
+  const restlessPromise = fetchRestlessWorkerSources(id, type, season, episode);
+  const quietPromise = fetchQuietWorkerSources(id, type, season, episode); // idem (quiet-wildflower)
+
   try {
     const response = await fetch(endpoint, {
       method: 'GET',
@@ -5517,7 +5695,10 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // Idem pour le Worker "mr-wolf-yt" : flux HLS direct en anglais (VO) — retiré
     // (le Worker n'est plus interrogé).
 
-    if (!entries.length && !netfloxEarlySources.length) {
+    const restlessSources = await restlessPromise;
+    const quietSources = await quietPromise;
+
+    if (!entries.length && !netfloxEarlySources.length && !restlessSources.length && !quietSources.length) {
       if (allowSeriesFallback) {
         showEpisodeFields(true);
         setStatus(preferredLang === 'fr' ? 'Aucun lien vidéo trouvé sur /movies/. Si c’est une série, indique la saison et l’épisode.' : 'No video link found on /movies/. If it’s a series, enter the season and episode.');
@@ -5654,6 +5835,21 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       });
     });
 
+    // Onglet « Autres langues » : Vidly avec sélecteur audio (audioPicker=1) -> espagnol, allemand, italien,
+    // portugais, polonais, japonais… Toujours dans « Autres lecteurs » de cette section (lang 'ml').
+    //   Film  -> https://vidly.pro/movie/{id}?color=f00f0f&autoplay=1&audioPicker=1
+    //   Série -> https://vidly.pro/tv/{id}/{saison}/{episode}?color=f00f0f&autoplay=1&audioPicker=1
+    processed.push({
+      url: type === 'tv'
+        ? `https://vidly.pro/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}?color=f00f0f&autoplay=1&audioPicker=1`
+        : `https://vidly.pro/movie/${encodeURIComponent(id)}?color=f00f0f&autoplay=1&audioPicker=1`,
+      lang: 'ml',
+      isDirect: false,
+      hostname: 'vidly.pro',
+      known: matchKnownHost('vidly.pro'),
+      manual: true
+    });
+
     // Nouvelle source VO (Viduki) — 4 serveurs — ajoutée manuellement dans l'onglet Anglais / Autres lecteurs.
     // Les 4 entrées partageant le même nom connu ("Viduki") sont automatiquement regroupées
     // sous un même menu déroulant par buildOtherGroups (comme pour les lecteurs dupliqués).
@@ -5711,6 +5907,39 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       }
       processed.splice(insertAt, 0, netSrc);
     });
+
+    // Sources du Worker "restless-resonance" : TOUT À LA FIN des autres sources directes de leur langue
+    // (le tri stable plus bas conserve cet ordre : finepulfe d'abord, ces flux en dernier).
+    restlessSources.forEach(rs => {
+      const already = processed.some(s => sameStreamUrl(s.url, rs.url));
+      if (!already) processed.push(rs);
+    });
+    // Worker "quiet-wildflower" : flux HLS -> fin des flux directs ; embeds (Moviez…) -> « Autres lecteurs » (rang trié sous Vidly).
+    quietSources.forEach(qs => {
+      // Embeds : comparaison sur l'URL COMPLÈTE (sameStreamUrl ignore la requête, or Moviez VF et VOSTFR ne
+      // diffèrent que par ?lang=vf / ?lang=vostfr -> le 2e était pris à tort pour un doublon et supprimé).
+      const already = qs.isDirect
+        ? processed.some(s => sameStreamUrl(s.url, qs.url))
+        : processed.some(s => s.url === qs.url && s.lang === qs.lang);
+      if (!already) processed.push(qs);
+    });
+
+    // Proxy HLS : pour chaque flux M3U8 Vidzy / Uqload, une entrée « via proxy » juste AVANT l'entrée normale.
+    try {
+      const withProxy = [];
+      processed.forEach(src => {
+        if (shouldProxyHls(src)) {
+          const purl = hlsProxyUrl(src.url);
+          src.proxyFallbackUrl = purl; // sert aussi à lire les pistes audio quand le CORS bloque l'accès direct
+          if (!processed.some(o => o.url === purl) && !withProxy.some(o => o.url === purl)) {
+            withProxy.push({ ...src, url: purl, proxied: true, originalUrl: src.url, proxyFallbackUrl: undefined });
+          }
+        }
+        withProxy.push(src);
+      });
+      processed.length = 0;
+      processed.push(...withProxy);
+    } catch (e) { console.error('Proxy HLS: ajout des entrées impossible', e); }
 
     // Source directe HLS (Worker "mr-wolf-yt") — retirée (le Worker n'est plus
     // interrogé, plus d'insertion de source ici).
@@ -5770,7 +5999,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       processed = processed.filter(s => !(isFrembed(s) && !hasContentId(s)));
     }
     processed.sort((a,b) => {
-      if (a.lang !== b.lang) return a.lang === sortLang ? -1 : 1;
+      if (a.lang !== b.lang) return langSortRank(a.lang, sortLang) - langSortRank(b.lang, sortLang);
       return sortRank(a) - sortRank(b);
     });
     assignDisplayNames(processed);
@@ -5873,6 +6102,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     userWantsPlaying = true; // un nouveau contenu se lance en lecture par défaut, quel que soit l'état du précédent
     selectCloudflareSource(sourceToSelect, { bypassLock: true, noResume: true });
     setStatus('', false);
+    // Lecture des pistes audio des flux M3U8 (arrière-plan, jamais bloquant) -> rangement VF / VO / Autres langues.
+    refineSourcesByAudioTracks(currentSources).catch(err => console.warn('refineSourcesByAudioTracks', err));
     maybeResumeSubTranslate(); // rouvre le menu Sous-titres si une traduction a été interrompue par la fermeture de la page
     return true;
   } catch (err) {
@@ -5909,6 +6140,170 @@ function isDualAudioSource(url) {
     const h = new URL(url).hostname.toLowerCase();
     return isFinepulfeHost(h);
   } catch (e) { return false; }
+}
+
+// ── Sources via le Worker "quiet-wildflower" ──
+// Endpoints : /?id={tmdb}  (film)   |   /?id={tmdb}&season={S}&episode={E}  (série)
+// Réponse : TEXTE brut, une source par ligne :
+//   vf (intégration) : https://api.moviez.ac/969681?autoplay=1&lang=vf&...     -> embed
+//   vf : https://strm5.uqload.vc/hls2/.../master.m3u8?t=...                    -> flux HLS direct
+//   vostfr (intégré) : https://api.moviez.ac/...  /  vostfr : https://....m3u8
+// vf -> français ; vo / vostfr -> anglais. Flux HLS -> onglet « Lecteur NETFLOX » (tout à la fin des
+// flux directs) ; liens « intégré/intégration » -> onglet « Autres lecteurs », juste sous Vidly.
+const QUIET_API_BASE = 'https://netfloxxx.quiet-wildflower-3400.workers.dev';
+
+function parseQuietWorkerText(text) {
+  const out = [];
+  // Tolère une réponse JSON échappée (\/ et \u0026) ou du texte décoré (markdown, puces…)
+  const raw = String(text || '').replace(/\\u0026/gi, '&').replace(/\\\//g, '/').replace(/\\r/g, '').replace(/\\n/g, '\n');
+  const norm = str => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // <étiquette de langue> [ (note) ou autre texte ] : <URL>  — sur une même ligne
+  const re = /(?<![a-z0-9])(vostfr|vosub|vostf|vff|vfq|vf|vo|english|french|francais|eng)(?![a-z0-9])([^:\n]*):\s*(https?:\/\/[^\s"'<>\\]+)/gi;
+  let m;
+  while ((m = re.exec(raw))) {
+    const tag = norm(m[1]);
+    const lang = ['vf', 'vff', 'vfq', 'french', 'francais'].includes(tag) ? 'fr' : 'en';
+    const url = m[3].replace(/[),.;}\]]+$/, '');
+    // Embed si la note dit « intégré / intégration », OU si le lien n'est pas un flux lisible directement
+    const embedded = /integr/.test(norm(m[2])) || !isDirectPlayable(url);
+    out.push({ url, lang, embedded });
+  }
+  return out;
+}
+
+async function fetchQuietWorkerSources(id, type, season, episode) {
+  const qs = type === 'tv'
+    ? `?id=${encodeURIComponent(id)}&season=${encodeURIComponent(season)}&episode=${encodeURIComponent(episode)}`
+    : `?id=${encodeURIComponent(id)}`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000); // le Worker interroge plusieurs sites : on lui laisse du temps
+  try {
+    const response = await fetch(`${QUIET_API_BASE}/${qs}`, {
+      method: 'GET',
+      headers: { 'Accept': 'text/plain,*/*' },
+      signal: ctrl.signal
+    });
+    if (!response.ok) return [];
+    const rawText = await response.text();
+    const items = parseQuietWorkerText(rawText);
+    console.log('[quiet-wildflower]', items.length, 'source(s)', items.map(i => `${i.lang}${i.embedded ? '/embed' : '/hls'}`).join(' '), '\n', rawText.slice(0, 600));
+    const seen = new Set();
+    const out = [];
+    items.forEach(({ url, lang, embedded }) => {
+      if (seen.has(url)) return;
+      seen.add(url);
+      let hostname = '';
+      try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
+      if (embedded) {
+        out.push({ url, lang, isDirect: false, hostname, known: matchKnownHost(hostname), fromQuietWorker: true });
+      } else {
+        out.push({ url, lang, isDirect: true, hostname, known: null, fromQuietWorker: true });
+      }
+    });
+    return out;
+  } catch (e) {
+    console.error('fetchQuietWorkerSources error:', e);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Sources directes (m3u8) via le Worker "restless-resonance" ──
+// Endpoints : /movie/{id_tmdb}  et  /tv/{id_tmdb}/{saison}/{episode}
+// Réponse : TEXTE brut (pas du JSON), par sections :
+//   === VF ===
+//   https://....m3u8?token=...
+//   === VO ===  (ou VOSTFR)
+//   https://....m3u8
+// VF -> onglet NETFLOX français ; VO / VOSTFR -> onglet NETFLOX anglais (même convention que code-exe).
+// Ces sources sont ajoutées TOUT À LA FIN des flux directs de leur langue (voir fetchTMDBSources).
+const RESTLESS_API_BASE = 'https://netfloxxx.restless-resonance-a376.workers.dev';
+
+function parseRestlessWorkerText(text) {
+  const out = [];
+  let lang = null; // tant qu'aucune section n'est ouverte, on ignore les lignes
+  String(text || '').split(/\r?\n/).forEach(line => {
+    const t = line.trim();
+    if (!t) return;
+    const head = t.match(/^=+\s*(.*?)\s*=+$/);
+    if (head) {
+      const label = head[1].toLowerCase().replace(/[^a-z]/g, '');
+      if (label === 'vf' || label === 'vff' || label === 'vfq' || label === 'french' || label === 'francais') lang = 'fr';
+      else if (label === 'vo' || label === 'vostfr' || label === 'vosub' || label === 'vostf' || label === 'eng' || label === 'english') lang = 'en';
+      else lang = null; // section inconnue : on ne devine pas la langue
+      return;
+    }
+    if (!lang) return;
+    const m = t.match(/https?:\/\/[^\s"'<>\\]+/i);
+    if (!m) return;
+    const url = m[0].replace(/[),.;}\]]+$/, '');
+    out.push({ url, lang });
+  });
+  return out;
+}
+
+async function fetchRestlessWorkerSources(id, type, season, episode) {
+  const path = type === 'tv'
+    ? `/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`
+    : `/movie/${encodeURIComponent(id)}`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000); // jamais bloquer le chargement du lecteur
+  try {
+    const response = await fetch(`${RESTLESS_API_BASE}${path}`, {
+      method: 'GET',
+      headers: { 'Accept': 'text/plain,application/json,*/*' },
+      signal: ctrl.signal
+    });
+    if (!response.ok) return [];
+    const raw = await response.text();
+
+    let items = [];
+    // Au cas où le Worker renverrait un jour du JSON { vf:[], vo:[] } : on le gère aussi.
+    try {
+      const j = JSON.parse(raw);
+      if (j && typeof j === 'object') {
+        const pick = (list, lang) => (Array.isArray(list) ? list : []).forEach(it => {
+          const u = typeof it === 'string' ? it : it && it.url;
+          if (typeof u === 'string' && /^https?:\/\//i.test(u)) items.push({ url: u, lang });
+        });
+        pick(j.vf, 'fr'); pick(j.vo, 'en'); pick(j.vostfr, 'en');
+      }
+    } catch (e) { items = parseRestlessWorkerText(raw); }
+
+    const seen = new Set();
+    const out = [];
+    items.forEach(({ url, lang }) => {
+      if (seen.has(url)) return;
+      seen.add(url);
+      let hostname = '';
+      try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
+      out.push({ url, lang, isDirect: true, hostname, known: null, fromRestlessWorker: true });
+    });
+    return out;
+  } catch (e) {
+    console.error('fetchRestlessWorkerSources error:', e);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Proxy HLS (Worker perso) pour les flux M3U8 Vidzy / Uqload ──
+// Pour CHAQUE flux direct M3U8 d'un de ces hébergeurs, on ajoute une 2e entrée qui passe par le proxy :
+//   https://netfloxxx.net-flo-x-67-328.workers.dev/?url=<flux d'origine encodé>
+// Elle est placée JUSTE AVANT le flux normal (donc après finepulfe, avant Uqload/Vidzy « normal »). Si le proxy
+// échoue, le lecteur retombe tout seul sur le flux normal qui suit.
+const HLS_PROXY_BASE = 'https://netfloxxx.net-flo-x-67-328.workers.dev';
+const HLS_PROXY_HOSTS = ['uqload', 'oqload', 'vidzy']; // fragments de nom d'hôte à faire passer par le proxy
+function hlsProxyUrl(url) { return `${HLS_PROXY_BASE}/?url=${encodeURIComponent(url)}`; }
+function shouldProxyHls(src) {
+  if (!src || !src.isDirect || src.manual || src.proxied) return false;
+  const url = String(src.url || '');
+  if (!/m3u8/i.test(url) || url.startsWith(HLS_PROXY_BASE)) return false;
+  let host = (src.hostname || '').toLowerCase();
+  if (!host) { try { host = new URL(url).hostname.toLowerCase(); } catch (e) { return false; } }
+  return HLS_PROXY_HOSTS.some(h => host.includes(h));
 }
 
 // ── Nouvelles sources directes Vidzy / Uqload (m3u8) via le nouveau Cloudflare Worker ──
@@ -6046,35 +6441,44 @@ async function fetchNetFloxDirectStream(id, type, season, episode) {
     try { data = await response.json(); } catch (e) { return []; }
     if (!data || typeof data !== 'object') return [];
 
-    // Le Worker renvoie le premier flux dans "stream" ET la liste complète des
-    // extractions réussies dans "all_extractions" ([{ success, voe_source, stream }, ...]).
-    // On prend les deux : chaque "stream" d'une extraction réussie devient un lecteur
-    // net-flox (les doublons, dont le flux principal répété dans la liste, sont
-    // écartés plus bas via seenUrls). Les extractions en échec sont ignorées.
-    const rawEntries = [];
-    if (data.stream != null) rawEntries.push(...extractVideoEntries(data.stream, ['stream']));
+    const out = [];
+    const seenUrls = new Set();
+    const pushUrl = (rawUrl, lang) => {
+      const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+      if (!/^https?:\/\//i.test(url) || seenUrls.has(url)) return; // pas de filtre sur l'extension : tout lien = HLS
+      seenUrls.add(url);
+      let hostname = '';
+      try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
+      out.push({ url, lang, isDirect: true, hostname, known: null });
+    };
+    const isEn = str => /(^|[^a-z])(vo|vostfr|vosub|vostf|english|anglais|eng|en)([^a-z]|$)/i.test(String(str || ''));
+
+    // NOUVEAU FORMAT : { success, referer_used, sources: [ { voe_source, lang: "VF"|"VO"|"VOSTFR", stream } ] }
+    // (la clé du lien peut aussi s'appeler "flux" ou "url" : on accepte les trois). Chaque source garde
+    // sa propre langue : VF -> onglet français ; VO / VOSTFR -> onglet anglais.
+    if (Array.isArray(data.sources)) {
+      data.sources.forEach((item, i) => {
+        if (typeof item === 'string') { pushUrl(item, 'fr'); return; }
+        if (!item || typeof item !== 'object' || item.success === false) return;
+        const link = item.stream != null ? item.stream : (item.flux != null ? item.flux : item.url);
+        if (typeof link === 'string') { pushUrl(link, isEn(item.lang) ? 'en' : 'fr'); return; }
+        if (link != null) {
+          extractVideoEntries(link, ['sources', String(i), 'stream']).forEach(en => {
+            pushUrl(en.url, isEn(`${item.lang || ''} ${en.pathKey}`) ? 'en' : 'fr');
+          });
+        }
+      });
+    }
+
+    // ANCIEN FORMAT (secours) : premier flux dans "stream" + liste "all_extractions" ([{ success, voe_source, stream }]).
+    if (data.stream != null) extractVideoEntries(data.stream, ['stream']).forEach(en => pushUrl(en.url, isEn(en.pathKey) ? 'en' : 'fr'));
     if (Array.isArray(data.all_extractions)) {
       data.all_extractions.forEach((ex, i) => {
         if (!ex || ex.success === false || ex.stream == null) return;
-        rawEntries.push(...extractVideoEntries(ex.stream, ['all_extractions', String(i), 'stream']));
+        extractVideoEntries(ex.stream, ['all_extractions', String(i), 'stream']).forEach(en => pushUrl(en.url, isEn(`${ex.lang || ''} ${en.pathKey}`) ? 'en' : 'fr'));
       });
     }
-    if (!rawEntries.length) return [];
-    const out = [];
-    const seenUrls = new Set();
-
-    rawEntries.forEach(entry => {
-      const url = entry.url;
-      if (!url || seenUrls.has(url)) return; // pas de filtre sur l'extension : tout lien dans "stream" = HLS
-      seenUrls.add(url);
-
-      let hostname = '';
-      try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
-
-      const lang = /\b(vo|vostfr|vosub|vostf|english|anglais|eng)\b/i.test(entry.pathKey) ? 'en' : 'fr';
-
-      out.push({ url, lang, isDirect: true, hostname, known: null });
-    });
+    if (!out.length) return [];
 
     return out;
   } catch (e) {
@@ -6195,6 +6599,17 @@ function sortRank(s) {
   }
   // Vidly (1080p-4K) : toujours le TOUT PREMIER lecteur de l'onglet Anglais / Autres lecteurs.
   if (s.lang === 'en' && /(^|\.)vidly\.pro$/i.test(s.hostname || '')) return -1;
+  // Onglet Français / Autres lecteurs : ordre Frembed, Blinkflux, Embedorigin, PUIS Vidly, puis Moviez
+  // (le reste des lecteurs connus suit ensuite dans l'ordre de KNOWN_HOSTS).
+  if (s.lang === 'fr' && !s.isDirect && /(^|\.)vidly\.pro$/i.test(s.hostname || '')) {
+    const eo = matchKnownHost('embedorigin');
+    return (eo ? eo.index : 1) + 0.25;
+  }
+  // Embeds « intégrés » du Worker quiet-wildflower (Moviez) : TOUJOURS juste en dessous de Vidly.
+  if (s.fromQuietWorker && !s.isDirect) {
+    const eo = matchKnownHost('embedorigin');
+    return (s.lang === 'en' ? -1 : (eo ? eo.index : 1) + 0.25) + 0.25; // FR : juste après Vidly (qui suit Embedorigin) ; EN : juste après Vidly
+  }
   if (s.known) return s.known.index;
   return 999;
 }
@@ -6216,8 +6631,10 @@ function hostBaseName(hostname) {
 // Attribue les noms : Lecteur 1 / Lecteur 2 pour les flux directs (onglet Lecteur NETFLOX),
 // nom du lecteur connu pour les embeds identifiés, "Lecteur vidéo" / 2 / 3 sinon (onglet Autres lecteurs).
 function assignDisplayNames(list) {
-  const counters = { fr: { direct:0, unknown:0 }, en: { direct:0, unknown:0 } };
-  const knownCounters = { fr: {}, en: {} };
+  // 'ml' = onglet « Autres langues » : DOIT avoir ses compteurs, sinon counters['ml'] est undefined et la
+  // fonction plante (TypeError) -> aucune source chargée -> ticket 404 « séance annulée ».
+  const counters = { fr: { direct:0, unknown:0 }, en: { direct:0, unknown:0 }, ml: { direct:0, unknown:0 } };
+  const knownCounters = { fr: {}, en: {}, ml: {} };
 
   list.forEach((s, idx) => {
     s.id = idx;
@@ -6246,6 +6663,8 @@ function assignDisplayNames(list) {
 }
 
 // Sources directes (m3u8/mp4...) : onglet "Lecteur NETFLOX".
+// Rang d'une langue dans la liste triée : langue prioritaire (0), autre langue fr/en (1), « autres langues » ml (2, toujours en dernier).
+function langSortRank(l, first) { return l === first ? 0 : (l === 'ml' ? 2 : 1); }
 function getDirectSources(langKey) {
   return currentSources.filter(s => s.lang === langKey && s.isDirect);
 }
@@ -6330,11 +6749,13 @@ function renderCloudflareSources() {
     const sectionLang = wpGuestSourceLangPriority || preferredLang;
     const langLabelFr = preferredLang === 'fr' ? 'Français' : 'French';
     const langLabelEn = preferredLang === 'fr' ? 'Version Originale' : 'Original Version';
-    const langOrder = sectionLang === 'en'
+    const langOrder = (sectionLang === 'en'
       ? [['en', langLabelEn], ['fr', langLabelFr]]
-      : [['fr', langLabelFr], ['en', langLabelEn]];
+      : [['fr', langLabelFr], ['en', langLabelEn]]
+    ).concat([['ml', tr('lang_other_languages')]]); // « Autres langues » : toujours sous la version originale
 
     langOrder.forEach(([langKey, langLabel]) => {
+     try {
       const directSources = getDirectSources(langKey);
       const otherGroups = buildOtherGroups(langKey);
 
@@ -6343,7 +6764,24 @@ function renderCloudflareSources() {
 
       const header = document.createElement('div');
       header.className = 'lang-header';
-      header.innerHTML = `<span>${langLabel}</span><span class="lang-triangle"></span>`;
+      // Nombre de sources de la section : total, puis détail NETFLOX (flux directs) / autres lecteurs (tiers).
+      const nbNetflox = currentSources.filter(x => x.lang === langKey && x.isDirect).length;
+      const nbAutres = currentSources.filter(x => x.lang === langKey && !x.isDirect).length;
+      const nbTotal = nbNetflox + nbAutres;
+      const fr = preferredLang === 'fr';
+      const wTotal = fr ? (nbTotal > 1 ? 'sources' : 'source') : (nbTotal !== 1 ? 'sources' : 'source');
+      const wOther = fr ? 'autres' : 'other';
+      const metaTxt = `${nbTotal} ${wTotal} : ${nbNetflox} netflox · ${nbAutres} ${wOther}`;
+      header.innerHTML =
+        `<span class="lang-head-left"><span class="lang-head-title">${langLabel}</span>` +
+          `<span class="lang-meta" aria-label="${escapeHTML(metaTxt)}">` +
+            `<span class="lang-meta-total"><b>${nbTotal}</b> ${wTotal}</span>` +
+            `<span class="lang-meta-colon">:</span>` +
+            `<span class="lang-meta-item nx${nbNetflox ? '' : ' zero'}"><b>${nbNetflox}</b> netflox</span>` +
+            `<span class="lang-meta-sep">·</span>` +
+            `<span class="lang-meta-item${nbAutres ? '' : ' zero'}"><b>${nbAutres}</b> ${wOther}</span>` +
+          `</span>` +
+        `</span><span class="lang-triangle"></span>`;
       header.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -6454,6 +6892,10 @@ function renderCloudflareSources() {
       section.appendChild(body);
       pane.appendChild(section);
       if (subtabsRef) updateTabUnderline(subtabsRef, sourceSubTabFromRect[langKey]);
+     } catch (secErr) {
+       // Une section qui plante ne doit JAMAIS faire disparaître les autres (ni leurs sources).
+       console.error('renderCloudflareSources: section', langKey, secErr);
+     }
     });
   });
 
@@ -6535,10 +6977,14 @@ function sourceChangedToastText(s) {
 }
 
 function sourceLabel(s) {
-  if (preferredLang === 'fr' || s.known || !s.isDirect) return s.displayName;
-  const numMatch = /(\d+)$/.exec(s.displayName);
-  if (s.isDirect) return numMatch ? `Player ${numMatch[1]}` : 'Player';
-  return numMatch ? `Video player ${numMatch[1]}` : 'Video player';
+  let base;
+  if (preferredLang === 'fr' || s.known || !s.isDirect) base = s.displayName;
+  else {
+    const numMatch = /(\d+)$/.exec(s.displayName);
+    if (s.isDirect) base = numMatch ? `Player ${numMatch[1]}` : 'Player';
+    else base = numMatch ? `Video player ${numMatch[1]}` : 'Video player';
+  }
+  return s.audioLangLabel ? `${base} · ${s.audioLangLabel}` : base; // « Autres langues » : on précise la langue de la piste
 }
 
 function renderFlatRow(s) {
@@ -6555,7 +7001,20 @@ function renderFlatRow(s) {
   if (locked) {
     wpAttachLockedRow(row);
   } else {
-    row.onclick = (e) => { e.stopPropagation(); selectCloudflareSource(s.id); };
+    row.onclick = (e) => {
+      e.stopPropagation();
+      // « Autres langues » : on explique d'abord le principe (contenu dans de nombreuses langues), puis le popup
+      // adblocker (lecteur tiers), et seulement ensuite on lance la source. Cliquer la source déjà active ne fait rien.
+      if (s.lang === 'ml' && s.id !== currentSourceIndex && !wpSourceIsLocked(s)) {
+        showMultiLangNotice(() => {
+          // Lecteur direct (flux M3U8) : pas d'adblocker ; lecteur tiers (Vidly…) : adblocker juste après le message.
+          if (s.isDirect) selectCloudflareSource(s.id);
+          else setTimeout(() => openAdblockPopup(() => selectCloudflareSource(s.id)), 350);
+        });
+        return;
+      }
+      selectCloudflareSource(s.id);
+    };
   }
   return row;
 }
@@ -7894,6 +8353,8 @@ function showEmbedPlayer(url, resumeTime) {
   // popups de chargement fermées.
   waitForPopupsCleared(() => { frame.src = url; });
   pw.classList.add('embed-mode');
+  clearTimeout(idleTimer);
+  pw.classList.remove('ambient');
   loadScreen.style.display = 'none';
   pw.style.display = 'block';
   showCtrls();
@@ -8391,15 +8852,74 @@ function populateSources(tracks) {
   if (!tracks || tracks.length < 2) return;
 }
 
-// Sélectionne, parmi les pistes audio d'un flux HLS.js, celle qui correspond
-// à la langue demandée ('en' ou 'fr'), en se basant sur le nom / code langue.
+// ── LANGUES DES PISTES AUDIO (flux M3U8 multi-audio, comme dans VLC : Piste audio > ...) ──
+// [code, libellé affiché, alias reconnus (sans accents, en minuscules)]
+const AUDIO_LANGS = [
+  ['fr', 'Français',   ['fr', 'fre', 'fra', 'french', 'francais', 'vf', 'vff', 'vfq', 'vfi']],
+  ['en', 'English',    ['en', 'eng', 'english', 'anglais', 'vo', 'vostfr']],
+  ['es', 'Español',    ['es', 'spa', 'espanol', 'spanish', 'espagnol', 'castellano', 'latino']],
+  ['de', 'Deutsch',    ['de', 'ger', 'deu', 'german', 'deutsch', 'allemand']],
+  ['it', 'Italiano',   ['it', 'ita', 'italian', 'italiano', 'italien']],
+  ['pt', 'Português',  ['pt', 'por', 'portuguese', 'portugues', 'portugais']],
+  ['pl', 'Polski',     ['pl', 'pol', 'polish', 'polski', 'polonais']],
+  ['ja', '日本語',      ['ja', 'jpn', 'japanese', 'japonais', '日本語']],
+  ['ko', '한국어',      ['ko', 'kor', 'korean', 'coreen', '한국어']],
+  ['zh', '中文',        ['zh', 'zho', 'chi', 'chinese', 'chinois', 'mandarin', 'cantonese', '中文']],
+  ['ru', 'Русский',    ['ru', 'rus', 'russian', 'russe', 'русский']],
+  ['ar', 'العربية',    ['ar', 'ara', 'arabic', 'arabe', 'العربية']],
+  ['tr', 'Türkçe',     ['tr', 'tur', 'turkish', 'turc', 'turkce']],
+  ['nl', 'Nederlands', ['nl', 'nld', 'dut', 'dutch', 'neerlandais', 'nederlands']],
+  ['hi', 'हिन्दी',      ['hi', 'hin', 'hindi']],
+  ['sv', 'Svenska',    ['sv', 'swe', 'swedish', 'suedois', 'svenska']],
+  ['da', 'Dansk',      ['da', 'dan', 'danish', 'danois', 'dansk']],
+  ['no', 'Norsk',      ['no', 'nor', 'nob', 'norwegian', 'norvegien', 'norsk']],
+  ['fi', 'Suomi',      ['fi', 'fin', 'finnish', 'finnois', 'suomi']],
+  ['cs', 'Čeština',    ['cs', 'ces', 'cze', 'czech', 'tcheque', 'cestina']],
+  ['el', 'Ελληνικά',   ['el', 'ell', 'gre', 'greek', 'grec']],
+  ['he', 'עברית',      ['he', 'heb', 'hebrew', 'hebreu']],
+  ['ro', 'Română',     ['ro', 'ron', 'rum', 'romanian', 'roumain']],
+  ['hu', 'Magyar',     ['hu', 'hun', 'hungarian', 'hongrois', 'magyar']],
+  ['uk', 'Українська', ['uk', 'ukr', 'ukrainian', 'ukrainien']],
+  ['th', 'ไทย',        ['th', 'tha', 'thai', 'thailandais']],
+  ['vi', 'Tiếng Việt', ['vi', 'vie', 'vietnamese', 'vietnamien']],
+  ['id', 'Indonesia',  ['id', 'ind', 'indonesian', 'indonesien']],
+];
+const AUDIO_LANG_BY_ALIAS = (() => {
+  const m = new Map();
+  AUDIO_LANGS.forEach(([code, , aliases]) => aliases.forEach(a => { if (!m.has(a)) m.set(a, code); }));
+  return m;
+})();
+// Mots courts autorisés quand on lit un NOM de piste (« VF », « VO », « FR ») ; les autres codes à 2 lettres
+// (« it », « de », « en »…) sont des mots courants : on ne les accepte QUE dans l'attribut LANGUAGE.
+const AUDIO_NAME_SHORT_OK = new Set(['vf', 'vff', 'vfq', 'vo', 'fr']);
+const audioNorm = str => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+function audioLangLabel(code) { const e = AUDIO_LANGS.find(l => l[0] === code); return e ? e[1] : String(code || '').toUpperCase(); }
+// Code de langue d'une piste à partir de l'attribut LANGUAGE (prioritaire, ex. « fr », « spa », « fr-FR ») puis du NOM
+// (ex. « audio Español », « Piste 3 [Français] »). Retourne '' si rien de reconnaissable (« Piste 4 », « und »…).
+function audioTrackLangCode(language, name) {
+  const lg = audioNorm(language).split(/[-_]/)[0];
+  if (lg && lg !== 'und' && lg !== 'mul' && lg !== 'zxx' && AUDIO_LANG_BY_ALIAS.has(lg)) return AUDIO_LANG_BY_ALIAS.get(lg);
+  const tokens = audioNorm(name).split(/[^a-z0-9\u00c0-\uffff]+/).filter(Boolean);
+  for (const t of tokens) {
+    if (!AUDIO_LANG_BY_ALIAS.has(t)) continue;
+    if (t.length <= 2 && !AUDIO_NAME_SHORT_OK.has(t)) continue;
+    return AUDIO_LANG_BY_ALIAS.get(t);
+  }
+  return '';
+}
+
+// Sélectionne, parmi les pistes audio d'un flux HLS.js, celle qui correspond à la langue demandée
+// ('fr', 'en', 'es', 'de'…), en se basant sur le code langue puis le nom de la piste.
 function selectHLSAudioTrackByLang(hlsInstance, langCode) {
   const tracks = hlsInstance.audioTracks || [];
   if (tracks.length < 2) return;
-  const re = langCode === 'en'
-    ? /\b(en|eng|english|anglais|vo|vostfr)\b/i
-    : /\b(fr|fre|fra|french|français|francais|vf)\b/i;
-  const idx = tracks.findIndex(t => re.test(`${t.name || ''} ${t.lang || ''}`));
+  let idx = tracks.findIndex(t => audioTrackLangCode(t.lang, t.name) === langCode);
+  if (idx < 0 && (langCode === 'en' || langCode === 'fr')) { // ancien repérage (finepulfe) en secours
+    const re = langCode === 'en'
+      ? /\b(en|eng|english|anglais|vo|vostfr)\b/i
+      : /\b(fr|fre|fra|french|français|francais|vf)\b/i;
+    idx = tracks.findIndex(t => re.test(`${t.name || ''} ${t.lang || ''}`));
+  }
   if (idx >= 0 && hlsInstance.audioTrack !== idx) hlsInstance.audioTrack = idx;
 }
 
@@ -8407,13 +8927,152 @@ function selectHLSAudioTrackByLang(hlsInstance, langCode) {
 function selectNativeAudioTrackByLang(videoEl, langCode) {
   const tracks = videoEl.audioTracks;
   if (!tracks || tracks.length < 2) return;
-  const re = langCode === 'en'
-    ? /\b(en|eng|english|anglais|vo|vostfr)\b/i
-    : /\b(fr|fre|fra|french|français|francais|vf)\b/i;
+  let found = -1;
   for (let i = 0; i < tracks.length; i++) {
-    const t = tracks[i];
-    t.enabled = re.test(`${t.label || ''} ${t.language || ''}`);
+    if (audioTrackLangCode(tracks[i].language, tracks[i].label) === langCode) { found = i; break; }
   }
+  if (found < 0 && (langCode === 'en' || langCode === 'fr')) {
+    const re = langCode === 'en'
+      ? /\b(en|eng|english|anglais|vo|vostfr)\b/i
+      : /\b(fr|fre|fra|french|français|francais|vf)\b/i;
+    for (let i = 0; i < tracks.length; i++) { if (re.test(`${tracks[i].label || ''} ${tracks[i].language || ''}`)) { found = i; break; } }
+  }
+  if (found < 0) return;
+  for (let i = 0; i < tracks.length; i++) tracks[i].enabled = (i === found);
+}
+
+// Lit le manifeste maître d'un flux M3U8 et retourne ses pistes audio [{ code, name, lang }] (code '' = langue
+// non reconnue), ou null si le manifeste est illisible (CORS, token refusé, délai…) : on ne touche alors à rien.
+async function probeHlsAudioTracks(url, timeoutMs = 6000, fallbackUrl = null) {
+  const first = await probeHlsAudioTracksOnce(url, timeoutMs);
+  if (first || !fallbackUrl) return first;
+  return probeHlsAudioTracksOnce(fallbackUrl, timeoutMs); // accès direct bloqué (CORS…) : on retente via le proxy
+}
+async function probeHlsAudioTracksOnce(url, timeoutMs = 6000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal, credentials: 'omit', cache: 'no-store' });
+    if (!res.ok) return null;
+    const txt = await res.text();
+    if (!/^\s*#EXTM3U/.test(txt)) return null;
+    const tracks = [];
+    txt.split(/\r?\n/).forEach(line => {
+      if (!/^#EXT-X-MEDIA:/i.test(line)) return;
+      const attrs = {};
+      line.slice(line.indexOf(':') + 1).replace(/([A-Z0-9-]+)=("([^"]*)"|[^,]*)/gi, (m, k, v, q) => { attrs[k.toUpperCase()] = q != null ? q : v; return m; });
+      if (String(attrs.TYPE || '').toUpperCase() !== 'AUDIO') return;
+      tracks.push({ code: audioTrackLangCode(attrs.LANGUAGE, attrs.NAME), name: attrs.NAME || '', lang: attrs.LANGUAGE || '' });
+    });
+    return tracks;
+  } catch (e) { return null; }
+  finally { clearTimeout(timer); }
+}
+
+// Décide où ranger un flux selon ses pistes audio. Fonction PURE (testable) :
+//  · aucune langue reconnue (une seule piste sans nom, « Piste 4 »…) -> null : on garde le classement du worker (VF/VO) ;
+//  · sinon le flux va dans la/les section(s) de ses vraies langues : fr -> Français, en -> Version Originale,
+//    toute autre langue -> « Autres langues » (une entrée par langue). Si le worker disait VO mais que la piste
+//    est française, le flux est DÉPLACÉ ; s'il y a plusieurs langues, il est DUPLIQUÉ (avec la bonne piste choisie).
+// Interrupteur : true = une source dont la piste audio CONTREDIT le worker est DÉPLACÉE dans la bonne section (ex. annoncée
+// VO mais piste française -> elle passe en Français) ; false = elle reste en place et une copie est ajoutée dans la bonne section.
+// Le journal « [audio-tracks] » de la console détaille chaque décision.
+const AUDIO_REFINE_MOVE_MISFILED = true;
+
+function planAudioPlacement(workerLang, tracks, allowMove = AUDIO_REFINE_MOVE_MISFILED) {
+  const known = [];
+  (tracks || []).forEach(t => { if (t.code && !known.includes(t.code)) known.push(t.code); });
+  if (!known.length) return null;
+  const sectionOf = c => (c === 'fr' ? 'fr' : (c === 'en' ? 'en' : 'ml'));
+  const order = ['fr', 'en', 'ml'];
+  const targets = known
+    .map(code => ({ lang: sectionOf(code), code }))
+    .sort((a, b) => order.indexOf(a.lang) - order.indexOf(b.lang));
+  const multi = (tracks || []).length >= 2;
+  const match = targets.find(t => t.lang === workerLang);
+  if (match) {
+    // La piste confirme la section du worker : l'entrée reste en place ; les autres langues deviennent des copies.
+    return { keep: { lang: workerLang, code: match.code, setAudio: multi }, copies: targets.filter(t => t !== match) };
+  }
+  // CONTRADICTION (ex. le worker dit VO, la piste est française).
+  if (allowMove) {
+    const keep = targets[0];
+    return { keep: { lang: keep.lang, code: keep.code, setAudio: true }, copies: targets.filter(t => t !== keep) };
+  }
+  return { keep: { lang: workerLang, code: null, setAudio: false }, copies: targets, contradicted: true };
+}
+
+let refineSourcesToken = 0;
+// Après le lancement du lecteur (en arrière-plan, sans jamais retarder la lecture) : on lit les pistes audio de chaque
+// flux M3U8 et on le range dans la bonne section. Permet aussi d'obtenir plus de flux (un même M3U8 FR+EN+ES = 3 entrées).
+async function refineSourcesByAudioTracks(list) {
+  const token = ++refineSourcesToken;
+  if (typeof wpRoomCode !== 'undefined' && wpRoomCode) return; // Watch Party : les listes doivent rester identiques entre hôte et invités
+  const cands = (list || []).filter(s => s.isDirect && !s.audioLangOverride && !s.manual && !isDualAudioSource(s.url) && /m3u8/i.test(s.url || '')).slice(0, 20);
+  if (!cands.length) return;
+  const results = new Map();
+  let next = 0;
+  const worker = async () => {
+    while (next < cands.length) {
+      const src = cands[next++];
+      results.set(src, await probeHlsAudioTracks(src.url, 6000, src.proxyFallbackUrl));
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  if (token !== refineSourcesToken || currentSources !== list) return; // autre contenu chargé entre-temps
+
+  try {
+    const added = [];
+    const edits = [];   // modifications d'entrées existantes, appliquées seulement à la fin (tout ou rien)
+    const log = [];
+    cands.forEach(src => {
+      const tracks = results.get(src);
+      const plan = planAudioPlacement(src.lang, tracks);
+      const host = (src.hostname || '').replace(/^www\./, '');
+      if (!plan) { log.push(`${host} [${src.lang}] pistes: ${tracks ? (tracks.map(t => t.code || '?').join(',') || 'aucune') : 'manifeste illisible'} -> inchangé`); return; }
+      if (plan.keep.lang !== src.lang || plan.keep.setAudio) edits.push({ src, plan });
+      const made = [];
+      plan.copies.forEach(c => {
+        const dup = list.some(o => o.url === src.url && o.lang === c.lang && (o.audioLangOverride || null) === c.code) ||
+                    added.some(o => o.url === src.url && o.lang === c.lang && o.audioLangOverride === c.code);
+        if (dup) return;
+        const copy = { ...src, lang: c.lang, audioLangOverride: c.code };
+        if (c.lang === 'ml') copy.audioLangLabel = audioLangLabel(c.code); else delete copy.audioLangLabel;
+        added.push(copy);
+        made.push(`${c.lang}/${c.code}`);
+      });
+      log.push(`${host} [${src.lang}] pistes: ${(tracks || []).map(t => t.code || '?').join(',')} -> ` +
+               `${plan.contradicted ? 'CONTREDIT le worker (laissé en place) ' : (plan.keep.lang !== src.lang ? 'DÉPLACÉ vers ' + plan.keep.lang + ' ' : 'confirmé ')}` +
+               `${made.length ? '+ copies ' + made.join(' ') : ''}`);
+    });
+    try { console.info('[audio-tracks]\n  ' + log.join('\n  ')); } catch (e) {}
+    if (!edits.length && !added.length) return;
+
+    // Application (tout ou rien) : ces éditions ne peuvent plus échouer ; la liste n'est remplacée qu'à la toute fin.
+    edits.forEach(({ src, plan }) => {
+      if (plan.keep.lang !== src.lang) src.lang = plan.keep.lang;
+      if (plan.keep.setAudio && plan.keep.code) src.audioLangOverride = plan.keep.code;
+      if (plan.keep.lang === 'ml') src.audioLangLabel = audioLangLabel(plan.keep.code);
+    });
+
+    const active = currentSources[currentSourceIndex];
+    const sortLang = wpGuestSourceLangPriority || preferredLang;
+    const hadDirectAny = new Set(list.filter(x => x.isDirect).map(x => x.lang));
+    const merged = list.concat(added);
+    merged.sort((a, b) => {
+      if (a.lang !== b.lang) return langSortRank(a.lang, sortLang) - langSortRank(b.lang, sortLang);
+      return sortRank(a) - sortRank(b);
+    });
+    assignDisplayNames(merged);
+    // Une section qui reçoit ses PREMIERS flux directs (ex. « Autres langues ») s'ouvre sur « Lecteur NETFLOX ».
+    new Set(merged.filter(x => x.isDirect).map(x => x.lang)).forEach(l => { if (!hadDirectAny.has(l)) sourceSubTab[l] = 'netflox'; });
+    currentSources = merged;
+    currentSourceIndex = active ? merged.indexOf(active) : currentSourceIndex;
+  } catch (err) {
+    console.warn('[audio-tracks] reclassement annulé (aucune source modifiée) :', err);
+    return;
+  }
+  try { renderCloudflareSources(); } catch (e) {}
 }
 
 // ── PLAYBACK ──
@@ -8625,7 +9284,7 @@ function toggleFullscreen() {
 const FS_RELOCATE_IDS = [
   'wp-leave-overlay', 'wp-hostclose-overlay',
   'wp-join-prompt-overlay', 'ab-overlay', 'ext-overlay', 'wp-ext-warn-overlay',
-  'nolang-overlay', 'src-error-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'mc-overlay', 'tp-overlay'
+  'nolang-overlay', 'src-error-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'mc-overlay', 'tp-overlay', 'ml-overlay'
 ];
 const fsRelocateAnchors = new Map();
 
@@ -8965,8 +9624,23 @@ function buildAmbientContent() {
 // directement — d'où cette vérification à part pour empêcher le mode ambiance
 // de se déclencher par-dessus.
 function anyOverlayOpen() {
-  return ['ab-overlay', 'mc-overlay', 'nolang-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'wp-ext-warn-overlay']
-    .some(id => document.getElementById(id)?.classList.contains('open'));
+  // Liste COMPLÈTE : avant, « changement de lecteur », « contenu multilingue », « extension requise »,
+  // « erreur de source » et les popups Watch Party n'étaient pas vus -> le mode ambiance démarrait derrière eux.
+  // Un popup en train de se fermer (.nx-closing, fondu de 0,3 s) ne compte plus.
+  const open = id => { const el = document.getElementById(id); return !!el && !el.classList.contains('nx-closing') && (el.classList.contains('open') || el.classList.contains('show')); };
+  return ['ab-overlay', 'mc-overlay', 'nolang-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'wp-ext-warn-overlay',
+          'tp-overlay', 'ml-overlay', 'ext-overlay', 'src-error-overlay', 'wp-ended-overlay', 'wp-join-prompt-overlay'].some(open);
+}
+
+// Vrai si un lecteur externe (iframe) est affiché / en cours, quelle que soit la façon dont on y est arrivé.
+// On ne se fie pas qu'à la classe « embed-mode » : l'iframe visible, ou l'absence totale de source sur le
+// <video> (showEmbedPlayer lui retire son src), prouvent aussi qu'on n'est PAS sur un lecteur direct.
+function isEmbedPlayerActive() {
+  if (pw.classList.contains('embed-mode')) return true;
+  const f = document.getElementById('embed-frame');
+  if (f && f.style.display === 'block') return true;
+  if (f && f.getAttribute('src') && f.getAttribute('src') !== 'about:blank' && video.style.display === 'none') return true;
+  return false;
 }
 
 function enterAmbientMode() {
@@ -8979,6 +9653,8 @@ function enterAmbientMode() {
   // ambiance : il se lance par-dessus (z-index plus haut). La souris posée sur la barre
   // ne bloque pas non plus si un menu y est ouvert (le menu vit dans la barre).
   const menuOpen = !!document.querySelector('.settings-panel.open, .menu-popup.open, .sub-lang-dropdown.open') || subLangDropdownOpen || pendingAutresPanelOpen;
+  // Mode ambiance réservé au lecteur Netflox : jamais sur les autres lecteurs (embeds).
+  if (isEmbedPlayerActive()) return;
   if (!video.paused || scrubbing || playerLocked || (overBar && !menuOpen) || overUpNext || !popupsClear || anyOverlayOpen()) return;
   buildAmbientContent();
   pw.classList.add('ambient');
@@ -8995,6 +9671,7 @@ let idleTimer = null;
 function resetIdleTimer() {
   clearTimeout(idleTimer);
   exitAmbientMode();
+  if (isEmbedPlayerActive()) return; // pas de mode ambiance sur les autres lecteurs
   if (video.paused && !playerLocked) idleTimer = setTimeout(enterAmbientMode, 10000);
 }
 
@@ -9115,6 +9792,112 @@ document.addEventListener('keydown', e => {
 
 document.getElementById('movie-input').addEventListener('keydown', e => { if (e.key==='Enter') loadMovieByTMDB(); });
 document.getElementById('series-input').addEventListener('keydown', e => { if (e.key==='Enter') loadSeriesByTMDB(); });
+
+// ── ENTRÉE = bouton principal (rouge) du popup ouvert ──
+// Compris / Continuer / Installer l'extension / Passer maintenant / J'ai compris, démarrer…
+// Ne fait STRICTEMENT rien s'il n'y a aucun popup ouvert (aucun preventDefault, aucun clic).
+// Les popups de confirmation destructive (quitter / terminer la Watch Party) sont exclus :
+// on ne les valide jamais d'un simple appui sur Entrée.
+(function () {
+  const POPUPS = [
+    ['mc-overlay', 'open'], ['ab-overlay', 'open'], ['tp-overlay', 'open'], ['ml-overlay', 'open'], ['ext-overlay', 'open'],
+    ['wp-ext-warn-overlay', 'open'], ['nolang-overlay', 'open'], ['src-error-overlay', 'open'],
+    ['recent-overlay', 'open'], ['nosource-overlay', 'open'], ['unreleased-overlay', 'open'],
+    ['wp-ended-overlay', 'show'], ['wp-join-prompt-overlay', 'show']
+  ];
+  const shown = b => !!b && !b.disabled && b.getClientRects().length > 0 && getComputedStyle(b).visibility !== 'hidden';
+
+  function openPopup() {
+    let found = null;
+    for (const [id, cls] of POPUPS) {
+      const el = document.getElementById(id);
+      if (el && el.classList.contains(cls) && !el.classList.contains('closing') && shown(el)) found = el; // le dernier ouvert = le plus haut
+    }
+    return found;
+  }
+  function primaryButton(ov) {
+    const list = sel => Array.from(ov.querySelectorAll(sel)).find(shown);
+    return list('.ab-primary') || list('.wp-join-prompt-confirm') || list('.ab-btns button');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.repeat || e.isComposing || e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const ov = openPopup();
+    if (!ov) return;                                   // pas de popup : on ne touche à rien
+    const t = e.target;
+    const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable ||
+      (t.tagName === 'INPUT' && !/^(button|checkbox|radio|range|submit)$/.test(t.type)));
+    if (typing) return;                                // on laisse les champs de texte gérer leur Entrée
+    if (t && ov.contains(t) && /^(BUTTON|A)$/.test(t.tagName)) return; // bouton du popup sélectionné : clic natif
+    const btn = primaryButton(ov);
+    if (!btn) return;
+    e.preventDefault();                                // évite qu'un bouton du lecteur (derrière) soit cliqué
+    e.stopPropagation();
+    try { if (document.activeElement && !ov.contains(document.activeElement)) document.activeElement.blur(); } catch (err) {}
+    btn.click();
+  });
+
+  // ── ÉCHAP = bouton SECONDAIRE du popup ouvert (jamais le bouton rouge, réservé à Entrée) ──
+  // Popup à 2 boutons : Échap = le bouton non rouge (Annuler / Changer de source / J'ai compris…).
+  // Popup à 1 seul bouton : Échap = ce bouton (comme Entrée). Cas particuliers pour éviter les surprises :
+  //   · Watch Party terminée : le secondaire est « Retourner à l'accueil » (quitte la page) -> Échap = « Compris ».
+  //   · Erreur de source : si « Réessayer » est affiché (choix ambigu), Échap ne fait rien.
+  //   · Demande de pseudo Watch Party : Échap ne fait rien.
+  // Phase de capture + stopImmediatePropagation : les raccourcis du lecteur derrière ne réagissent pas.
+  function escapeAction(ov) {
+    const vis = sel => Array.from(ov.querySelectorAll(sel)).find(shown);
+    if (ov.id === 'wp-join-prompt-overlay') return null; // demande de pseudo : Échap ne fait rien
+    if (ov.id === 'wp-ended-overlay') { const b = vis('.ab-primary'); return b ? () => b.click() : null; }
+    if (ov.id === 'src-error-overlay' && vis('#src-error-stay-btn')) return null;
+    const b = vis('.ab-ghost') || vis('.ab-primary') || vis('.ab-btns button');
+    return b ? () => b.click() : null;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || e.repeat || e.isComposing || e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const ov = openPopup();
+    if (!ov) return;                                   // pas de popup : Échap garde son comportement habituel
+    const act = escapeAction(ov);
+    if (!act) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    try { if (document.activeElement && !ov.contains(document.activeElement)) document.activeElement.blur(); } catch (err) {}
+    act();
+  }, true);
+})();
+
+
+// ── Fermeture animée des popups (Entrée / clic / Échap…) ──
+// mc / ext / src-error ont déjà leur propre animation .closing ; tp / wp-ended / wp-join-prompt ont leur fondu.
+// Les autres masquaient simplement l'overlay (display:none) : on observe le retrait de la classe « open »
+// et on rejoue une courte animation de sortie, sans toucher à la logique d'ouverture/fermeture existante.
+(function () {
+  const IDS = ['ab-overlay', 'nolang-overlay', 'nosource-overlay', 'recent-overlay', 'unreleased-overlay', 'wp-ext-warn-overlay'];
+  const timers = new Map();
+  const obs = new MutationObserver(muts => {
+    muts.forEach(m => {
+      const el = m.target;
+      const wasOpen = /(^|\s)open(\s|$)/.test(m.oldValue || '');
+      const isOpen = el.classList.contains('open');
+      if (isOpen) {                       // ré-ouvert pendant la fermeture : on annule l'animation
+        // IMPORTANT : ne toucher à la classe QUE si elle est présente. classList.remove() sur une classe
+        // absente re-déclenche quand même l'observateur -> boucle infinie (page gelée).
+        if (el.classList.contains('nx-closing')) { clearTimeout(timers.get(el)); el.classList.remove('nx-closing'); }
+        return;
+      }
+      if (wasOpen && !el.classList.contains('nx-closing')) {
+        el.classList.add('nx-closing');
+        clearTimeout(timers.get(el));
+        timers.set(el, setTimeout(() => { if (el.classList.contains('nx-closing')) el.classList.remove('nx-closing'); }, 300));
+      }
+    });
+  });
+  IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) obs.observe(el, { attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+  });
+})();
 
 // ── MENUS ──
 function toggleMenu(id) {
@@ -10513,6 +11296,67 @@ function dlCardHTML(item) {
     </a>`;
 }
 
+// Nettoie une URL renvoyée par l'API (espaces parasites, ex. « https: //… ») ; '' si ce n'est pas du http(s).
+function dlCleanUrl(u) {
+  if (typeof u !== 'string') return '';
+  const c = u.replace(/\s+/g, '');
+  return /^https?:\/\//i.test(c) ? c : '';
+}
+
+// Parse la réponse du Worker. JSON normal d'abord ; sinon réparation tolérante (virgule oubliée entre
+// deux clés, espaces dans les URLs) pour ne jamais perdre les liens à cause d'un détail de format.
+function dlParseResponse(raw) {
+  try { return JSON.parse(raw); } catch (e) {}
+  try { return JSON.parse(String(raw).replace(/"\s*"(?=[A-Za-z_]+"\s*:)/g, '","')); } catch (e) {}
+  return null;
+}
+
+const DL_LOADIX_ICON = '<svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+
+// Carte de la nouvelle API : { url, movix_url, webflix:{name,url,details:{...}}, loadix_url, loadix_id }
+// RÈGLE : on ne prend QUE `url` et `movix_url` (les 2 liens avec token ?ff=…). Les liens du bloc
+// `webflix` (y compris details.url, sans ff) ne sont JAMAIS utilisés.
+function dlMainCardHTML(data) {
+  const d = (data.webflix && data.webflix.details) || {};
+  const linkUrl = dlCleanUrl(data.url);
+  const linkMovix = dlCleanUrl(data.movix_url);
+  let loadix = dlCleanUrl(data.loadix_url);
+  if (!loadix && data.loadix_id) loadix = `https://loadix.fun/media/${encodeURIComponent(data.loadix_id)}`;
+
+  // En-tête : titre du film / de la série (+ saison et épisode), pas le nom de la source
+  const title = (currentTitleInfo && currentTitleInfo.title) || '';
+  const seasonLine = currentMediaType === 'tv'
+    ? tr('download_episode_row').replace('{season}', currentSeason).replace('{episode}', currentEpisode) : '';
+
+  let fileName = (data.webflix && typeof data.webflix.name === 'string' && data.webflix.name.trim()) || '';
+  if (!fileName && (linkUrl || linkMovix)) {
+    try { fileName = decodeURIComponent(new URL(linkUrl || linkMovix).pathname.split('/').pop() || ''); } catch (e) {}
+  }
+
+  const quality = d.quality && !/^unknown$/i.test(d.quality) ? d.quality : '';
+  const E = escapeHTML;
+  const dlIcon = DL_ICON.replace('width="22" height="22"', '');
+
+  return `
+    <div class="dl-card dl-card-v2">
+      <div class="dl-card-head">
+        <span class="dl-host"><span class="dl-title-wrap">${E(title || (preferredLang === 'fr' ? 'Téléchargement' : 'Download'))}${seasonLine ? `<span class="dl-title-ep"> : ${E(seasonLine)}</span>` : ''}</span></span>
+        ${quality ? `<span class="dl-badge dl-badge-quality">${E(quality)}</span>` : ''}
+      </div>
+      ${fileName ? `<div class="dl-file">${E(fileName)}</div>` : ''}
+      <div class="dl-info">
+        <div class="dl-row"><span>${tr('download_lang')} :</span><b>${E(dlTranslateLangValue(d.language) || '—')}</b></div>
+        <div class="dl-row"><span>${tr('download_size')} :</span><b>${d.size ? E(d.size) : tr('download_unknown_size')}</b></div>
+        ${d.added_at ? `<div class="dl-row"><span>${tr('download_uploaded')} :</span><b>${E(dlFormatDate(d.added_at))}</b></div>` : ''}
+      </div>
+      <div class="dl-actions">
+        ${linkUrl ? `<a class="dl-btn dl-btn-primary" href="${E(linkUrl)}">${dlIcon}${tr('download_server_n').replace('{n}', '1')}</a>` : ''}
+        ${linkMovix ? `<a class="dl-btn dl-btn-primary" href="${E(linkMovix)}">${dlIcon}${tr('download_server_n').replace('{n}', '2')}</a>` : ''}
+        ${loadix ? `<a class="dl-btn" href="${E(loadix)}" target="_blank" rel="noopener noreferrer">${DL_LOADIX_ICON}${tr('download_btn_loadix')}</a>` : ''}
+      </div>
+    </div>`;
+}
+
 async function renderDownloadPanel() {
   const content = document.getElementById('download-panel-content');
   if (!content) return;
@@ -10525,20 +11369,29 @@ async function renderDownloadPanel() {
   const token = ++dlReqToken;
   content.innerHTML = dlEmptyHTML('download_loading_title', null, false, 'loading');
 
+  // Nouvelle API : ?type=movie&tmdb_id=ID   |   ?type=tv&tmdb_id=ID&season=S&episode=E
   const url = currentMediaType === 'tv'
-    ? `${DL_API_BASE}?tmdb_id=${encodeURIComponent(currentTMDB)}&type=tv&s=${encodeURIComponent(currentSeason)}&e=${encodeURIComponent(currentEpisode)}`
-    : `${DL_API_BASE}?tmdb_id=${encodeURIComponent(currentTMDB)}&type=movie`;
+    ? `${DL_API_BASE}?type=tv&tmdb_id=${encodeURIComponent(currentTMDB)}&season=${encodeURIComponent(currentSeason)}&episode=${encodeURIComponent(currentEpisode)}`
+    : `${DL_API_BASE}?type=movie&tmdb_id=${encodeURIComponent(currentTMDB)}`;
 
   try {
     const res = await fetch(url);
-    const data = await res.json();
+    const raw = await res.text();
     if (token !== dlReqToken) return; // le panneau a changé de contenu entre-temps
-    const list = Array.isArray(data.resultats) ? data.resultats : [];
-    if (!list.length) {
+    const data = dlParseResponse(raw);
+    if (!data || typeof data !== 'object') throw new Error('Réponse illisible');
+
+    // Ancien format (liste « resultats ») conservé en secours
+    const legacy = Array.isArray(data.resultats) ? data.resultats : [];
+    const hasNew = data.success !== false && (dlCleanUrl(data.url) || dlCleanUrl(data.movix_url) || dlCleanUrl(data.loadix_url) || data.loadix_id);
+
+    if (hasNew) {
+      content.innerHTML = `<div class="dl-list">${dlMainCardHTML(data)}</div>`;
+    } else if (legacy.length) {
+      content.innerHTML = `<div class="dl-list">${legacy.map(dlCardHTML).join('')}</div>`;
+    } else {
       content.innerHTML = dlEmptyHTML('download_none_title', 'download_none_sub');
-      return;
     }
-    content.innerHTML = `<div class="dl-list">${list.map(dlCardHTML).join('')}</div>`;
   } catch (err) {
     if (token !== dlReqToken) return;
     content.innerHTML = dlEmptyHTML('download_error_title', 'download_error_sub', true);
@@ -13299,6 +14152,15 @@ function goToNextSourceAfterError() {
     // fois que l'utilisateur l'ouvre.
     if (nextSource && !nextSource.isDirect) {
       sourceSubTab[nextSource.lang] = 'autres';
+    } else if (nextSource && nextSource.lang === 'ml') {
+      // Arrivée sur un flux direct « Autres langues » : message « Contenu multilingue » (pas de lecteur tiers ni d'adblocker).
+      enqueuePopup(POPUP_PRIORITY.srcError, () => new Promise(resolve => {
+        setTimeout(() => showMultiLangNotice(() => {
+          resolve();
+          // Le popup a mis la lecture en pause : on la relance si l'utilisateur la voulait.
+          try { if (userWantsPlaying && video.paused && !isEmbedPlayerActive()) video.play().catch(() => {}); } catch (e) {}
+        }), 450);
+      }));
     }
     // BUG FIX : la liste est triée par langue (FR puis VO, ou l'inverse). Quand
     // tous les lecteurs d'une langue ont échoué, passer à l'index suivant nous
@@ -13306,7 +14168,10 @@ function goToNextSourceAfterError() {
     const prevLang = currentSources[currentSourceIndex] && currentSources[currentSourceIndex].lang;
     const crossesLang = !!(nextSource && prevLang && nextSource.lang !== prevLang);
     selectCloudflareSource(nextId, { bypassLock: true });
-    if (crossesLang) {
+    // Arrivée sur « Autres langues » (dernier recours) : pas de message « aucun lecteur dans cette langue »,
+    // le popup « Contenu multilingue » est enchaîné plus bas à la place.
+    const toMultiLang = !!(nextSource && nextSource.lang === 'ml');
+    if (crossesLang && !toMultiLang) {
       enqueuePopup(POPUP_PRIORITY.unavailable, () => showNoSourceInLangPopup(prevLang, nextSource.lang, { fallback: true }));
     }
     showActionToast(sourceChangedToastText(currentSources[nextId]));
@@ -13319,6 +14184,16 @@ function goToNextSourceAfterError() {
       enqueuePopup(POPUP_PRIORITY.srcError, () => new Promise(resolve => {
         setTimeout(() => {
           showThirdPartyNotice(() => {
+            if (toMultiLang) {
+              // « Autres langues » : changement de lecteur -> contenu multilingue -> adblocker.
+              // La file n'est libérée qu'à la fermeture du popup multilingue : le lecteur tiers ne démarre
+              // donc (image + son) qu'une fois les popups fermés.
+              setTimeout(() => showMultiLangNotice(() => {
+                resolve();
+                setTimeout(() => openAdblockPopup(() => {}, { auto: true }), 350);
+              }), 350);
+              return;
+            }
             resolve();
             setTimeout(() => openAdblockPopup(() => {}, { auto: true }), 350);
           });
@@ -13343,7 +14218,7 @@ const POPUP_FIT_MARGIN = 18;      // px minimum entre un popup et chaque bord de
 const POPUP_FIT_MIN_SCALE = 0.55; // jamais plus petit que 55 %
 const POPUP_FIT_OVERLAYS = [
   'wp-autoplay-overlay', 'solo-autoplay-overlay', 'wp-leave-overlay', 'wp-hostclose-overlay',
-  'wp-ended-overlay', 'wp-join-prompt-overlay', 'mc-overlay', 'ab-overlay', 'tp-overlay',
+  'wp-ended-overlay', 'wp-join-prompt-overlay', 'mc-overlay', 'ab-overlay', 'tp-overlay', 'ml-overlay',
   'ext-overlay', 'wp-ext-warn-overlay', 'nolang-overlay', 'src-error-overlay',
   'recent-overlay', 'nosource-overlay', 'unreleased-overlay'
 ];
@@ -13401,6 +14276,36 @@ function closeThirdPartyNotice() {
   overlay.classList.remove('in');
   setTimeout(() => overlay.classList.remove('open'), 250);
   if (tpNoticeCallback) { const cb = tpNoticeCallback; tpNoticeCallback = null; cb(); }
+}
+
+// ── POPUP « AUTRES LANGUES » (information) ──
+let mlNoticeCallback = null;
+function showMultiLangNotice(onClose) {
+  mlNoticeCallback = typeof onClose === 'function' ? onClose : null;
+  const overlay = document.getElementById('ml-overlay');
+  if (!overlay) { if (mlNoticeCallback) { const cb = mlNoticeCallback; mlNoticeCallback = null; cb(); } return; }
+  // Rien ne doit continuer derrière le popup (image ni son) :
+  //  · lecteur direct : on met le <video> en pause (la source suivante relancera la lecture elle-même) ;
+  //  · lecteur tiers (iframe) : impossible à piloter de l'extérieur -> on le vide (about:blank). Il va de toute
+  //    façon être remplacé par la source choisie juste après ce popup.
+  try { if (video && !video.paused) video.pause(); } catch (e) {}
+  try {
+    const f = document.getElementById('embed-frame');
+    const fs = f && f.getAttribute('src');
+    if (f && fs && fs !== 'about:blank') f.src = 'about:blank';
+  } catch (e) {}
+  // Textes (avec gras) remplis dans la langue d'interface courante, sans toucher aux autres popups.
+  [['ml-title', 'ml_title'], ['ml-p1', 'ml_p1'], ['ml-ok-btn', 'ml_btn']].forEach(([elId, key]) => {
+    const el = document.getElementById(elId); if (el) el.innerHTML = tr(key);
+  });
+  overlay.classList.add('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add('in')));
+}
+function closeMultiLangNotice() {
+  const overlay = document.getElementById('ml-overlay');
+  overlay.classList.remove('in');
+  setTimeout(() => overlay.classList.remove('open'), 250);
+  if (mlNoticeCallback) { const cb = mlNoticeCallback; mlNoticeCallback = null; cb(); }
 }
 
 // ── POPUP AVERTISSEMENT "AUTRES LECTEURS" (pubs) ──
