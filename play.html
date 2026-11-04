@@ -5924,21 +5924,23 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       if (!already) processed.push(qs);
     });
 
-    // Proxy HLS : pour chaque flux M3U8 Vidzy / Uqload, une entrée « via proxy » juste AVANT l'entrée normale.
+    // Proxy HLS : pour chaque flux M3U8 Vidzy / Uqload, une entrée « via proxy ». TOUTES les entrées proxy sont regroupées
+    // en un seul bloc, placé juste APRÈS finepulfe et AVANT tous les autres flux directs (Uqload / Vidzy normaux compris).
     try {
-      const withProxy = [];
+      const proxyBlock = [];
       processed.forEach(src => {
-        if (shouldProxyHls(src)) {
-          const purl = hlsProxyUrl(src.url);
-          src.proxyFallbackUrl = purl; // sert aussi à lire les pistes audio quand le CORS bloque l'accès direct
-          if (!processed.some(o => o.url === purl) && !withProxy.some(o => o.url === purl)) {
-            withProxy.push({ ...src, url: purl, proxied: true, originalUrl: src.url, proxyFallbackUrl: undefined });
-          }
-        }
-        withProxy.push(src);
+        if (!shouldProxyHls(src)) return;
+        const purl = hlsProxyUrl(src.url);
+        src.proxyFallbackUrl = purl; // sert aussi à lire les pistes audio quand le CORS bloque l'accès direct
+        if (processed.some(o => o.url === purl) || proxyBlock.some(o => o.url === purl)) return;
+        proxyBlock.push({ ...src, url: purl, proxied: true, originalUrl: src.url, proxyFallbackUrl: undefined });
       });
-      processed.length = 0;
-      processed.push(...withProxy);
+      if (proxyBlock.length) {
+        // Position : juste avant le premier flux direct qui n'est PAS finepulfe (= juste après le bloc finepulfe).
+        let at = processed.findIndex(o => o.isDirect && !isFinepulfeHost(o.hostname));
+        if (at < 0) at = processed.length;
+        processed.splice(at, 0, ...proxyBlock);
+      }
     } catch (e) { console.error('Proxy HLS: ajout des entrées impossible', e); }
 
     // Source directe HLS (Worker "mr-wolf-yt") — retirée (le Worker n'est plus
@@ -6595,6 +6597,9 @@ function sortRank(s) {
     // de sortir) : on ne peut donc pas se reposer uniquement sur le tri
     // stable / l'ordre d'insertion comme avant, il faut un rang dédié.
     if (isFinepulfeHost(s.hostname)) return -2000;
+    // Flux « via proxy » (Vidzy / Uqload) : TOUS regroupés juste après finepulfe, avant les autres flux directs
+    // (y compris les copies ajoutées plus tard par la lecture des pistes audio).
+    if (s.proxied) return -1500;
     return -1000;
   }
   // Vidly (1080p-4K) : toujours le TOUT PREMIER lecteur de l'onglet Anglais / Autres lecteurs.
