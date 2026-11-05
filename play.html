@@ -3025,10 +3025,10 @@
   /* Lueur rouge derrière TOUS les popups (plus intense) */
   #ab-overlay, #tp-overlay, #ml-overlay, #ext-overlay, #wp-ext-warn-overlay, #nolang-overlay, #nosource-overlay,
   #src-error-overlay, #recent-overlay, #unreleased-overlay, #wp-join-prompt-overlay, #wp-ended-overlay {
-    background:radial-gradient(ellipse 62% 58% at 50% 50%, rgba(220,38,38,0.42), rgba(220,38,38,0.16) 48%, transparent 78%), rgba(0,0,0,0.78);
+    background:radial-gradient(ellipse 78% 72% at 50% 50%, rgba(235,40,40,0.72), rgba(220,38,38,0.34) 46%, rgba(220,38,38,0.08) 72%, transparent 90%), rgba(0,0,0,0.78);
   }
   #mc-overlay {
-    background:radial-gradient(ellipse 62% 58% at 50% 50%, rgba(220,38,38,0.42), rgba(220,38,38,0.16) 48%, transparent 78%), rgba(0,0,0,0.82);
+    background:radial-gradient(ellipse 78% 72% at 50% 50%, rgba(235,40,40,0.72), rgba(220,38,38,0.34) 46%, rgba(220,38,38,0.08) 72%, transparent 90%), rgba(0,0,0,0.82);
   }
 </style>
 </head>
@@ -6207,6 +6207,66 @@ function isExtRequiredHost(hostname) {
   return isFinepulfeHost(h) || EXT_REQUIRED_HOST_FRAGMENTS.some(f => h.includes(f));
 }
 
+// ── Détection de l'extension NETFLOX (pour Uqload / Vidzy normaux) ──
+// Sans l'extension, ces hébergeurs ne renvoient PAS de 403 : ils servent une AUTRE vidéo (leurre). Une lecture « réussie » ne prouve donc
+// rien. La seule preuve fiable disponible : finepulfe répond 403 sans l'extension et laisse passer un segment avec. On sonde donc un segment
+// finepulfe (s'il y en a un pour ce contenu) et on mémorise le résultat ; tout segment finepulfe chargé en lecture compte aussi comme preuve.
+const NF_EXT_FLAG = 'netflox_ext_ok_ts';
+const NF_EXT_FLAG_TTL = 6 * 3600 * 1000;
+function nfExtMarkPresent() { try { localStorage.setItem(NF_EXT_FLAG, String(Date.now())); } catch (e) {} }
+function nfExtMarkAbsent()  { try { localStorage.removeItem(NF_EXT_FLAG); } catch (e) {} }
+function nfExtCachedPresent() {
+  try { const t = parseInt(localStorage.getItem(NF_EXT_FLAG) || '0', 10); return !!t && (Date.now() - t) < NF_EXT_FLAG_TTL; }
+  catch (e) { return false; }
+}
+async function nfFetchProbe(url, opts) {
+  const ctl = new AbortController();
+  const to = setTimeout(() => ctl.abort(), 6000);
+  try { return await fetch(url, Object.assign({ cache: 'no-store', signal: ctl.signal }, opts || {})); }
+  finally { clearTimeout(to); }
+}
+async function nfDetectExtension() {
+  if (window.NF_IS_TV) return false;
+  if (nfExtCachedPresent()) return true;
+  const fp = (currentSources || []).find(x => x && x.isDirect && !x.proxied && isFinepulfeHost(x.hostname));
+  if (!fp) return false;                       // aucune sonde possible : on considère l'extension absente (toujours demandée)
+  try {
+    let target = fp.url;
+    // On descend jusqu'au PREMIER SEGMENT (le manifeste est public, seuls les segments exigent l'extension).
+    for (let depth = 0; depth < 3; depth++) {
+      const r = await nfFetchProbe(target);
+      if (r.status === 403) { nfExtMarkAbsent(); return false; }
+      if (!r.ok) return false;
+      const txt = await r.text();
+      if (!/^#EXTM3U/m.test(txt)) { nfExtMarkPresent(); return true; }
+      const line = txt.split(/\r?\n/).map(l => l.trim()).find(l => l && !l.startsWith('#'));
+      if (!line) return false;
+      target = new URL(line, target).href;
+      if (!/\.m3u8(\?|$)/i.test(target)) {
+        const seg = await nfFetchProbe(target, { headers: { Range: 'bytes=0-0' } });
+        if (seg.status === 403) { nfExtMarkAbsent(); return false; }
+        if (seg.ok || seg.status === 206) { nfExtMarkPresent(); return true; }
+        return false;
+      }
+    }
+  } catch (e) { /* réseau / CORS : extension non prouvée */ }
+  return false;
+}
+let nfExtCheckToken = 0;
+let nfExtVerifiedUrl = null;
+// Même enchaînement que l'erreur 403 finepulfe (voir le handler d'erreur HLS) : popup « extension requise » / sondage en arrière-plan.
+function nfExtMissingFlow() {
+  if (extRetryPending) {
+    extRetryPending = false;
+    extRetryInFlight = false;
+    if (extRetryIsSilentBackground) { extRetryIsSilentBackground = false; }
+    else if (extRetryWasDeliberate) { showExtRetryStillBlockedPopup(); }
+    else { showExtensionRequiredPopup(); }
+  } else {
+    handleFinepulfeExtensionRequired();
+  }
+}
+
 // Domaines connus pour proposer plusieurs pistes audio dans un même flux m3u8.
 function isDualAudioSource(url) {
   try {
@@ -7108,6 +7168,8 @@ function renderFlatRow(s) {
   const tags = [];
   if (s.lang === 'en' && s.voKind === 'VOSTFR') tags.push('VOSTFR'); // seul VOSTFR est affiché (plus de badge « VO »), à gauche de la qualité
   if (is1080) tags.push('1080p - 4K');
+  // Source qui nécessite l'extension NETFLOX (finepulfe, Uqload / Vidzy normaux) — jamais les entrées « via proxy ».
+  if (s.isDirect && !s.proxied && isExtRequiredHost(s.hostname)) tags.push('Extension');
   if (kind) tags.push(kind);
   const kindHTML = tags.map(t => `<span class="src-kind-tag">${t}</span>`).join('<span class="src-kind-sep">·</span>');
   const icon = s.isDirect ? NETFLOX_ICON_HTML : TV_ICON_HTML;
@@ -8535,6 +8597,23 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
   currentStreamUrl = url;
   currentStreamIsHLS = isHLS;
   currentStreamTitle = title || currentStreamTitle;
+  // Uqload / Vidzy normaux : on ne lance RIEN (ni image ni son) tant que la présence de l'extension n'est pas prouvée.
+  if (needsExt && !isFinepulfe && nfExtVerifiedUrl !== url) {
+    const myToken = ++nfExtCheckToken;
+    showSpinner();
+    nfDetectExtension().then(ok => {
+      if (myToken !== nfExtCheckToken || currentStreamUrl !== url) return;   // l'utilisateur a changé de source entre-temps
+      if (ok) {
+        nfExtVerifiedUrl = url;
+        if (extPopupPending) finishExtPopupAsSuccess();
+        loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry);
+      } else {
+        hideSpinner();
+        nfExtMissingFlow();
+      }
+    });
+    return;
+  }
   // Reprend au temps donné (ex: bascule FR/EN sur un même flux finepulfe en
   // pleine Watch Party) plutôt que de repartir du début.
   const applyResumeTime = () => {
@@ -8638,6 +8717,7 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
       hls.on(Hls.Events.FRAG_LOADED, () => {
         if (finepulfeFirstFragLoaded) return;
         finepulfeFirstFragLoaded = true;
+        if (isFinepulfe) nfExtMarkPresent(); // un segment finepulfe est passé : l'extension est bien là
         extGraceRetries.delete(url);
         if (extPopupPending) finishExtPopupAsSuccess();
         playWhenReady();
@@ -8680,6 +8760,7 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
           // (Uqload / Vidzy sans extension : le blocage peut aussi se manifester par une erreur réseau/CORS sans code HTTP)
           // Cas spécifique : source finepulfe qui répond 403 -> l'extension
           // NETFLOX est requise pour y accéder.
+          if (isFinepulfe) nfExtMarkAbsent();
           // Deux situations bien différentes :
           //  - échec AU LANCEMENT (la source n'a jamais démarré) : c'est
           //    probablement la toute première fois, on propose carrément
