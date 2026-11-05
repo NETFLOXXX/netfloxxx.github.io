@@ -284,7 +284,7 @@
   #nav-mid  { grid-column:2; justify-self:center; }
   #nav-next { grid-column:3; justify-self:start; }
 
-  /* ── BOUTON « PASSER L'INTRODUCTION » — timecodes fournis par l'API ── */
+  /* ── BOUTON « PASSER L'INTRODUCTION » — timecodes fournis par l'API ── */
   #skip-intro-btn {
     position:absolute; right:26px; bottom:26px; z-index:64;
     display:inline-flex; align-items:center; gap:12px;
@@ -451,12 +451,24 @@
 
   /* ── MODE AMBIANCE (pause prolongée, 10s sans activité) ── */
   #ambient-mode {
-    position:absolute; inset:0; z-index:210; /* au-dessus des menus ouverts (sous-titres, sources, vitesse… : z-index 200) */
+    position:absolute; inset:0; z-index:2500; /* au-dessus des menus ouverts (z-index 200) ET des popups (2000-2100, y compris relocalisés dans le lecteur en plein écran) */
     opacity:0; pointer-events:none;
     transition:opacity 0.9s cubic-bezier(0.22,1,0.36,1);
   }
   #player-wrap.ambient #ambient-mode { opacity:1; }
-  /* Mode ambiance réservé au lecteur Netflox : jamais sur les « autres lecteurs » (embeds). */
+  /* Le lecteur forme son propre contexte d'empilement (z-index 500, sous les popups du <body>) : pendant l'ambiance on le
+     remonte au-dessus de tous les popups pour que le mode ambiance se lance PAR-DESSUS eux. */
+  #player-wrap.ambient, body.wp-room-active #player-wrap.ambient { z-index:3000; }
+  /* Ambiance lancée PAR-DESSUS un popup : #player-wrap (position:fixed) forme TOUJOURS son propre contexte d'empilement, donc rien
+     de ce qu'il contient ne peut passer au-dessus des popups du <body>. On sort donc la couche #ambient-mode du lecteur et on la
+     pose directement dans le <body> (position:fixed, même rectangle que le lecteur) ; le lecteur et le popup ne bougent plus,
+     seule l'ambiance apparaît / s'efface en fondu au-dessus. */
+  #ambient-mode.amb-detached { position:fixed; inset:auto; z-index:2500; }
+  #ambient-mode.amb-live { opacity:1; }
+  #ambient-mode.amb-live #ambient-backdrop { opacity:1; transform:scale(1); }
+  #ambient-mode.amb-live #ambient-panel { opacity:1; transform:translateX(0); }
+  #player-wrap.ambient.ambient-nolift, body.wp-room-active #player-wrap.ambient.ambient-nolift { z-index:500; }
+  /* Mode ambiance réservé au lecteur Netflox : jamais sur les « autres lecteurs » (embeds). */
   #player-wrap.embed-mode #ambient-mode { display:none !important; }
   #ambient-backdrop {
     position:absolute; inset:0; background-size:cover; background-position:center 30%;
@@ -507,7 +519,7 @@
     display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden;
   }
   #ambient-overview:empty, #ambient-meta:empty { display:none; }
-  /* Temps « position / durée » : à côté de l'année (film) ; sur sa propre ligne sous « Saison · Épisode » (série). */
+  /* Temps « position / durée » : à côté de l'année (film) ; sur sa propre ligne sous « Saison · Épisode » (série). */
   #ambient-meta .ambient-sep { font-style:normal; opacity:0.5; margin:0 4px; }
   #ambient-meta .ap-time {
     font-variant-numeric:tabular-nums; letter-spacing:0.04em; color:rgba(255,255,255,0.85);
@@ -1535,14 +1547,14 @@
   }
   .dl-row b { color:rgba(255,255,255,0.72); font-weight:600; }
 
-  /* Fermeture animée commune : ces popups passaient de display:flex à display:none d'un coup (« sec »).
+  /* Fermeture animée commune : ces popups passaient de display:flex à display:none d'un coup (« sec »).
      Le script ajoute .nx-closing pendant ~0,3 s à la fermeture, quelle que soit la façon de fermer
      (clic, Entrée, Échap…). */
   @keyframes nx-overlay-out { from { opacity:1; } to { opacity:0; } }
   @keyframes nx-modal-out { from { opacity:1; transform:none; } to { opacity:0; transform:scale(0.94) translateY(8px); } }
   .nx-closing { display:flex !important; pointer-events:none !important; animation:nx-overlay-out 0.28s ease forwards !important; }
   .nx-closing > * { animation:nx-modal-out 0.28s cubic-bezier(0.4,0,1,1) forwards !important; }
-  /* Carte « lien direct » (nouvelle API) : infos + boutons d'action */
+  /* Carte « lien direct » (nouvelle API) : infos + boutons d'action */
   .dl-card.dl-card-v2 { cursor:default; }
   .dl-card-v2 .dl-host span.dl-title-wrap { white-space:normal; overflow:visible; text-overflow:clip; line-height:1.35; }
   .dl-card-v2 .dl-title-ep { font-weight:600; color:rgba(255,255,255,0.7); }
@@ -1715,7 +1727,7 @@
   }
   .lang-section.collapsed .lang-triangle { transform:rotate(-90deg); }
   .lang-body { overflow:hidden; }
-  /* En-tête de section = design d'origine (titre à gauche, triangle à droite) + une ligne discrète « total · netflox · autres » */
+  /* En-tête de section = design d'origine (titre à gauche, triangle à droite) + une ligne discrète « total · netflox · autres » */
   .lang-head-left { display:flex; flex-direction:column; align-items:flex-start; gap:6px; min-width:0; }
   .lang-head-title { line-height:1.2; }
   .lang-meta {
@@ -1831,6 +1843,16 @@
   .src-subtabs .settings-tab:disabled { color:rgba(255,255,255,0.25); cursor:default; }
   .src-subtabs .settings-tab:disabled:hover { color:rgba(255,255,255,0.25); }
   .src-subtab-content { padding-top:2px; }
+  /* titre seul (aucune source NETFLOX) : « Autres lecteurs » centré, sans sous-onglets */
+  .src-solo-title {
+    margin:2px 12px 8px; padding:0 4px; display:flex; justify-content:center; font-size:0.85rem; font-weight:600;
+    color:#fff; border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .src-solo-title span { position:relative; padding:10px 14px; }
+  .src-solo-title span::after {
+    content:''; position:absolute; left:0; right:0; bottom:-1px; height:3px;
+    background:var(--red); border-radius:3px 3px 0 0;
+  }
   /* slide léger lors du changement de sous-onglet (Lecteur NETFLOX / Autres lecteurs), même effet que Sources/Format/Vitesse */
   .src-subtab-content.slide-right { animation:pane-in-from-right 0.3s cubic-bezier(0.22,1,0.36,1); }
   .src-subtab-content.slide-left  { animation:pane-in-from-left 0.3s cubic-bezier(0.22,1,0.36,1); }
@@ -2102,7 +2124,7 @@
     .ep-season-dropdown { scrollbar-width:thin; scrollbar-color:#dc2626 rgba(255,255,255,0.06); }
   }
   .ep-season-dropdown.open { display:block; }
-  .ep-season-dropdown::-webkit-scrollbar { width:6px; height:0; }
+  .ep-season-dropdown::-webkit-scrollbar { width:12px; height:0; } /* 12 px = barre de 6 px + 3 px d'air de chaque côté */
   .ep-season-dropdown::-webkit-scrollbar-button,
   .ep-season-dropdown::-webkit-scrollbar-button:single-button,
   .ep-season-dropdown::-webkit-scrollbar-button:vertical:start,
@@ -2112,10 +2134,12 @@
     display:none !important; width:0 !important; height:0 !important;
     -webkit-appearance:none; background:transparent;
   }
-  .ep-season-dropdown::-webkit-scrollbar-track { background:transparent; }
+  /* marges haut/bas : la barre ne déborde plus sur les coins arrondis */
+  .ep-season-dropdown::-webkit-scrollbar-track { background:transparent; margin:10px 0; }
   .ep-season-dropdown::-webkit-scrollbar-track-piece { background:transparent; }
-  .ep-season-dropdown::-webkit-scrollbar-thumb { background:#dc2626; border-radius:6px; }
-  .ep-season-dropdown::-webkit-scrollbar-thumb:hover { background:#ef4444; }
+  /* bordure transparente = barre plus fine, décollée du cadre */
+  .ep-season-dropdown::-webkit-scrollbar-thumb { background:#dc2626; border-radius:6px; border:3px solid transparent; background-clip:padding-box; }
+  .ep-season-dropdown::-webkit-scrollbar-thumb:hover { background:#ef4444; background-clip:padding-box; }
   .ep-season-dropdown::-webkit-scrollbar-corner { background:transparent; }
   .ep-season-option {
     padding:13px 18px; font-size:0.92rem; color:rgba(255,255,255,0.8); cursor:pointer;
@@ -2485,7 +2509,7 @@
   #ab-modal button.ab-ghost:focus,
   #ab-modal button.ab-ghost:focus-visible { outline:none; }
 
-  /* ── POPUP "BASCULE VERS UN LECTEUR TIERS" (source en erreur -> changement auto vers « Autres lecteurs ») ── */
+  /* ── POPUP "BASCULE VERS UN LECTEUR TIERS" (source en erreur -> changement auto vers « Autres lecteurs ») ── */
   #tp-overlay {
     position:fixed; inset:0; z-index:2100;
     background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
@@ -2520,7 +2544,7 @@
   #tp-modal button.ab-action:hover { background:var(--red-h); transform:scale(1.03); }
   #tp-modal button.ab-action:active { transform:scale(0.98); }
 
-  /* ── POPUP « AUTRES LANGUES » (information avant lecture) ── */
+  /* ── POPUP « AUTRES LANGUES » (information avant lecture) ── */
   #ml-overlay {
     position:fixed; inset:0; z-index:2100;
     background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
@@ -2684,48 +2708,29 @@
   #wp-ext-warn-modal button.ab-ghost:focus,
   #wp-ext-warn-modal button.ab-ghost:focus-visible { outline:none; }
 
-  /* ── POPUPS "LANGUE / SOURCE INDISPONIBLE" (nolang + nosource, style commun) ── */
+  /* ── POPUPS "LANGUE / SOURCE INDISPONIBLE" (nolang + nosource) : même style que les autres popups (cf. #ab-modal) ── */
   #nolang-overlay, #nosource-overlay {
     position:fixed; inset:0; z-index:2000;
-    background:radial-gradient(ellipse 70% 50% at 50% 35%, rgba(220,38,38,0.16), transparent 70%), rgba(0,0,0,0.82);
-    backdrop-filter:blur(14px) saturate(125%); -webkit-backdrop-filter:blur(14px) saturate(125%);
+    background:rgba(0,0,0,0.78); backdrop-filter:blur(10px);
     display:none; align-items:center; justify-content:center; padding:20px;
   }
-  #nolang-overlay.open, #nosource-overlay.open { display:flex; animation:nx-fade 0.25s ease both; }
+  #nolang-overlay.open, #nosource-overlay.open { display:flex; }
   #nolang-modal, #nosource-modal {
-    position:relative; width:100%; max-width:420px; overflow:hidden;
-    background:linear-gradient(165deg, #212125 0%, #131315 65%);
-    border:1px solid rgba(255,255,255,0.09); border-radius:26px;
-    padding:38px 28px 24px; text-align:center; font-family:'Outfit',sans-serif;
-    box-shadow:0 40px 90px rgba(0,0,0,0.75), 0 0 90px -24px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-    animation:nx-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    width:100%; max-width:400px; background:linear-gradient(180deg, #1c1c1c, #131313);
+    border:1px solid rgba(255,255,255,0.1); border-radius:20px;
+    padding:28px 26px 22px; box-shadow:0 30px 70px rgba(0,0,0,0.7);
+    animation:ab-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    font-family:'Outfit',sans-serif; text-align:center;
   }
-  #nolang-modal::before, #nosource-modal::before {
-    content:''; position:absolute; top:0; left:50%; width:62%; height:2px; transform:translateX(-50%);
-    background:linear-gradient(90deg, transparent, var(--red-h), transparent);
-  }
-  #nolang-modal::after, #nosource-modal::after {
-    content:''; position:absolute; top:-90px; left:50%; width:260px; height:180px; transform:translateX(-50%);
-    background:radial-gradient(closest-side, rgba(220,38,38,0.28), transparent); pointer-events:none;
-  }
-  #nolang-modal > *, #nosource-modal > * { position:relative; z-index:1; }
   #nolang-modal .nx-icon, #nosource-modal .nx-icon {
-    position:relative; width:70px; height:70px; border-radius:50%; margin:0 auto 20px;
+    width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--red-h), var(--red));
     display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(circle at 30% 28%, var(--red-h), var(--red) 70%);
-    box-shadow:0 12px 30px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.3);
+    margin:0 auto 16px; box-shadow:0 8px 20px rgba(220,38,38,0.35);
   }
-  #nolang-modal .nx-icon::after, #nosource-modal .nx-icon::after {
-    content:''; position:absolute; inset:-7px; border-radius:50%;
-    border:1.5px solid rgba(239,68,68,0.55); animation:nx-ring 2.2s ease-out infinite;
-  }
-  #nolang-modal .nx-icon svg, #nosource-modal .nx-icon svg { width:32px; height:32px; color:#fff; }
-  #nolang-modal h3, #nosource-modal h3 {
-    font-size:1.3rem; font-weight:800; margin-bottom:10px; letter-spacing:-0.02em; color:#fff;
-  }
-  #nolang-modal p, #nosource-modal p {
-    font-size:0.9rem; line-height:1.6; color:rgba(255,255,255,0.62); margin:0 auto; max-width:340px;
-  }
+  #nolang-modal .nx-icon svg, #nosource-modal .nx-icon svg { width:26px; height:26px; color:#fff; }
+  #nolang-modal h3, #nosource-modal h3 { font-size:1.15rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.01em; color:#fff; }
+  #nolang-modal p, #nosource-modal p { font-size:0.87rem; line-height:1.55; color:rgba(255,255,255,0.6); margin-bottom:0; }
   .nx-route { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:20px 0 2px; }
   .nx-route:empty { display:none; }
   .nx-chip {
@@ -2735,18 +2740,17 @@
   .nx-chip.off { color:rgba(255,255,255,0.38); border-color:rgba(255,255,255,0.07); text-decoration:line-through; text-decoration-color:rgba(239,68,68,0.8); }
   .nx-chip.on  { color:#fff; background:rgba(220,38,38,0.18); border-color:rgba(239,68,68,0.55); box-shadow:0 0 18px -4px rgba(220,38,38,0.55); }
   .nx-arrow { width:20px; height:20px; color:var(--red-h); flex:none; animation:nx-nudge 1.4s ease-in-out infinite; }
-  #nolang-modal .ab-btns, #nosource-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:24px; }
+  #nolang-modal .ab-btns, #nosource-modal .ab-btns { display:flex; flex-direction:column; gap:9px; margin-top:16px; }
   #nolang-modal button.ab-action, #nosource-modal button.ab-action {
-    width:100%; border:none; border-radius:14px; cursor:pointer; text-align:center;
-    font-family:'Outfit',sans-serif; transition:transform 0.15s, box-shadow 0.2s, filter 0.2s;
+    width:100%; border:none; border-radius:12px; padding:13px 16px;
+    font-family:'Outfit',sans-serif; font-weight:600; font-size:0.88rem;
+    cursor:pointer; transition:background 0.2s, transform 0.15s; text-align:center;
   }
-  #nolang-modal button.ab-primary, #nosource-modal button.ab-primary {
-    padding:16px; font-size:1rem; font-weight:700; color:#fff;
-    background:linear-gradient(135deg, var(--red-h), var(--red));
-    box-shadow:0 12px 26px -8px rgba(220,38,38,0.7), inset 0 1px 0 rgba(255,255,255,0.22);
-  }
-  #nolang-modal button.ab-primary:hover, #nosource-modal button.ab-primary:hover { transform:translateY(-1px) scale(1.02); filter:brightness(1.08); }
   #nolang-modal button.ab-action:active, #nosource-modal button.ab-action:active { transform:scale(0.98); }
+  #nolang-modal button.ab-primary, #nosource-modal button.ab-primary {
+    padding:16px 16px; font-size:1rem; font-weight:700; background:var(--red); color:#fff;
+  }
+  #nolang-modal button.ab-primary:hover, #nosource-modal button.ab-primary:hover { background:var(--red-h); transform:scale(1.03); }
   @keyframes nx-fade  { from{opacity:0;} to{opacity:1;} }
   @keyframes nx-pop   { from{opacity:0; transform:scale(0.9) translateY(18px);} to{opacity:1; transform:scale(1) translateY(0);} }
   @keyframes nx-ring  { 0%{transform:scale(0.9); opacity:0.9;} 100%{transform:scale(1.5); opacity:0;} }
@@ -2910,7 +2914,7 @@
     pointer-events:none!important;overflow:hidden!important
   }
 
-  /* ── PAGE 404 « ticket » (même style que sur l'accueil du site) ── */
+  /* ── PAGE 404 « ticket » (même style que sur l'accueil du site) ── */
   #nf-404 { position:fixed; inset:0; z-index:2147483000; background:#0a0a0a; color:#fff; display:none; overflow:auto; }
   #nf-404.open { display:block; }
   #nf-404 .nf-tk-wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:28px; padding:40px 20px; position:relative; z-index:1; background:radial-gradient(ellipse 70% 45% at 50% 0%, rgba(229,9,20,0.22), transparent 70%); }
@@ -2986,6 +2990,46 @@
   html.tv-mode #download-btn, html.tv-mode #lock-btn,
   html.tv-mode button[onclick*="togglePiP"] { display:none !important; }
   html.tv-mode .settings-panel [onclick].nf-focus, html.tv-mode .settings-panel button.nf-focus { background:rgba(220,38,38,0.22); }
+  /* ── LUEUR ROUGE commune à tous les popups : halo flou DERRIÈRE la carte ── */
+  #ab-overlay,
+  #mc-overlay,
+  #tp-overlay,
+  #ml-overlay,
+  #ext-overlay,
+  #wp-ext-warn-overlay,
+  #nolang-overlay,
+  #src-error-overlay,
+  #recent-overlay,
+  #unreleased-overlay,
+  #nosource-overlay,
+  #wp-ended-overlay,
+  #wp-join-prompt-overlay {
+    background-image:radial-gradient(ellipse 55% 50% at 50% 50%, rgba(220,38,38,0.28), rgba(220,38,38,0.08) 55%, transparent 75%);
+  }
+  #ab-modal,
+  #mc-modal,
+  #tp-modal,
+  #ml-modal,
+  #ext-modal,
+  #wp-ext-warn-modal,
+  #nolang-modal,
+  #src-error-modal,
+  #recent-modal,
+  #unreleased-modal,
+  #nosource-modal,
+  #wp-ended-card,
+  #wp-join-prompt-card {
+    box-shadow:0 0 120px -8px rgba(220,38,38,0.5), 0 30px 70px rgba(0,0,0,0.7);
+  }
+
+  /* Lueur rouge derrière TOUS les popups (plus intense) */
+  #ab-overlay, #tp-overlay, #ml-overlay, #ext-overlay, #wp-ext-warn-overlay, #nolang-overlay, #nosource-overlay,
+  #src-error-overlay, #recent-overlay, #unreleased-overlay, #wp-join-prompt-overlay, #wp-ended-overlay {
+    background:radial-gradient(ellipse 62% 58% at 50% 50%, rgba(220,38,38,0.42), rgba(220,38,38,0.16) 48%, transparent 78%), rgba(0,0,0,0.78);
+  }
+  #mc-overlay {
+    background:radial-gradient(ellipse 62% 58% at 50% 50%, rgba(220,38,38,0.42), rgba(220,38,38,0.16) 48%, transparent 78%), rgba(0,0,0,0.82);
+  }
 </style>
 </head>
 <body>
@@ -3660,7 +3704,7 @@
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
     </div>
     <h3 id="ab-title" data-i18n="ab_title">Attention aux publicités</h3>
-    <p id="ab-p1" data-i18n="ab_p1">Les lecteurs de l'onglet <strong>« Autres lecteurs »</strong> sont fournis par des sites tiers et peuvent afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n'est pas responsable de leur contenu.</p>
+    <p id="ab-p1" data-i18n="ab_p1">Les lecteurs de l'onglet <strong>« Autres lecteurs »</strong> sont fournis par des sites tiers et peuvent afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n'est pas responsable de leur contenu.</p>
     <p data-i18n="ab_p2">Si une pub s'ouvre : <strong>ne cliquez sur rien</strong>, fermez simplement l'onglet ou la fenêtre et revenez sur le site.</p>
     <p data-i18n="ab_p3">Vous pouvez revenir à un lecteur NETFLOX à tout moment depuis le menu Sources.</p>
 
@@ -3678,7 +3722,7 @@
   </div>
 </div>
 
-<!-- POPUP « AUTRES LANGUES » (information avant de lancer une source de l'onglet Autres langues) -->
+<!-- POPUP « AUTRES LANGUES » (information avant de lancer une source de l'onglet Autres langues) -->
 <div id="ml-overlay">
   <div id="ml-modal">
     <div class="ab-icon">
@@ -3692,7 +3736,7 @@
   </div>
 </div>
 
-<!-- POPUP "BASCULE VERS UN LECTEUR TIERS" (changement auto de source vers « Autres lecteurs ») -->
+<!-- POPUP "BASCULE VERS UN LECTEUR TIERS" (changement auto de source vers « Autres lecteurs ») -->
 <div id="tp-overlay">
   <div id="tp-modal">
     <div class="ab-icon">
@@ -4182,7 +4226,7 @@ function returnToLoadScreenOnError() {
   hideGatherScreen();
   pw.classList.remove('pw-enter');
   pw.style.display = 'none';
-  // Plus d'écran de saisie d'ID : ticket « Source introuvable », puis retour
+  // Plus d'écran de saisie d'ID : ticket « Source introuvable », puis retour
   // sur la fiche du titre sur le site (ou l'accueil si on n'a pas d'ID).
   showNotFoundPage(preferredLang === 'fr' ? 'Source introuvable pour ce contenu.' : 'No source found for this title.');
 }
@@ -4324,8 +4368,8 @@ function decideAssetLang(displayTitle, enTitle, originalLang) {
   if (originalLang === 'fr') return 'fr';
   if (displayTitle && enTitle) {
     const a = stripLeadingArticle(displayTitle), b = stripLeadingArticle(enTitle);
-    // Identique, OU titre fr = titre anglais + un sous-titre français (ex. « The Rookie : Le Flic de Los
-    // Angeles ») : TMDB y mélange les affiches France et Québec, toutes taguées « fr » et impossibles à
+    // Identique, OU titre fr = titre anglais + un sous-titre français (ex. « The Rookie : Le Flic de Los
+    // Angeles ») : TMDB y mélange les affiches France et Québec, toutes taguées « fr » et impossibles à
     // distinguer -> on reste sur l'anglais pour que l'affiche et le logo concordent.
     return (a === b || (b.length >= 4 && a.startsWith(b + ' '))) ? 'en' : 'fr';
   }
@@ -4333,8 +4377,8 @@ function decideAssetLang(displayTitle, enTitle, originalLang) {
 }
 
 // ── Requêtes TMDB fiables pour les visuels ──
-// Une requête refusée (trop de requêtes d'un coup -> erreur 429) était mise en cache comme « pas
-// d'affiche » : l'ancienne affiche restait alors affichée. Maintenant : 6 requêtes en parallèle
+// Une requête refusée (trop de requêtes d'un coup -> erreur 429) était mise en cache comme « pas
+// d'affiche » : l'ancienne affiche restait alors affichée. Maintenant : 6 requêtes en parallèle
 // maximum, 3 essais, et un échec n'est JAMAIS mis en cache (la demande suivante réessaie).
 let tmdbActive = 0;
 const tmdbWaiters = [];
@@ -4361,7 +4405,7 @@ async function tmdbFetchJson(url, attempts = 3) {
 }
 
 // Détails ANGLAIS (en-US) : titre (pour le comparer au titre français affiché) + affiche par défaut
-// en-US (repli quand le titre est le même en fr et en anglais mais qu'aucune affiche n'est taguée « en »).
+// en-US (repli quand le titre est le même en fr et en anglais mais qu'aucune affiche n'est taguée « en »).
 // Renvoie null en cas d'échec (jamais mis en cache).
 const enTitleCache = new Map();
 async function getEnglishDetails(id, type) {
@@ -4413,7 +4457,7 @@ async function getTitleAssetsForLang(id, type, displayTitle, originalLang) {
     const lang = decideAssetLang(displayTitle, en.title, originalLang);
 
     // Parmi les visuels d'une langue, TMDB en héberge parfois plusieurs (titre France ET titre Québec
-    // sont tous deux taguées « fr ») : on préfère celui de France, sinon un qui n'est pas du Canada.
+    // sont tous deux taguées « fr ») : on préfère celui de France, sinon un qui n'est pas du Canada.
     const pickLang = (arr) => {
       const same = arr.filter(x => x.iso_639_1 === lang);
       return same.find(x => x.iso_3166_1 === 'FR') || same.find(x => x.iso_3166_1 !== 'CA') || same[0];
@@ -4423,7 +4467,7 @@ async function getTitleAssetsForLang(id, type, displayTitle, originalLang) {
     // et l'appelant garde l'affiche par défaut déjà récupérée via l'appel principal.
     const bestPoster = pickLang(posters);
     if (bestPoster) result.posterPath = bestPoster.file_path;
-    // Titre identique en fr et en anglais mais aucune affiche taguée « en » : affiche par défaut en-US
+    // Titre identique en fr et en anglais mais aucune affiche taguée « en » : affiche par défaut en-US
     // (au lieu de retomber sur l'affiche fr-FR).
     else if (lang === 'en' && en.poster) result.posterPath = en.poster;
 
@@ -4436,7 +4480,7 @@ async function getTitleAssetsForLang(id, type, displayTitle, originalLang) {
       result.logoWidth = bestLogo.width;
       result.logoHeight = bestLogo.height;
     } else {
-      // Aucun logo dans la langue choisie : on garde quand même un logo « de secours » (l'autre langue,
+      // Aucun logo dans la langue choisie : on garde quand même un logo « de secours » (l'autre langue,
       // fr / en seulement) que SEUL l'écran de recherche de flux utilise — il n'y a pas d'affiche à côté,
       // donc pas d'incohérence visible. Ailleurs (affiche + logo ensemble), on reste sur le titre écrit.
       const order = lang === 'fr' ? ['en', ''] : ['fr'];
@@ -4485,6 +4529,7 @@ const KNOWN_HOSTS = [
   ['smoothpre.com','Smoothpre'],
   ['sandratableother.com','Sandratableother'],
   ['jessicayeahcatch.com','Jessicayeahcatch'],
+  ['vidcore.io','Vidcore'],
   ['viduki.net','Viduki'],
   ['videasy.to','Videasy'],
   ['vidly.pro','Vidly'],
@@ -4705,7 +4750,7 @@ const I18N = {
   mc_btn_continue: { fr: 'Continuer', en: 'Continue' },
   mc_btn_cancel: { fr: 'Annuler', en: 'Cancel' },
   ab_title: { fr: 'Attention aux publicités', en: 'Beware of ads' },
-  ab_p1: { fr: 'Les lecteurs de l\'onglet <strong>« Autres lecteurs »</strong> sont fournis par des sites tiers et peuvent afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n\'est pas responsable de leur contenu.', en: 'Players in the <strong>"Other players"</strong> tab are provided by third-party sites and may show ads (pop-up, new tab, redirect). NETFLOX is not responsible for their content.' },
+  ab_p1: { fr: 'Les lecteurs de l\'onglet <strong>« Autres lecteurs »</strong> sont fournis par des sites tiers et peuvent afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n\'est pas responsable de leur contenu.', en: 'Players in the <strong>"Other players"</strong> tab are provided by third-party sites and may show ads (pop-up, new tab, redirect). NETFLOX is not responsible for their content.' },
   ab_auto_title: { fr: 'Source externe à NETFLOX', en: 'Source external to NETFLOX' },
   ab_auto_p1: { fr: 'La source a changé automatiquement : vous êtes maintenant sur une <strong>source externe à NETFLOX</strong>, qui peut afficher des publicités (pop-up, nouvel onglet, redirection). NETFLOX n\'est pas responsable de leur contenu.', en: 'The source changed automatically: you are now on a <strong>source external to NETFLOX</strong>, which may show ads (pop-up, new tab, redirect). NETFLOX is not responsible for their content.' },
   ab_p2: { fr: 'Si une pub s\'ouvre : <strong>ne cliquez sur rien</strong>, fermez simplement l\'onglet ou la fenêtre et revenez sur le site.', en: 'If an ad opens: <strong>don\'t click on anything</strong>, just close the tab or window and come back to the site.' },
@@ -4750,7 +4795,7 @@ const I18N = {
   wp_ext_warn_proceed: { fr: 'J\'ai compris, démarrer', en: 'Got it, start' },
   wp_ext_warn_cancel: { fr: 'Annuler', en: 'Cancel' },
   sub_only_netflox: { fr: 'Les sous-titres externes (OpenSubtitles) sont disponibles uniquement pour le lecteur NETFLOX.', en: 'External subtitles (OpenSubtitles) are only available for the NETFLOX player.' },
-  sub_change_source_hint: { fr: 'Changez de source depuis le panneau « Sources » pour y accéder.', en: 'Switch source from the "Sources" panel to access them.' },
+  sub_change_source_hint: { fr: 'Changez de source depuis le panneau « Sources » pour y accéder.', en: 'Switch source from the "Sources" panel to access them.' },
   sub_settings_unavailable: { fr: 'Réglages disponibles une fois un sous-titre chargé via le lecteur NETFLOX.', en: 'Settings become available once a subtitle is loaded via the NETFLOX player.' },
   sub_searching: { fr: 'Recherche des sous-titres…', en: 'Searching for subtitles…' },
   sub_disable_all: { fr: 'Désactiver tous les sous-titres', en: 'Disable all subtitles' },
@@ -4847,7 +4892,7 @@ function setPreferredLang(lang) {
   });
   if (currentSources.length) {
     // BUG FIX : le tri change l'ordre du tableau, or l'invariant du code est
-    // « index === s.id === currentSourceIndex ». Sans remise à jour des id et
+    // « index === s.id === currentSourceIndex ». Sans remise à jour des id et
     // de l'index courant, un clic sur une source (ex: finepulfe en anglais)
     // lançait currentSources[id] = une AUTRE source (souvent la française).
     const activeSource = currentSources[currentSourceIndex] || null;
@@ -5019,8 +5064,8 @@ async function fetchTMDBInfo(id, typeHint) {
 }
 
 // ── CLASSIFICATION D'ÂGE (TMDB) ──
-// Même système que NETFLOX (netflox_3) : toute classification (FR « 10 / -12 /
-// TP », US « PG-13 / TV-14 / TV-MA », GB « 15 », DE « FSK 16 »…) est convertie
+// Même système que NETFLOX (netflox_3) : toute classification (FR « 10 / -12 /
+// TP », US « PG-13 / TV-14 / TV-MA », GB « 15 », DE « FSK 16 »…) est convertie
 // en niveau d'âge FR : 0, 10, 12, 16, 18, toujours dans le sens prudent.
 // Pays pris dans l'ordre FR > US > GB > DE : on s'arrête au premier pays qui
 // a une classification exploitable (la plus stricte s'il y en a plusieurs).
@@ -5081,7 +5126,7 @@ async function fetchAgeCertification(id, type) {
 // popup "film récent" par exemple) s'il s'agit d'un contenu -16 ou -18.
 // Hors Watch Party : le popup de classification (-16 / -18) s'affiche AVANT l'écran de recherche de flux,
 // par-dessus le fond du film (backdrop + affiche + logo + titre totalement floutés tant qu'on n'a pas
-// cliqué sur « Continuer »). Renvoie false si l'utilisateur annule.
+// cliqué sur « Continuer »). Renvoie false si l'utilisateur annule.
 async function soloClassificationGate(id, type, season, episode) {
   if (wpIsHost || wpIsGuest) return true; // en Watch Party, le flux habituel reste en place
   type = type === 'tv' ? 'tv' : 'movie';
@@ -5104,10 +5149,10 @@ async function soloClassificationGate(id, type, season, episode) {
   await showMatureContentPopup(age, type, quick.title || (preferredLang === 'fr' ? 'ce contenu' : 'this title'));
   if (mcLastAction === 'cancel') {
     wpMatureAckedKey = null;
-    setTimeout(wpHideJoinBg, 1500); // « Annuler » quitte la page ; filet de sécurité si on reste ici
+    setTimeout(wpHideJoinBg, 1500); // « Annuler » quitte la page ; filet de sécurité si on reste ici
     return false;
   }
-  // « Continuer » : le fond reste en place ; showGatherScreen() reprend la même image (flou levé) puis
+  // « Continuer » : le fond reste en place ; showGatherScreen() reprend la même image (flou levé) puis
   // retire le fond du popup. Filet de sécurité si la recherche de flux ne démarre jamais.
   setTimeout(() => {
     if (!gatherScreen.classList.contains('show')) { wpSetJoinBgLocked(false); wpHideJoinBg(); }
@@ -5143,7 +5188,7 @@ function showMatureContentPopup(ageLimit, type, title) {
       ? (is18 ? 'interdite' : 'déconseillée')
       : (is18 ? 'interdit' : 'déconseillé');
     textEl.innerHTML =
-      `<p>${article.charAt(0).toUpperCase() + article.slice(1)} ${noun} « <strong>${safeTitle}</strong> » que vous êtes sur le point de visionner est ${status} au moins de ${is18 ? 18 : 16} ans, et peut heurter la sensibilité des enfants et même de certaines personnes.<br><strong>Êtes-vous sûr(e) de vouloir continuer ?</strong></p>`;
+      `<p>${article.charAt(0).toUpperCase() + article.slice(1)} ${noun} « <strong>${safeTitle}</strong> » que vous êtes sur le point de visionner est ${status} au moins de ${is18 ? 18 : 16} ans, et peut heurter la sensibilité des enfants et même de certaines personnes.<br><strong>Êtes-vous sûr(e) de vouloir continuer ?</strong></p>`;
   } else {
     const noun = type === 'tv' ? 'show' : 'movie';
     textEl.innerHTML =
@@ -5154,15 +5199,17 @@ function showMatureContentPopup(ageLimit, type, title) {
 }
 
 function mcContinue() {
-  mcLastAction = 'continue';
   const mcOv = document.getElementById('mc-overlay');
+  if (mcOv.classList.contains('closing')) return; // déjà en train de se fermer (évite un double déclenchement)
+  mcLastAction = 'continue';
   mcOv.classList.add('closing');
   setTimeout(() => mcOv.classList.remove('open', 'closing'), 330);
-  if (typeof mcResolve === 'function') { const r = mcResolve; mcResolve = null; r(); }
+  // On laisse l'animation de sortie se jouer EN ENTIER avant d'enchaîner (écran de recherche de flux).
+  if (typeof mcResolve === 'function') { const r = mcResolve; mcResolve = null; setTimeout(r, 330); }
 }
 
-// « Annuler » dans l'avertissement de classification : on quitte tout de suite, SANS passer par la
-// confirmation « quitter la Watch Party ? » de goBack(). On quitte quand même proprement le salon.
+// « Annuler » dans l'avertissement de classification : on quitte tout de suite, SANS passer par la
+// confirmation « quitter la Watch Party ? » de goBack(). On quitte quand même proprement le salon.
 function mcQuitDirect() {
   const viaLink = !!(wpJoinViaLink || wpArrivedViaLink);
   try {
@@ -5174,8 +5221,11 @@ function mcQuitDirect() {
 }
 
 function mcCancel() {
+  const mcOv = document.getElementById('mc-overlay');
+  if (mcOv.classList.contains('closing')) return;
   mcLastAction = 'cancel';
-  document.getElementById('mc-overlay').classList.remove('open');
+  mcOv.classList.add('closing');
+  setTimeout(() => mcOv.classList.remove('open', 'closing'), 330);
   if (typeof mcResolve === 'function') { const r = mcResolve; mcResolve = null; r(); }
   mcQuitDirect();
 }
@@ -5431,7 +5481,7 @@ function checkRecentMoviePopup(info) {
   const release = new Date(dateStr);
   if (isNaN(release.getTime())) return;
 
-  // Date de sortie dans le futur : popup « pas encore sorti » (et non « récemment sorti »).
+  // Date de sortie dans le futur : popup « pas encore sorti » (et non « récemment sorti »).
   const parts = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
   if (parts) {
     const releaseDay = new Date(+parts[1], +parts[2] - 1, +parts[3]);
@@ -5462,8 +5512,8 @@ function showUnreleasedPopup(title, type, releaseDay, daysLeft) {
   const inDays = fr ? `dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}` : `in ${daysLeft} day${daysLeft > 1 ? 's' : ''}`;
   const text = fr
     ? (isTV
-        ? `« ${title} » n'a pas encore commencé sa diffusion. Premier épisode prévu le ${dateTxt} (${inDays}).`
-        : `« ${title} » n'est pas encore sorti. Sortie prévue le ${dateTxt} (${inDays}).`)
+        ? `« ${title} » n'a pas encore commencé sa diffusion. Premier épisode prévu le ${dateTxt} (${inDays}).`
+        : `« ${title} » n'est pas encore sorti. Sortie prévue le ${dateTxt} (${inDays}).`)
     : (isTV
         ? `"${title}" has not started airing yet. First episode expected on ${dateTxt} (${inDays}).`
         : `"${title}" has not been released yet. Release expected on ${dateTxt} (${inDays}).`);
@@ -5488,7 +5538,7 @@ function closeUnreleasedPopup() {
   if (typeof unreleasedPopupResolve === 'function') {
     const resolve = unreleasedPopupResolve;
     unreleasedPopupResolve = null;
-    resolve();
+    setTimeout(resolve, 290); // laisse l'animation de sortie se jouer avant d'enchaîner
   }
 }
 
@@ -5497,8 +5547,8 @@ function showRecentMoviePopup(title, type='movie') {
   const lang = preferredLang;
   const text = lang === 'fr'
     ? (isTV
-        ? `« ${title} » est une série dont la diffusion a commencé il y a moins de 3 mois. La qualité vidéo peut être limitée et certaines sources peuvent ne pas encore proposer les bons épisodes. Essayez plusieurs lecteurs si besoin.`
-        : `« ${title} » est sorti il y a moins de 3 mois. Les versions disponibles peuvent provenir d'enregistrements réalisés en salle de cinéma ou à l'aide d'un téléphone, avec une image et un son de moindre qualité. Certaines sources peuvent également ne pas encore proposer le bon contenu. Essayez plusieurs lecteurs si besoin.`)
+        ? `« ${title} » est une série dont la diffusion a commencé il y a moins de 3 mois. La qualité vidéo peut être limitée et certaines sources peuvent ne pas encore proposer les bons épisodes. Essayez plusieurs lecteurs si besoin.`
+        : `« ${title} » est sorti il y a moins de 3 mois. Les versions disponibles peuvent provenir d'enregistrements réalisés en salle de cinéma ou à l'aide d'un téléphone, avec une image et un son de moindre qualité. Certaines sources peuvent également ne pas encore proposer le bon contenu. Essayez plusieurs lecteurs si besoin.`)
     : (isTV
         ? `"${title}" is a series that started airing less than 3 months ago. Video quality may be limited, and some sources may not yet offer the correct episodes. Try several players if needed.`
         : `"${title}" was released less than 3 months ago. Available versions may come from recordings made in a movie theater or with a phone, with lower picture and sound quality. Some sources may also not yet offer the correct content. Try several players if needed.`);
@@ -5526,7 +5576,7 @@ function closeRecentMoviePopup() {
   if (typeof recentPopupResolve === 'function') {
     const resolve = recentPopupResolve;
     recentPopupResolve = null;
-    resolve();
+    setTimeout(resolve, 290);
   }
 }
 
@@ -5704,7 +5754,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
         setStatus(preferredLang === 'fr' ? 'Aucun lien vidéo trouvé sur /movies/. Si c’est une série, indique la saison et l’épisode.' : 'No video link found on /movies/. If it’s a series, enter the season and episode.');
         return;
       }
-      // Aucune source (ni française ni anglaise) : popup explicatif, puis page « Séance annulée ».
+      // Aucune source (ni française ni anglaise) : popup explicatif, puis page « Séance annulée ».
       hideGatherScreen();
       pw.classList.remove('pw-enter');
       pw.style.display = 'none';
@@ -5818,7 +5868,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     });
 
     // Nouvelle source 1080p-4K (Vidly) avec sélecteur audio : ajoutée manuellement dans
-    // « Autres lecteurs », en FR et en VO (le sélecteur audio permet de choisir la langue).
+    // « Autres lecteurs », en FR et en VO (le sélecteur audio permet de choisir la langue).
     //   Film  -> https://vidly.pro/movie/{id}?color=fc0808&autoplay=1
     //   Série -> https://vidly.pro/tv/{id}/{saison}/{episode}?color=fc0808&autoplay=1
     ['fr', 'en'].forEach(vLang => {
@@ -5835,8 +5885,8 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       });
     });
 
-    // Onglet « Autres langues » : Vidly avec sélecteur audio (audioPicker=1) -> espagnol, allemand, italien,
-    // portugais, polonais, japonais… Toujours dans « Autres lecteurs » de cette section (lang 'ml').
+    // Onglet « Autres langues » : Vidly avec sélecteur audio (audioPicker=1) -> espagnol, allemand, italien,
+    // portugais, polonais, japonais… Toujours dans « Autres lecteurs » de cette section (lang 'ml').
     //   Film  -> https://vidly.pro/movie/{id}?color=f00f0f&autoplay=1&audioPicker=1
     //   Série -> https://vidly.pro/tv/{id}/{saison}/{episode}?color=f00f0f&autoplay=1&audioPicker=1
     processed.push({
@@ -5847,6 +5897,20 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       isDirect: false,
       hostname: 'vidly.pro',
       known: matchKnownHost('vidly.pro'),
+      manual: true
+    });
+
+    // Nouvelle source VO (Vidcore) — onglet Anglais / Autres lecteurs, affichée juste au-dessus de Viduki.
+    //   Film  -> https://vidcore.io/movie/{id TMDB}
+    //   Série -> https://vidcore.io/tv/{id TMDB}/{saison}/{épisode}
+    processed.push({
+      url: type === 'tv'
+        ? `https://vidcore.io/tv/${encodeURIComponent(id)}/${encodeURIComponent(season)}/${encodeURIComponent(episode)}`
+        : `https://vidcore.io/movie/${encodeURIComponent(id)}`,
+      lang: 'en',
+      isDirect: false,
+      hostname: 'vidcore.io',
+      known: matchKnownHost('vidcore.io'),
       manual: true
     });
 
@@ -5914,7 +5978,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       const already = processed.some(s => sameStreamUrl(s.url, rs.url));
       if (!already) processed.push(rs);
     });
-    // Worker "quiet-wildflower" : flux HLS -> fin des flux directs ; embeds (Moviez…) -> « Autres lecteurs » (rang trié sous Vidly).
+    // Worker "quiet-wildflower" : flux HLS -> fin des flux directs ; embeds (Moviez…) -> « Autres lecteurs » (rang trié sous Vidly).
     quietSources.forEach(qs => {
       // Embeds : comparaison sur l'URL COMPLÈTE (sameStreamUrl ignore la requête, or Moviez VF et VOSTFR ne
       // diffèrent que par ?lang=vf / ?lang=vostfr -> le 2e était pris à tort pour un doublon et supprimé).
@@ -5924,23 +5988,21 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
       if (!already) processed.push(qs);
     });
 
-    // Proxy HLS : pour chaque flux M3U8 Vidzy / Uqload, une entrée « via proxy ». TOUTES les entrées proxy sont regroupées
-    // en un seul bloc, placé juste APRÈS finepulfe et AVANT tous les autres flux directs (Uqload / Vidzy normaux compris).
+    // Proxy HLS : pour chaque flux M3U8 Vidzy / Uqload, une entrée « via proxy » juste AVANT l'entrée normale.
     try {
-      const proxyBlock = [];
+      const withProxy = [];
       processed.forEach(src => {
-        if (!shouldProxyHls(src)) return;
-        const purl = hlsProxyUrl(src.url);
-        src.proxyFallbackUrl = purl; // sert aussi à lire les pistes audio quand le CORS bloque l'accès direct
-        if (processed.some(o => o.url === purl) || proxyBlock.some(o => o.url === purl)) return;
-        proxyBlock.push({ ...src, url: purl, proxied: true, originalUrl: src.url, proxyFallbackUrl: undefined });
+        if (shouldProxyHls(src)) {
+          const purl = hlsProxyUrl(src.url);
+          src.proxyFallbackUrl = purl; // sert aussi à lire les pistes audio quand le CORS bloque l'accès direct
+          if (!processed.some(o => o.url === purl) && !withProxy.some(o => o.url === purl)) {
+            withProxy.push({ ...src, url: purl, proxied: true, originalUrl: src.url, proxyFallbackUrl: undefined });
+          }
+        }
+        withProxy.push(src);
       });
-      if (proxyBlock.length) {
-        // Position : juste avant le premier flux direct qui n'est PAS finepulfe (= juste après le bloc finepulfe).
-        let at = processed.findIndex(o => o.isDirect && !isFinepulfeHost(o.hostname));
-        if (at < 0) at = processed.length;
-        processed.splice(at, 0, ...proxyBlock);
-      }
+      processed.length = 0;
+      processed.push(...withProxy);
     } catch (e) { console.error('Proxy HLS: ajout des entrées impossible', e); }
 
     // Source directe HLS (Worker "mr-wolf-yt") — retirée (le Worker n'est plus
@@ -5951,7 +6013,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // Priorité "unavailable" : après "film récent", avant "petit problème technique".
     // BUG FIX : les lecteurs de secours ajoutés en dur (Frembed, Videasy,
     // Viduki — marqués "manual") sont TOUJOURS présents, donc processed n'était
-    // jamais vide et les popups « aucune source » ne s'affichaient jamais. On ne
+    // jamais vide et les popups « aucune source » ne s'affichaient jamais. On ne
     // compte que les vraies sources trouvées par les Workers.
     const realSources = processed.filter(s => !s.manual);
     if (realSources.length === 0) {
@@ -5966,7 +6028,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // ── Bascule automatique de langue si AUCUN lecteur (ni NETFLOX ni Autres) ──
     // n'existe dans la langue choisie au départ, mais qu'il y en a dans l'autre
     // langue : on bascule sur l'autre langue, et on prévient l'utilisateur par
-    // un popup (même style que celui du « Aucun lecteur NETFLOX »).
+    // un popup (même style que celui du « Aucun lecteur NETFLOX »).
     let langSwitchedFrom = null;
     {
       const otherLangCheck = preferredLang === 'fr' ? 'en' : 'fr';
@@ -5987,7 +6049,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // rejoint une Watch Party à la main (code tapé) sans changer la langue de
     // l'interface, on privilégie quand même la langue de l'hôte dans la liste.
     const sortLang = wpGuestSourceLangPriority || preferredLang;
-    // Frembed renvoie parfois la page « embed » générique du site (sans identifiant
+    // Frembed renvoie parfois la page « embed » générique du site (sans identifiant
     // de film dans l'URL) : elle ne lit rien. On l'écarte TOUJOURS — qu'un vrai lien
     // Frembed soit disponible ou non — pour qu'elle ne soit jamais proposée ni
     // sélectionnée automatiquement ; seuls les liens avec identifiant (chemin ou
@@ -6002,7 +6064,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     }
     processed.sort((a,b) => {
       if (a.lang !== b.lang) return langSortRank(a.lang, sortLang) - langSortRank(b.lang, sortLang);
-      return sortRank(a) - sortRank(b);
+      return compareSourcesInLang(a, b);
     });
     assignDisplayNames(processed);
 
@@ -6042,7 +6104,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     resetActiveSubtitle();
 
     // Si la langue choisie a des lecteurs, mais aucun lecteur NETFLOX (flux direct),
-    // on prévient l'utilisateur par un popup, on bascule sur l'onglet « Autres lecteurs »
+    // on prévient l'utilisateur par un popup, on bascule sur l'onglet « Autres lecteurs »
     // (on reste sur la même langue, on NE change PAS de langue), puis on affiche
     // aussi le popup adblocker vu qu'on utilise des lecteurs tiers.
     {
@@ -6070,7 +6132,7 @@ async function fetchTMDBSources(id, type, season, episode, allowSeriesFallback=f
     // langue choisie (celle de l'hôte de la Watch Party si rejointe à la main,
     // sinon la langue de l'interface) ; sinon, PAS de bascule vers le lecteur
     // direct de l'autre langue — on reste sur cette langue et on prend le
-    // lecteur de repli dans « Autres lecteurs » : Frembed en français (ou, à défaut,
+    // lecteur de repli dans « Autres lecteurs » : Frembed en français (ou, à défaut,
     // le premier autre lecteur disponible dans cette langue).
     let sourceToSelect = processed.findIndex(s => s.lang === sortLang && s.isDirect);
     if (sourceToSelect < 0) {
@@ -6136,6 +6198,15 @@ function isFinepulfeHost(hostname) {
   return FINEPULFE_HOSTS.some(d => h === d || h.endsWith('.' + d));
 }
 
+// Hébergeurs qui, comme finepulfe, ne doivent être affichés / lus QUE si l'extension NETFLOX est présente :
+// Uqload / Oqload / Vidzy en flux DIRECT « normal ». Les entrées « via proxy » ont l'hôte du Worker proxy
+// (jamais ces noms), donc elles n'ont pas besoin de l'extension et ne sont pas concernées.
+const EXT_REQUIRED_HOST_FRAGMENTS = ['uqload', 'oqload', 'vidzy'];
+function isExtRequiredHost(hostname) {
+  const h = (hostname || '').toLowerCase();
+  return isFinepulfeHost(h) || EXT_REQUIRED_HOST_FRAGMENTS.some(f => h.includes(f));
+}
+
 // Domaines connus pour proposer plusieurs pistes audio dans un même flux m3u8.
 function isDualAudioSource(url) {
   try {
@@ -6150,8 +6221,8 @@ function isDualAudioSource(url) {
 //   vf (intégration) : https://api.moviez.ac/969681?autoplay=1&lang=vf&...     -> embed
 //   vf : https://strm5.uqload.vc/hls2/.../master.m3u8?t=...                    -> flux HLS direct
 //   vostfr (intégré) : https://api.moviez.ac/...  /  vostfr : https://....m3u8
-// vf -> français ; vo / vostfr -> anglais. Flux HLS -> onglet « Lecteur NETFLOX » (tout à la fin des
-// flux directs) ; liens « intégré/intégration » -> onglet « Autres lecteurs », juste sous Vidly.
+// vf -> français ; vo / vostfr -> anglais. Flux HLS -> onglet « Lecteur NETFLOX » (tout à la fin des
+// flux directs) ; liens « intégré/intégration » -> onglet « Autres lecteurs », juste sous Vidly.
 const QUIET_API_BASE = 'https://netfloxxx.quiet-wildflower-3400.workers.dev';
 
 function parseQuietWorkerText(text) {
@@ -6166,7 +6237,7 @@ function parseQuietWorkerText(text) {
     const tag = norm(m[1]);
     const lang = ['vf', 'vff', 'vfq', 'french', 'francais'].includes(tag) ? 'fr' : 'en';
     const url = m[3].replace(/[),.;}\]]+$/, '');
-    // Embed si la note dit « intégré / intégration », OU si le lien n'est pas un flux lisible directement
+    // Embed si la note dit « intégré / intégration », OU si le lien n'est pas un flux lisible directement
     const embedded = /integr/.test(norm(m[2])) || !isDirectPlayable(url);
     out.push({ url, lang, embedded });
   }
@@ -6225,6 +6296,7 @@ const RESTLESS_API_BASE = 'https://netfloxxx.restless-resonance-a376.workers.dev
 function parseRestlessWorkerText(text) {
   const out = [];
   let lang = null; // tant qu'aucune section n'est ouverte, on ignore les lignes
+  let vk = 'VO';   // « VO » ou « VOSTFR » (affiché en tag sur les sources de la section anglaise)
   String(text || '').split(/\r?\n/).forEach(line => {
     const t = line.trim();
     if (!t) return;
@@ -6234,13 +6306,14 @@ function parseRestlessWorkerText(text) {
       if (label === 'vf' || label === 'vff' || label === 'vfq' || label === 'french' || label === 'francais') lang = 'fr';
       else if (label === 'vo' || label === 'vostfr' || label === 'vosub' || label === 'vostf' || label === 'eng' || label === 'english') lang = 'en';
       else lang = null; // section inconnue : on ne devine pas la langue
+      vk = /^(vostfr|vosub|vostf)$/.test(label) ? 'VOSTFR' : 'VO';
       return;
     }
     if (!lang) return;
     const m = t.match(/https?:\/\/[^\s"'<>\\]+/i);
     if (!m) return;
     const url = m[0].replace(/[),.;}\]]+$/, '');
-    out.push({ url, lang });
+    out.push({ url, lang, vk });
   });
   return out;
 }
@@ -6265,22 +6338,22 @@ async function fetchRestlessWorkerSources(id, type, season, episode) {
     try {
       const j = JSON.parse(raw);
       if (j && typeof j === 'object') {
-        const pick = (list, lang) => (Array.isArray(list) ? list : []).forEach(it => {
+        const pick = (list, lang, vk) => (Array.isArray(list) ? list : []).forEach(it => {
           const u = typeof it === 'string' ? it : it && it.url;
-          if (typeof u === 'string' && /^https?:\/\//i.test(u)) items.push({ url: u, lang });
+          if (typeof u === 'string' && /^https?:\/\//i.test(u)) items.push({ url: u, lang, vk });
         });
-        pick(j.vf, 'fr'); pick(j.vo, 'en'); pick(j.vostfr, 'en');
+        pick(j.vf, 'fr'); pick(j.vo, 'en', 'VO'); pick(j.vostfr, 'en', 'VOSTFR');
       }
     } catch (e) { items = parseRestlessWorkerText(raw); }
 
     const seen = new Set();
     const out = [];
-    items.forEach(({ url, lang }) => {
+    items.forEach(({ url, lang, vk }) => {
       if (seen.has(url)) return;
       seen.add(url);
       let hostname = '';
       try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
-      out.push({ url, lang, isDirect: true, hostname, known: null, fromRestlessWorker: true });
+      out.push({ url, lang, isDirect: true, hostname, known: null, fromRestlessWorker: true, voKind: lang === 'en' ? (vk || 'VO') : undefined });
     });
     return out;
   } catch (e) {
@@ -6294,7 +6367,7 @@ async function fetchRestlessWorkerSources(id, type, season, episode) {
 // ── Proxy HLS (Worker perso) pour les flux M3U8 Vidzy / Uqload ──
 // Pour CHAQUE flux direct M3U8 d'un de ces hébergeurs, on ajoute une 2e entrée qui passe par le proxy :
 //   https://netfloxxx.net-flo-x-67-328.workers.dev/?url=<flux d'origine encodé>
-// Elle est placée JUSTE AVANT le flux normal (donc après finepulfe, avant Uqload/Vidzy « normal »). Si le proxy
+// Elle est placée JUSTE AVANT le flux normal (donc après finepulfe, avant Uqload/Vidzy « normal »). Si le proxy
 // échoue, le lecteur retombe tout seul sur le flux normal qui suit.
 const HLS_PROXY_BASE = 'https://netfloxxx.net-flo-x-67-328.workers.dev';
 const HLS_PROXY_HOSTS = ['uqload', 'oqload', 'vidzy']; // fragments de nom d'hôte à faire passer par le proxy
@@ -6342,7 +6415,7 @@ async function fetchCodeExeSources(id, type, season, episode) {
     if (!data || typeof data !== 'object') return [];
 
     const out = [];
-    const pushGroup = (list, lang) => {
+    const pushGroup = (list, lang, vk) => {
       if (!Array.isArray(list)) return;
       list
         .slice()
@@ -6352,13 +6425,13 @@ async function fetchCodeExeSources(id, type, season, episode) {
           if (!url || typeof url !== 'string') return;
           let hostname = '';
           try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
-          out.push({ url, lang, isDirect: true, hostname, known: null });
+          out.push({ url, lang, isDirect: true, hostname, known: null, voKind: vk });
         });
     };
 
     pushGroup(data.vf, 'fr');
-    pushGroup(data.vo, 'en');
-    pushGroup(data.vostfr, 'en');
+    pushGroup(data.vo, 'en', 'VO');
+    pushGroup(data.vostfr, 'en', 'VOSTFR');
 
     return out;
   } catch (e) {
@@ -6445,13 +6518,13 @@ async function fetchNetFloxDirectStream(id, type, season, episode) {
 
     const out = [];
     const seenUrls = new Set();
-    const pushUrl = (rawUrl, lang) => {
+    const pushUrl = (rawUrl, lang, hint) => {
       const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
       if (!/^https?:\/\//i.test(url) || seenUrls.has(url)) return; // pas de filtre sur l'extension : tout lien = HLS
       seenUrls.add(url);
       let hostname = '';
       try { hostname = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {}
-      out.push({ url, lang, isDirect: true, hostname, known: null });
+      out.push({ url, lang, isDirect: true, hostname, known: null, fromNetfloxVoe: true, voKind: lang === 'en' ? (/vostf|vosub/i.test(String(hint || '')) ? 'VOSTFR' : 'VO') : undefined });
     };
     const isEn = str => /(^|[^a-z])(vo|vostfr|vosub|vostf|english|anglais|eng|en)([^a-z]|$)/i.test(String(str || ''));
 
@@ -6463,21 +6536,21 @@ async function fetchNetFloxDirectStream(id, type, season, episode) {
         if (typeof item === 'string') { pushUrl(item, 'fr'); return; }
         if (!item || typeof item !== 'object' || item.success === false) return;
         const link = item.stream != null ? item.stream : (item.flux != null ? item.flux : item.url);
-        if (typeof link === 'string') { pushUrl(link, isEn(item.lang) ? 'en' : 'fr'); return; }
+        if (typeof link === 'string') { pushUrl(link, isEn(item.lang) ? 'en' : 'fr', item.lang); return; }
         if (link != null) {
           extractVideoEntries(link, ['sources', String(i), 'stream']).forEach(en => {
-            pushUrl(en.url, isEn(`${item.lang || ''} ${en.pathKey}`) ? 'en' : 'fr');
+            pushUrl(en.url, isEn(`${item.lang || ''} ${en.pathKey}`) ? 'en' : 'fr', `${item.lang || ''} ${en.pathKey}`);
           });
         }
       });
     }
 
     // ANCIEN FORMAT (secours) : premier flux dans "stream" + liste "all_extractions" ([{ success, voe_source, stream }]).
-    if (data.stream != null) extractVideoEntries(data.stream, ['stream']).forEach(en => pushUrl(en.url, isEn(en.pathKey) ? 'en' : 'fr'));
+    if (data.stream != null) extractVideoEntries(data.stream, ['stream']).forEach(en => pushUrl(en.url, isEn(en.pathKey) ? 'en' : 'fr', en.pathKey));
     if (Array.isArray(data.all_extractions)) {
       data.all_extractions.forEach((ex, i) => {
         if (!ex || ex.success === false || ex.stream == null) return;
-        extractVideoEntries(ex.stream, ['all_extractions', String(i), 'stream']).forEach(en => pushUrl(en.url, isEn(`${ex.lang || ''} ${en.pathKey}`) ? 'en' : 'fr'));
+        extractVideoEntries(ex.stream, ['all_extractions', String(i), 'stream']).forEach(en => pushUrl(en.url, isEn(`${ex.lang || ''} ${en.pathKey}`) ? 'en' : 'fr', `${ex.lang || ''} ${en.pathKey}`));
       });
     }
     if (!out.length) return [];
@@ -6589,6 +6662,15 @@ function buildSourceMeta(entry) {
   return { url, lang, isDirect, hostname, known };
 }
 
+// Version originale (onglet anglais) : TOUS les VO d'abord (dans l'ordre habituel des hébergeurs), puis TOUS les VOSTFR dessous.
+function voKindRank(s) { return (s.lang === 'en' && s.isDirect && s.voKind === 'VOSTFR') ? 1 : 0; }
+function compareSourcesInLang(a, b) {
+  if (a.lang === 'en' && b.lang === 'en' && a.isDirect && b.isDirect) {
+    const d = voKindRank(a) - voKindRank(b);
+    if (d) return d;
+  }
+  return sortRank(a) - sortRank(b);
+}
 function sortRank(s) {
   if (s.isDirect) {
     // Finepulfe doit TOUJOURS être la toute première source directe, quel
@@ -6597,9 +6679,20 @@ function sortRank(s) {
     // de sortir) : on ne peut donc pas se reposer uniquement sur le tri
     // stable / l'ordre d'insertion comme avant, il faut un rang dédié.
     if (isFinepulfeHost(s.hostname)) return -2000;
-    // Flux « via proxy » (Vidzy / Uqload) : TOUS regroupés juste après finepulfe, avant les autres flux directs
-    // (y compris les copies ajoutées plus tard par la lecture des pistes audio).
-    if (s.proxied) return -1500;
+    // Ordre des flux directs d'une langue (les rangs groupent TOUS les flux d'un même hébergeur ensemble,
+    // quel que soit l'ordre d'arrivée des Workers) :
+    //   finepulfe → tous les Uqload normaux → tous les Vidzy normaux → proxy Uqload → proxy Vidzy → les autres → Voe en dernier.
+    if (s.fromNetfloxVoe) return -500;
+    const h = String(s.hostname || '').toLowerCase();
+    const isUq = h.includes('uqload') || h.includes('oqload');
+    const isVz = h.includes('vidzy');
+    if (!s.proxied) {
+      if (isUq) return -1900;
+      if (isVz) return -1890;
+    } else {
+      if (isUq) return -1800;
+      if (isVz) return -1790;
+    }
     return -1000;
   }
   // Vidly (1080p-4K) : toujours le TOUT PREMIER lecteur de l'onglet Anglais / Autres lecteurs.
@@ -6610,7 +6703,7 @@ function sortRank(s) {
     const eo = matchKnownHost('embedorigin');
     return (eo ? eo.index : 1) + 0.25;
   }
-  // Embeds « intégrés » du Worker quiet-wildflower (Moviez) : TOUJOURS juste en dessous de Vidly.
+  // Embeds « intégrés » du Worker quiet-wildflower (Moviez) : TOUJOURS juste en dessous de Vidly.
   if (s.fromQuietWorker && !s.isDirect) {
     const eo = matchKnownHost('embedorigin');
     return (s.lang === 'en' ? -1 : (eo ? eo.index : 1) + 0.25) + 0.25; // FR : juste après Vidly (qui suit Embedorigin) ; EN : juste après Vidly
@@ -6619,7 +6712,7 @@ function sortRank(s) {
   return 999;
 }
 
-// « www.voe.sx » -> « Voe » ; « player.exemple.co.uk » -> « Exemple » (nom de domaine sans extension)
+// « www.voe.sx » -> « Voe » ; « player.exemple.co.uk » -> « Exemple » (nom de domaine sans extension)
 function hostBaseName(hostname) {
   let parts = String(hostname || '').toLowerCase().replace(/^www\./, '').split('.').filter(Boolean);
   if (!parts.length) return '';
@@ -6636,8 +6729,8 @@ function hostBaseName(hostname) {
 // Attribue les noms : Lecteur 1 / Lecteur 2 pour les flux directs (onglet Lecteur NETFLOX),
 // nom du lecteur connu pour les embeds identifiés, "Lecteur vidéo" / 2 / 3 sinon (onglet Autres lecteurs).
 function assignDisplayNames(list) {
-  // 'ml' = onglet « Autres langues » : DOIT avoir ses compteurs, sinon counters['ml'] est undefined et la
-  // fonction plante (TypeError) -> aucune source chargée -> ticket 404 « séance annulée ».
+  // 'ml' = onglet « Autres langues » : DOIT avoir ses compteurs, sinon counters['ml'] est undefined et la
+  // fonction plante (TypeError) -> aucune source chargée -> ticket 404 « séance annulée ».
   const counters = { fr: { direct:0, unknown:0 }, en: { direct:0, unknown:0 }, ml: { direct:0, unknown:0 } };
   const knownCounters = { fr: {}, en: {}, ml: {} };
 
@@ -6654,9 +6747,9 @@ function assignDisplayNames(list) {
       s.subLabel = `${s.known.name} ${kc[s.known.name]}`;
     } else {
       c.unknown++;
-      // Nom = nom de domaine sans l'extension (ex: « voe.sx » -> « Voe »). Plusieurs lecteurs
+      // Nom = nom de domaine sans l'extension (ex: « voe.sx » -> « Voe »). Plusieurs lecteurs
       // du même nom sont regroupés sous un même menu déroulant (voir buildOtherGroups) :
-      // « Waav 1 », « Waav 2 »… en sous-onglets.
+      // « Waav 1 », « Waav 2 »… en sous-onglets.
       const base = hostBaseName(s.hostname) || 'Lecteur vidéo';
       const uk = knownCounters[s.lang];
       uk['#' + base] = (uk['#' + base] || 0) + 1;
@@ -6668,7 +6761,7 @@ function assignDisplayNames(list) {
 }
 
 // Sources directes (m3u8/mp4...) : onglet "Lecteur NETFLOX".
-// Rang d'une langue dans la liste triée : langue prioritaire (0), autre langue fr/en (1), « autres langues » ml (2, toujours en dernier).
+// Rang d'une langue dans la liste triée : langue prioritaire (0), autre langue fr/en (1), « autres langues » ml (2, toujours en dernier).
 function langSortRank(l, first) { return l === first ? 0 : (l === 'ml' ? 2 : 1); }
 function getDirectSources(langKey) {
   return currentSources.filter(s => s.lang === langKey && s.isDirect);
@@ -6757,7 +6850,7 @@ function renderCloudflareSources() {
     const langOrder = (sectionLang === 'en'
       ? [['en', langLabelEn], ['fr', langLabelFr]]
       : [['fr', langLabelFr], ['en', langLabelEn]]
-    ).concat([['ml', tr('lang_other_languages')]]); // « Autres langues » : toujours sous la version originale
+    ).concat([['ml', tr('lang_other_languages')]]); // « Autres langues » : toujours sous la version originale
 
     langOrder.forEach(([langKey, langLabel]) => {
      try {
@@ -6810,6 +6903,19 @@ function renderCloudflareSources() {
                          : (directSources.length ? 'netflox' : 'autres');
         sourceSubTab[langKey] = activeTab;
 
+        if (!directSources.length) {
+          // Aucune source NETFLOX : pas de sous-onglets, juste un titre « Autres lecteurs » centré.
+          const solo = document.createElement('div');
+          solo.className = 'src-solo-title';
+          const soloLbl = document.createElement('span');
+          soloLbl.textContent = preferredLang === 'fr' ? 'Autres lecteurs' : 'Other players';
+          solo.appendChild(soloLbl);
+          body.appendChild(solo);
+          const soloContent = document.createElement('div');
+          soloContent.className = 'src-subtab-content';
+          otherGroups.forEach(g => soloContent.appendChild(g.type === 'flat' ? renderFlatRow(g.item) : renderGroup(g, langKey)));
+          body.appendChild(soloContent);
+        } else {
         const subtabs = document.createElement('div');
         subtabs.className = 'settings-tabs src-subtabs';
         subtabs.dataset.lang = langKey;
@@ -6892,6 +6998,7 @@ function renderCloudflareSources() {
         }
 
         body.appendChild(subContent);
+        }
       }
 
       section.appendChild(body);
@@ -6973,7 +7080,7 @@ function wpAttachLockedRow(el) {
 // qui étaient jusque-là écrits en dur en français dans assignDisplayNames().
 // Les noms de lecteurs connus (Uqload, etc.) ne sont eux jamais traduits.
 // Message du toast de changement de source : dit clairement si la source sélectionnée
-// est française ou anglaise (« Source anglaise sélectionnée : Videasy »).
+// est française ou anglaise (« Source anglaise sélectionnée : Videasy »).
 function sourceChangedToastText(s) {
   const key = s && s.lang === 'fr' ? 'source_selected_fr'
             : s && s.lang === 'en' ? 'source_selected_en'
@@ -6989,18 +7096,20 @@ function sourceLabel(s) {
     if (s.isDirect) base = numMatch ? `Player ${numMatch[1]}` : 'Player';
     else base = numMatch ? `Video player ${numMatch[1]}` : 'Video player';
   }
-  return s.audioLangLabel ? `${base} · ${s.audioLangLabel}` : base; // « Autres langues » : on précise la langue de la piste
+  return s.audioLangCode ? `${base} · ${audioLangDisplayName(s.audioLangCode)}` : base; // « Autres langues » : on précise la langue de la piste (traduite selon la langue du lecteur)
 }
 
 function renderFlatRow(s) {
   const row = document.createElement('div');
   const locked = wpSourceIsLocked(s);
   row.className = 'src-row' + (s.id === currentSourceIndex ? ' active' : '') + (locked ? ' wp-locked' : '');
-  const kind = s.isDirect ? (/m3u8/i.test(s.url) ? 'M3U8' : 'DIRECT') : 'EMBED';
+  const kind = s.isDirect ? 'HLS' : 'EMBED'; // toutes les sources directes affichent « HLS » (plus de « M3U8 » ni « DIRECT »)
   const is1080 = (s.isDirect && isDualAudioSource(s.url)) || (!s.isDirect && /videasy\.to|vidly\.pro/i.test(s.hostname || ''));
-  const kindHTML = is1080
-    ? `<span class="src-kind-tag">1080p - 4K</span><span class="src-kind-sep">·</span><span class="src-kind-tag">${kind}</span>`
-    : `<span class="src-kind-tag">${kind}</span>`;
+  const tags = [];
+  if (s.lang === 'en' && s.voKind === 'VOSTFR') tags.push('VOSTFR'); // seul VOSTFR est affiché (plus de badge « VO »), à gauche de la qualité
+  if (is1080) tags.push('1080p - 4K');
+  if (kind) tags.push(kind);
+  const kindHTML = tags.map(t => `<span class="src-kind-tag">${t}</span>`).join('<span class="src-kind-sep">·</span>');
   const icon = s.isDirect ? NETFLOX_ICON_HTML : TV_ICON_HTML;
   row.innerHTML = `<span class="src-row-label">${icon}${escapeHTML(sourceLabel(s))}</span><span>${kindHTML}</span>`;
   if (locked) {
@@ -7008,7 +7117,7 @@ function renderFlatRow(s) {
   } else {
     row.onclick = (e) => {
       e.stopPropagation();
-      // « Autres langues » : on explique d'abord le principe (contenu dans de nombreuses langues), puis le popup
+      // « Autres langues » : on explique d'abord le principe (contenu dans de nombreuses langues), puis le popup
       // adblocker (lecteur tiers), et seulement ensuite on lance la source. Cliquer la source déjà active ne fait rien.
       if (s.lang === 'ml' && s.id !== currentSourceIndex && !wpSourceIsLocked(s)) {
         showMultiLangNotice(() => {
@@ -7055,7 +7164,8 @@ function renderGroup(g, langKey) {
     const locked = wpSourceIsLocked(it);
     const sub = document.createElement('div');
     sub.className = 'src-subrow' + (it.id === currentSourceIndex ? ' active' : '') + (locked ? ' wp-locked' : '');
-    sub.innerHTML = `<span class="src-row-label">${TV_ICON_HTML}${escapeHTML(it.subLabel)}</span><span class="src-kind-tag">EMBED</span>`;
+    const subTags = (it.lang === 'en' && it.voKind === 'VOSTFR') ? `<span class="src-kind-tag">VOSTFR</span><span class="src-kind-sep">·</span>` : '';
+    sub.innerHTML = `<span class="src-row-label">${TV_ICON_HTML}${escapeHTML(it.subLabel)}</span><span>${subTags}<span class="src-kind-tag">EMBED</span></span>`;
     if (locked) {
       wpAttachLockedRow(sub);
     } else {
@@ -7378,7 +7488,7 @@ async function loadSkipSegments(id, type, season, episode, duration) {
       if (res.ok) {
         const data = await res.json();
         if (skipSegments.key !== key) return;
-        // On écarte les segments « out-of-range » (durée trop différente) : mieux vaut pas de bouton qu'un saut au mauvais endroit.
+        // On écarte les segments « out-of-range » (durée trop différente) : mieux vaut pas de bouton qu'un saut au mauvais endroit.
         const usable = sg => sg && sg.match !== 'out-of-range' && isFinite(sg.start_ms) && isFinite(sg.end_ms) && sg.end_ms > sg.start_ms;
         const toSec = sg => usable(sg) ? { start: sg.start_ms / 1000, end: sg.end_ms / 1000 } : null;
         const sg = (data && data.segments) || {};
@@ -7426,7 +7536,7 @@ async function loadSkipSegments(id, type, season, episode, duration) {
   }
 }
 
-// Seuil d'apparition de la carte « À suivre » : début du générique fourni par l'API
+// Seuil d'apparition de la carte « À suivre » : début du générique fourni par l'API
 // s'il est crédible (dans le dernier tiers de la vidéo), sinon 95 % de la durée.
 function upNextReached(ct, dur) {
   const o = skipSegments.outro;
@@ -7438,7 +7548,7 @@ function upNextReached(ct, dur) {
 
 // Appelée à chaque timeupdate : montre / cache le bouton pendant l'introduction.
 // Segment actif à l'instant t : l'introduction, ou le segment qui la précède (affiché
-// lui aussi comme « Passer l'introduction »). Dans ce second cas, un clic saute
+// lui aussi comme « Passer l'introduction »). Dans ce second cas, un clic saute
 // directement à la fin de l'introduction si elle suit de près (≤ 30 s), sinon à la
 // fin du segment en cours.
 function activeSkipSegment(ct) {
@@ -7454,7 +7564,7 @@ function activeSkipSegment(ct) {
 }
 
 // Remplissage fluide : timeupdate ne tire que ~4 fois par seconde, ce qui donnait un
-// effet « image par image ». On lit donc le temps de lecture à chaque frame d'affichage
+// effet « image par image ». On lit donc le temps de lecture à chaque frame d'affichage
 // et on extrapole entre deux mises à jour du navigateur.
 function startSkipProgress() {
   if (skipRaf) return;
@@ -8242,7 +8352,7 @@ function toggleOverview(btn) {
   }
 }
 
-// Masque « Voir plus » quand le synopsis tient déjà en 2 lignes (rien à déplier).
+// Masque « Voir plus » quand le synopsis tient déjà en 2 lignes (rien à déplier).
 function hideUselessOverviewToggles(root) {
   requestAnimationFrame(() => {
     root.querySelectorAll('.ep-overview').forEach(ov => {
@@ -8415,7 +8525,13 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
     try { return isFinepulfeHost(new URL(url).hostname); }
     catch (e) { return false; }
   })();
-  currentSourceIsFinepulfe = isFinepulfe;
+  // « Extension requise » : finepulfe + Uqload/Vidzy normaux. Même mécanisme : la vidéo n'est ni lancée ni affichée tant qu'un
+  // premier segment n'a pas été récupéré avec succès (donc seulement si l'extension est présente), sinon popup « extension requise ».
+  const needsExt = isFinepulfe || (() => {
+    try { return isExtRequiredHost(new URL(url).hostname); }
+    catch (e) { return false; }
+  })();
+  currentSourceIsFinepulfe = needsExt;
   currentStreamUrl = url;
   currentStreamIsHLS = isHLS;
   currentStreamTitle = title || currentStreamTitle;
@@ -8489,7 +8605,7 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
       // savoir si les segments vont réellement passer. Le lancement réel
       // se fait plus bas, sur FRAG_LOADED (premier segment chargé avec
       // succès).
-      if (!isFinepulfe) {
+      if (!needsExt) {
         // On ne lance vraiment la lecture qu'une fois toutes les popups de
         // chargement fermées (ex: "Film récent" -> "Compris") : le flux est
         // déjà prêt/mis en buffer en arrière-plan, mais le son/l'image
@@ -8509,7 +8625,7 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
     // moment-là qu'on referme la popup "extension requise" ET qu'on lance
     // la lecture — tant que ce n'est pas le cas, la vidéo reste à l'arrêt,
     // popup affichée ou non.
-    if (isFinepulfe) {
+    if (needsExt) {
       // BUG FIX : ce listener restait actif sur TOUS les FRAG_LOADED, pas
       // seulement le premier. Comme hls.js continue de charger des segments
       // en arrière-plan pendant la lecture (pour garder son buffer plein),
@@ -8560,7 +8676,8 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
             // sens ici.
             showExtensionRequiredPopup();
           }
-        } else if (isFinepulfe && httpStatus === 403) {
+        } else if (needsExt && (httpStatus === 403 || (!isFinepulfe && !httpStatus && d.type === Hls.ErrorTypes.NETWORK_ERROR))) {
+          // (Uqload / Vidzy sans extension : le blocage peut aussi se manifester par une erreur réseau/CORS sans code HTTP)
           // Cas spécifique : source finepulfe qui répond 403 -> l'extension
           // NETFLOX est requise pour y accéder.
           // Deux situations bien différentes :
@@ -8583,7 +8700,7 @@ function loadMedia(url, title, audioLangOverride, resumeTime, isReconnectRetry) 
             // BUG FIX (Edge mobile surtout) : juste après un changement de
             // source, l'extension (déjà installée et activée) n'est parfois
             // pas encore prête au moment de la toute première requête, qui
-            // part alors en 403 — d'où un popup « installer l'extension »
+            // part alors en 403 — d'où un popup « installer l'extension »
             // à tort (revenir sur la source ensuite marchait). On retente
             // donc en silence 2 fois, spinner affiché, avant de conclure
             // que l'extension manque vraiment.
@@ -8894,13 +9011,22 @@ const AUDIO_LANG_BY_ALIAS = (() => {
   AUDIO_LANGS.forEach(([code, , aliases]) => aliases.forEach(a => { if (!m.has(a)) m.set(a, code); }));
   return m;
 })();
-// Mots courts autorisés quand on lit un NOM de piste (« VF », « VO », « FR ») ; les autres codes à 2 lettres
-// (« it », « de », « en »…) sont des mots courants : on ne les accepte QUE dans l'attribut LANGUAGE.
+// Mots courts autorisés quand on lit un NOM de piste (« VF », « VO », « FR ») ; les autres codes à 2 lettres
+// (« it », « de », « en »…) sont des mots courants : on ne les accepte QUE dans l'attribut LANGUAGE.
 const AUDIO_NAME_SHORT_OK = new Set(['vf', 'vff', 'vfq', 'vo', 'fr']);
 const audioNorm = str => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 function audioLangLabel(code) { const e = AUDIO_LANGS.find(l => l[0] === code); return e ? e[1] : String(code || '').toUpperCase(); }
-// Code de langue d'une piste à partir de l'attribut LANGUAGE (prioritaire, ex. « fr », « spa », « fr-FR ») puis du NOM
-// (ex. « audio Español », « Piste 3 [Français] »). Retourne '' si rien de reconnaissable (« Piste 4 », « und »…).
+// Nom de la langue affiché dans la liste des sources, traduit dans la langue du lecteur : français -> « Espagnol »,
+// « Allemand »… ; version originale (anglais) -> « Spanish », « German »… (et non plus le nom natif « Español »).
+function audioLangDisplayName(code) {
+  try {
+    const name = new Intl.DisplayNames([preferredLang === 'fr' ? 'fr' : 'en'], { type: 'language' }).of(code);
+    if (name && name.toLowerCase() !== String(code).toLowerCase()) return name.charAt(0).toLocaleUpperCase() + name.slice(1);
+  } catch (e) {}
+  return audioLangLabel(code); // secours : nom natif
+}
+// Code de langue d'une piste à partir de l'attribut LANGUAGE (prioritaire, ex. « fr », « spa », « fr-FR ») puis du NOM
+// (ex. « audio Español », « Piste 3 [Français] »). Retourne '' si rien de reconnaissable (« Piste 4 », « und »…).
 function audioTrackLangCode(language, name) {
   const lg = audioNorm(language).split(/[-_]/)[0];
   if (lg && lg !== 'und' && lg !== 'mul' && lg !== 'zxx' && AUDIO_LANG_BY_ALIAS.has(lg)) return AUDIO_LANG_BY_ALIAS.get(lg);
@@ -8975,13 +9101,13 @@ async function probeHlsAudioTracksOnce(url, timeoutMs = 6000) {
 }
 
 // Décide où ranger un flux selon ses pistes audio. Fonction PURE (testable) :
-//  · aucune langue reconnue (une seule piste sans nom, « Piste 4 »…) -> null : on garde le classement du worker (VF/VO) ;
+//  · aucune langue reconnue (une seule piste sans nom, « Piste 4 »…) -> null : on garde le classement du worker (VF/VO) ;
 //  · sinon le flux va dans la/les section(s) de ses vraies langues : fr -> Français, en -> Version Originale,
-//    toute autre langue -> « Autres langues » (une entrée par langue). Si le worker disait VO mais que la piste
+//    toute autre langue -> « Autres langues » (une entrée par langue). Si le worker disait VO mais que la piste
 //    est française, le flux est DÉPLACÉ ; s'il y a plusieurs langues, il est DUPLIQUÉ (avec la bonne piste choisie).
 // Interrupteur : true = une source dont la piste audio CONTREDIT le worker est DÉPLACÉE dans la bonne section (ex. annoncée
 // VO mais piste française -> elle passe en Français) ; false = elle reste en place et une copie est ajoutée dans la bonne section.
-// Le journal « [audio-tracks] » de la console détaille chaque décision.
+// Le journal « [audio-tracks] » de la console détaille chaque décision.
 const AUDIO_REFINE_MOVE_MISFILED = true;
 
 function planAudioPlacement(workerLang, tracks, allowMove = AUDIO_REFINE_MOVE_MISFILED) {
@@ -9012,6 +9138,7 @@ let refineSourcesToken = 0;
 // flux M3U8 et on le range dans la bonne section. Permet aussi d'obtenir plus de flux (un même M3U8 FR+EN+ES = 3 entrées).
 async function refineSourcesByAudioTracks(list) {
   const token = ++refineSourcesToken;
+  let postRefine = null; // popup de bascule à afficher une fois la liste reclassée
   if (typeof wpRoomCode !== 'undefined' && wpRoomCode) return; // Watch Party : les listes doivent rester identiques entre hôte et invités
   const cands = (list || []).filter(s => s.isDirect && !s.audioLangOverride && !s.manual && !isDualAudioSource(s.url) && /m3u8/i.test(s.url || '')).slice(0, 20);
   if (!cands.length) return;
@@ -9042,7 +9169,7 @@ async function refineSourcesByAudioTracks(list) {
                     added.some(o => o.url === src.url && o.lang === c.lang && o.audioLangOverride === c.code);
         if (dup) return;
         const copy = { ...src, lang: c.lang, audioLangOverride: c.code };
-        if (c.lang === 'ml') copy.audioLangLabel = audioLangLabel(c.code); else delete copy.audioLangLabel;
+        if (c.lang === 'ml') copy.audioLangCode = c.code; else delete copy.audioLangCode;
         added.push(copy);
         made.push(`${c.lang}/${c.code}`);
       });
@@ -9053,23 +9180,45 @@ async function refineSourcesByAudioTracks(list) {
     try { console.info('[audio-tracks]\n  ' + log.join('\n  ')); } catch (e) {}
     if (!edits.length && !added.length) return;
 
+    // État AVANT reclassement : y avait-il un lecteur NETFLOX (flux direct) dans la langue choisie ? (les modifications ci-dessous
+    // changent les entrées en place, donc on le relève maintenant). Sert à prévenir l'utilisateur si le reclassement le fait disparaître.
+    const prefLangBefore = preferredLang;
+    const directPrefBefore = list.some(x => x.isDirect && x.lang === prefLangBefore);
     // Application (tout ou rien) : ces éditions ne peuvent plus échouer ; la liste n'est remplacée qu'à la toute fin.
     edits.forEach(({ src, plan }) => {
       if (plan.keep.lang !== src.lang) src.lang = plan.keep.lang;
       if (plan.keep.setAudio && plan.keep.code) src.audioLangOverride = plan.keep.code;
-      if (plan.keep.lang === 'ml') src.audioLangLabel = audioLangLabel(plan.keep.code);
+      if (plan.keep.lang === 'ml') src.audioLangCode = plan.keep.code;
     });
 
     const active = currentSources[currentSourceIndex];
+    // BUG FIX : les popups « aucun lecteur dans cette langue » (bascule en version originale / onglet « Autres lecteurs ») étaient
+    // décidés AVANT la lecture des pistes audio. Un M3U8 rangé « français » par le worker mais qui n'a en réalité pas de piste
+    // française est déplacé ici : la langue choisie se retrouvait sans lecteur, sans aucun message ni bascule. On refait donc le test.
+    {
+      const realAfter = list.concat(added).filter(x => !x.manual);
+      const otherLang = prefLangBefore === 'fr' ? 'en' : 'fr';
+      const directPrefAfter = list.concat(added).some(x => x.isDirect && x.lang === prefLangBefore);
+      if (directPrefBefore && !directPrefAfter) {
+        if (!realAfter.some(x => x.lang === prefLangBefore) && realAfter.some(x => x.lang === otherLang)) {
+          postRefine = { kind: 'switch', from: prefLangBefore, to: otherLang };
+          preferredLang = otherLang;
+          try { localStorage.setItem('netflox_lang_pref', preferredLang); } catch (err) {}
+          document.querySelectorAll('#load-lang-toggle .lang-pref-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === preferredLang));
+        } else if (list.concat(added).some(x => !x.isDirect && x.lang === prefLangBefore)) {
+          postRefine = { kind: 'others', lang: prefLangBefore };
+        }
+      }
+    }
     const sortLang = wpGuestSourceLangPriority || preferredLang;
     const hadDirectAny = new Set(list.filter(x => x.isDirect).map(x => x.lang));
     const merged = list.concat(added);
     merged.sort((a, b) => {
       if (a.lang !== b.lang) return langSortRank(a.lang, sortLang) - langSortRank(b.lang, sortLang);
-      return sortRank(a) - sortRank(b);
+      return compareSourcesInLang(a, b);
     });
     assignDisplayNames(merged);
-    // Une section qui reçoit ses PREMIERS flux directs (ex. « Autres langues ») s'ouvre sur « Lecteur NETFLOX ».
+    // Une section qui reçoit ses PREMIERS flux directs (ex. « Autres langues ») s'ouvre sur « Lecteur NETFLOX ».
     new Set(merged.filter(x => x.isDirect).map(x => x.lang)).forEach(l => { if (!hadDirectAny.has(l)) sourceSubTab[l] = 'netflox'; });
     currentSources = merged;
     currentSourceIndex = active ? merged.indexOf(active) : currentSourceIndex;
@@ -9077,6 +9226,32 @@ async function refineSourcesByAudioTracks(list) {
     console.warn('[audio-tracks] reclassement annulé (aucune source modifiée) :', err);
     return;
   }
+  try {
+    if (postRefine) {
+      const cur = currentSources[currentSourceIndex];
+      if (postRefine.kind === 'switch') {
+        // Plus aucune source dans la langue choisie : bascule + popup « Langue non disponible », comme au chargement.
+        const to = postRefine.to;
+        sourceSubTab[to] = currentSources.some(x => x.isDirect && x.lang === to) ? 'netflox' : 'autres';
+        enqueuePopup(POPUP_PRIORITY.unavailable, () => showNoSourceInLangPopup(postRefine.from, to));
+        if (!cur || cur.lang !== to) {
+          let idx = currentSources.findIndex(x => x.lang === to && x.isDirect);
+          if (idx < 0) idx = currentSources.findIndex(x => x.lang === to);
+          if (idx >= 0) selectCloudflareSource(idx, { bypassLock: true });
+        }
+      } else {
+        // Il reste des lecteurs dans la langue mais plus aucun NETFLOX : popup + onglet « Autres lecteurs » + adblocker, comme au chargement.
+        const lg = postRefine.lang;
+        sourceSubTab[lg] = 'autres';
+        enqueuePopup(POPUP_PRIORITY.unavailable, () => showNoNetfloxPopup(lg, () => { openAdblockPopup(() => {}); }));
+        if (!cur || cur.lang !== lg) {
+          let idx = lg === 'fr' ? currentSources.findIndex(x => x.lang === lg && !x.isDirect && (x.hostname || '').toLowerCase().includes('frembed')) : -1;
+          if (idx < 0) idx = currentSources.findIndex(x => x.lang === lg && !x.isDirect);
+          if (idx >= 0) selectCloudflareSource(idx, { bypassLock: true });
+        }
+      }
+    }
+  } catch (err) { console.warn('[audio-tracks] popup de bascule', err); }
   try { renderCloudflareSources(); } catch (e) {}
 }
 
@@ -9597,8 +9772,8 @@ function buildAmbientContent() {
     logoEl.textContent = info.title || '';
   }
 
-  // Ligne 1 : année (film) ou « Saison X · Épisode Y · Titre de l'épisode » (série).
-  // Ligne 2 : progression « position / durée totale », sur sa propre ligne en dessous.
+  // Ligne 1 : année (film) ou « Saison X · Épisode Y · Titre de l'épisode » (série).
+  // Ligne 2 : progression « position / durée totale », sur sa propre ligne en dessous.
   let metaBase = (info.type === 'tv' && info.season && info.episode)
     ? (preferredLang === 'fr' ? `Saison ${info.season} · Épisode ${info.episode}` : `Season ${info.season} · Episode ${info.episode}`)
     : ((info.releaseDate || info.firstAirDate || '').slice(0, 4));
@@ -9629,16 +9804,38 @@ function buildAmbientContent() {
 // directement — d'où cette vérification à part pour empêcher le mode ambiance
 // de se déclencher par-dessus.
 function anyOverlayOpen() {
-  // Liste COMPLÈTE : avant, « changement de lecteur », « contenu multilingue », « extension requise »,
-  // « erreur de source » et les popups Watch Party n'étaient pas vus -> le mode ambiance démarrait derrière eux.
+  // Liste COMPLÈTE : avant, « changement de lecteur », « contenu multilingue », « extension requise »,
+  // « erreur de source » et les popups Watch Party n'étaient pas vus -> le mode ambiance démarrait derrière eux.
   // Un popup en train de se fermer (.nx-closing, fondu de 0,3 s) ne compte plus.
   const open = id => { const el = document.getElementById(id); return !!el && !el.classList.contains('nx-closing') && (el.classList.contains('open') || el.classList.contains('show')); };
   return ['ab-overlay', 'mc-overlay', 'nolang-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'wp-ext-warn-overlay',
-          'tp-overlay', 'ml-overlay', 'ext-overlay', 'src-error-overlay', 'wp-ended-overlay', 'wp-join-prompt-overlay'].some(open);
+          'tp-overlay', 'ml-overlay', 'ext-overlay', 'src-error-overlay', 'wp-ended-overlay', 'wp-join-prompt-overlay',
+          'wp-leave-overlay', 'wp-hostclose-overlay', 'wp-autoplay-overlay', 'solo-autoplay-overlay'].some(open);
 }
 
+// Popups ouverts : le mode ambiance se lance PAR-DESSUS (voir le CSS : z-index du lecteur remonté pendant l'ambiance).
+// 1) Un popup s'ouvre et l'ambiance n'est pas active : on démarre le compte à rebours de 10 s (sans rien toucher si elle l'est déjà).
+// 2) Les popups vivent hors du lecteur (dans <body>) : la souris / le toucher / le clic dessus ne passaient pas par les écouteurs
+//    du lecteur -> on les compte aussi comme une activité, sinon l'ambiance se lançait pendant qu'on bougeait sur le popup
+//    et ne se fermait pas au mouvement.
+(function () {
+  const ids = ['ab-overlay', 'mc-overlay', 'nolang-overlay', 'recent-overlay', 'unreleased-overlay', 'nosource-overlay', 'wp-ext-warn-overlay',
+               'tp-overlay', 'ml-overlay', 'ext-overlay', 'src-error-overlay', 'wp-ended-overlay', 'wp-join-prompt-overlay',
+               'wp-leave-overlay', 'wp-hostclose-overlay', 'wp-autoplay-overlay', 'solo-autoplay-overlay'];
+  const obs = new MutationObserver(() => {
+    if (pw.classList.contains('ambient')) return;
+    if (anyOverlayOpen()) resetIdleTimer();
+  });
+  ids.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+  ['mousemove', 'mousedown', 'touchstart', 'click'].forEach(evt => document.addEventListener(evt, () => {
+    if (playerLocked) return;
+    if (!pw.classList.contains('ambient') && !anyOverlayOpen()) return; // hors popup, les écouteurs du lecteur s'en chargent
+    resetIdleTimer();
+  }, { passive: true, capture: true }));
+})();
+
 // Vrai si un lecteur externe (iframe) est affiché / en cours, quelle que soit la façon dont on y est arrivé.
-// On ne se fie pas qu'à la classe « embed-mode » : l'iframe visible, ou l'absence totale de source sur le
+// On ne se fie pas qu'à la classe « embed-mode » : l'iframe visible, ou l'absence totale de source sur le
 // <video> (showEmbedPlayer lui retire son src), prouvent aussi qu'on n'est PAS sur un lecteur direct.
 function isEmbedPlayerActive() {
   if (pw.classList.contains('embed-mode')) return true;
@@ -9648,33 +9845,95 @@ function isEmbedPlayerActive() {
   return false;
 }
 
+// Le mode ambiance ne doit se lancer que lorsqu'on est RÉELLEMENT sur le lecteur : jamais pendant l'écran de recherche
+// de flux, avant l'ouverture de la file de popups, ni pendant que le lecteur cherche / recharge / se reconnecte.
+let ambientIdleFrom = 0;
+function ambientLoadingBlocked() {
+  try {
+    if (gatherScreen.classList.contains('show')) return true;            // recherche de flux (y compris sa dissolution)
+    if (!popupGateOpen) return true;                                      // chargement pas terminé
+    const jb = document.getElementById('wp-join-bg');
+    if (jb && jb.classList.contains('show')) return true;                 // fond du popup de classification / pseudo
+    if (pw.classList.contains('pw-enter')) return true;                   // lecteur en cours d'apparition
+    if (pw.classList.contains('buffering') || srcReconnectionActive) return true; // le lecteur cherche / recharge
+  } catch (e) {}
+  return false;
+}
 function enterAmbientMode() {
-  // Ne se déclenche que si le film a vraiment démarré (porte des popups ouverte)
-  // et qu'aucune popup n'est affichée ni en attente (avertissement, "film récent",
-  // lecteur indisponible, adblocker...) — sinon le mode ambiance s'enclenchait
-  // par-dessus une popup encore ouverte.
-  const popupsClear = popupGateOpen && !popupQueueActive && popupQueue.length === 0;
+  // Se déclenche après 10 s sans activité en pause. Les popups (avertissement, « film récent », lecteur indisponible,
+  // adblocker…) ne bloquent PAS : le mode ambiance passe par-dessus eux et se ferme au moindre mouvement.
   // Un menu ouvert (sous-titres, sources, vitesse, format…) ne bloque plus le mode
   // ambiance : il se lance par-dessus (z-index plus haut). La souris posée sur la barre
   // ne bloque pas non plus si un menu y est ouvert (le menu vit dans la barre).
   const menuOpen = !!document.querySelector('.settings-panel.open, .menu-popup.open, .sub-lang-dropdown.open') || subLangDropdownOpen || pendingAutresPanelOpen;
   // Mode ambiance réservé au lecteur Netflox : jamais sur les autres lecteurs (embeds).
   if (isEmbedPlayerActive()) return;
-  if (!video.paused || scrubbing || playerLocked || (overBar && !menuOpen) || overUpNext || !popupsClear || anyOverlayOpen()) return;
+  if (getComputedStyle(pw).display === 'none') return; // lecteur pas affiché
+  if (ambientLoadingBlocked()) {
+    // On attend la fin du chargement, puis 10 s d'inactivité complètes sur le lecteur.
+    ambientIdleFrom = Date.now();
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(enterAmbientMode, 1000);
+    return;
+  }
+  if (ambientIdleFrom) {
+    const left = 10000 - (Date.now() - ambientIdleFrom);
+    if (left > 0) { clearTimeout(idleTimer); idleTimer = setTimeout(enterAmbientMode, left); return; }
+    ambientIdleFrom = 0;
+  }
+  if (!video.paused || scrubbing || playerLocked || (overBar && !menuOpen) || overUpNext) return; // les popups ne bloquent plus : l'ambiance se lance par-dessus
   buildAmbientContent();
+  clearTimeout(ambientDetachTimer);
+  if (anyOverlayOpen() && !document.fullscreenElement) {
+    ambientDetach();                       // par-dessus un popup (hors plein écran) : voir CSS
+  } else {
+    ambientReattach();                     // sinon comportement habituel, dans le lecteur (en plein écran les popups sont dans le lecteur)
+  }
   pw.classList.add('ambient');
   pw.classList.remove('cv');
   pw.style.cursor = '';
+}
+let ambientDetachTimer = null;
+function ambientDetach() {
+  const el = document.getElementById('ambient-mode');
+  if (!el) return;
+  if (!el.classList.contains('amb-detached')) {
+    const r = pw.getBoundingClientRect();
+    el.style.left = r.left + 'px'; el.style.top = r.top + 'px';
+    el.style.width = r.width + 'px'; el.style.height = r.height + 'px';
+    el.classList.add('amb-detached');
+    document.body.appendChild(el);
+    void el.offsetWidth;                   // l'état « opacité 0 » doit être peint avant le fondu
+  }
+  pw.classList.add('ambient-nolift');
+  el.classList.add('amb-live');
+}
+function ambientReattach() {
+  const el = document.getElementById('ambient-mode');
+  if (!el) return;
+  if (el.classList.contains('amb-detached')) {
+    el.classList.remove('amb-detached', 'amb-live');
+    el.style.left = el.style.top = el.style.width = el.style.height = '';
+    pw.appendChild(el);
+  }
+  pw.classList.remove('ambient-nolift');
 }
 function exitAmbientMode() {
   if (!pw.classList.contains('ambient')) return;
   pw.classList.remove('ambient');
   pw.classList.add('cv');
   pw.style.cursor = '';
+  const el = document.getElementById('ambient-mode');
+  if (el && el.classList.contains('amb-detached')) {
+    el.classList.remove('amb-live');       // fondu de sortie (le popup, lui, n'a jamais bougé)
+    clearTimeout(ambientDetachTimer);
+    ambientDetachTimer = setTimeout(() => { if (!pw.classList.contains('ambient')) ambientReattach(); }, 1250);
+  }
 }
 let idleTimer = null;
 function resetIdleTimer() {
   clearTimeout(idleTimer);
+  ambientIdleFrom = 0;
   exitAmbientMode();
   if (isEmbedPlayerActive()) return; // pas de mode ambiance sur les autres lecteurs
   if (video.paused && !playerLocked) idleTimer = setTimeout(enterAmbientMode, 10000);
@@ -9727,7 +9986,7 @@ pw.addEventListener('mousemove', (e) => { if (playerLocked) { showLockHint(); re
 pw.addEventListener('touchstart', () => { if (playerLocked) { showLockHint(); return; } if (pw.classList.contains('cv')) hideCtrls(); else showCtrls(); resetIdleTimer(); }, {passive:true});
 // BUG FIX : faire défiler (molette / barre de défilement d'un menu) sans bouger la souris n'était pas
 // compté comme une activité : le mode ambiance se lançait au bout de 10 s par-dessus le menu. La
-// molette et tout défilement (capture, car « scroll » ne remonte pas) relancent donc le compte à rebours.
+// molette et tout défilement (capture, car « scroll » ne remonte pas) relancent donc le compte à rebours.
 ['wheel', 'scroll'].forEach(evt => document.addEventListener(evt, () => {
   if (playerLocked) return;
   try { if (typeof playerVisible === 'function' && !playerVisible()) return; } catch (err) {}
@@ -9765,6 +10024,7 @@ video.addEventListener('play', () => { keyboardAction = false; hideTimer = setTi
 document.addEventListener('keydown', e => {
   if (!pw.style.display || pw.style.display === 'none') return;
   if (document.activeElement.tagName === 'INPUT') return;
+  if (window.nxPopupOpen && window.nxPopupOpen()) return; // popup ouvert : espace / flèches / etc. ne pilotent plus le lecteur
   if (subLangDropdownOpen) return; // laisse la navigation clavier du menu "Choisir la langue" gérer les touches
   resetIdleTimer(); // toute touche referme le mode ambiance / relance le compte à rebours
   if (playerLocked) {
@@ -9795,8 +10055,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-document.getElementById('movie-input').addEventListener('keydown', e => { if (e.key==='Enter') loadMovieByTMDB(); });
-document.getElementById('series-input').addEventListener('keydown', e => { if (e.key==='Enter') loadSeriesByTMDB(); });
+document.getElementById('movie-input').addEventListener('keydown', e => { if (e.key==='Enter') { if (window.nxPopupOpen && window.nxPopupOpen()) { e.preventDefault(); return; } loadMovieByTMDB(); } });
+document.getElementById('series-input').addEventListener('keydown', e => { if (e.key==='Enter') { if (window.nxPopupOpen && window.nxPopupOpen()) { e.preventDefault(); return; } loadSeriesByTMDB(); } });
 
 // ── ENTRÉE = bouton principal (rouge) du popup ouvert ──
 // Compris / Continuer / Installer l'extension / Passer maintenant / J'ai compris, démarrer…
@@ -9820,20 +10080,22 @@ document.getElementById('series-input').addEventListener('keydown', e => { if (e
     }
     return found;
   }
+  window.nxOpenPopup = openPopup;
   function primaryButton(ov) {
     const list = sel => Array.from(ov.querySelectorAll(sel)).find(shown);
     return list('.ab-primary') || list('.wp-join-prompt-confirm') || list('.ab-btns button');
   }
 
   document.addEventListener('keydown', e => {
-    if (e.key !== 'Enter' || e.repeat || e.isComposing || e.defaultPrevented) return;
+    if ((e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') || e.repeat || e.isComposing || e.defaultPrevented) return;
     if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
     const ov = openPopup();
     if (!ov) return;                                   // pas de popup : on ne touche à rien
     const t = e.target;
     const typing = t && (t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable ||
       (t.tagName === 'INPUT' && !/^(button|checkbox|radio|range|submit)$/.test(t.type)));
-    if (typing) return;                                // on laisse les champs de texte gérer leur Entrée
+    // Champ de texte DANS le popup : il gère son Entrée. Champ en dehors (ex. la saisie de l'ID derrière) : c'est le popup qui prend l'Entrée.
+    if (typing && ov.contains(t)) return;
     if (t && ov.contains(t) && /^(BUTTON|A)$/.test(t.tagName)) return; // bouton du popup sélectionné : clic natif
     const btn = primaryButton(ov);
     if (!btn) return;
@@ -9843,11 +10105,19 @@ document.getElementById('series-input').addEventListener('keydown', e => { if (e
     btn.click();
   });
 
+  // Espace : on empêche aussi le « clic au relâchement » d'un bouton resté sélectionné derrière le popup.
+  document.addEventListener('keyup', e => {
+    if (e.key !== ' ' && e.key !== 'Spacebar') return;
+    const ov = openPopup();
+    if (!ov || (e.target && ov.contains(e.target))) return;
+    e.preventDefault();
+  }, true);
+
   // ── ÉCHAP = bouton SECONDAIRE du popup ouvert (jamais le bouton rouge, réservé à Entrée) ──
   // Popup à 2 boutons : Échap = le bouton non rouge (Annuler / Changer de source / J'ai compris…).
   // Popup à 1 seul bouton : Échap = ce bouton (comme Entrée). Cas particuliers pour éviter les surprises :
-  //   · Watch Party terminée : le secondaire est « Retourner à l'accueil » (quitte la page) -> Échap = « Compris ».
-  //   · Erreur de source : si « Réessayer » est affiché (choix ambigu), Échap ne fait rien.
+  //   · Watch Party terminée : le secondaire est « Retourner à l'accueil » (quitte la page) -> Échap = « Compris ».
+  //   · Erreur de source : si « Réessayer » est affiché (choix ambigu), Échap ne fait rien.
   //   · Demande de pseudo Watch Party : Échap ne fait rien.
   // Phase de capture + stopImmediatePropagation : les raccourcis du lecteur derrière ne réagissent pas.
   function escapeAction(ov) {
@@ -9873,9 +10143,43 @@ document.getElementById('series-input').addEventListener('keydown', e => { if (e
 })();
 
 
+// ── GARDE POPUPS : tant qu'un popup est ouvert, rien ne doit relancer la lecture ──
+// (bouton des écouteurs / AirPods / touches média du clavier, via la Media Session du navigateur ou en natif)
+(function () {
+  const EXTRA = ['wp-leave-overlay', 'wp-hostclose-overlay'];
+  function nxPopupOpen() {
+    try {
+      if (window.nxOpenPopup && window.nxOpenPopup()) return true;
+      return EXTRA.some(id => { const el = document.getElementById(id); return el && el.classList.contains('show'); });
+    } catch (e) { return false; }
+  }
+  window.nxPopupOpen = nxPopupOpen;
+
+  // On repère les lectures lancées par le code du lecteur lui-même ; toute autre lecture
+  // (touche média native) pendant un popup est immédiatement remise en pause.
+  let lastProgrammaticPlay = 0;
+  const origPlay = video.play.bind(video);
+  video.play = function () { lastProgrammaticPlay = Date.now(); return origPlay(); };
+  video.addEventListener('play', () => {
+    if (!nxPopupOpen()) return;
+    if (Date.now() - lastProgrammaticPlay < 700) return;
+    try { video.pause(); } catch (e) {}
+  }, true);
+
+  // Media Session : les touches média / écouteurs sont ignorés pendant un popup, normaux sinon.
+  if ('mediaSession' in navigator) {
+    const set = (name, fn) => { try { navigator.mediaSession.setActionHandler(name, fn); } catch (e) {} };
+    const idle = () => pw.classList.contains('embed-mode');
+    set('play',  () => { if (nxPopupOpen() || idle()) return; video.play().catch(() => {}); });
+    set('pause', () => { if (nxPopupOpen() || idle()) return; video.pause(); });
+    set('seekbackward', d => { if (nxPopupOpen() || idle()) return; seekFlash(-((d && d.seekOffset) || 10)); });
+    set('seekforward',  d => { if (nxPopupOpen() || idle()) return; seekFlash((d && d.seekOffset) || 10); });
+  }
+})();
+
 // ── Fermeture animée des popups (Entrée / clic / Échap…) ──
 // mc / ext / src-error ont déjà leur propre animation .closing ; tp / wp-ended / wp-join-prompt ont leur fondu.
-// Les autres masquaient simplement l'overlay (display:none) : on observe le retrait de la classe « open »
+// Les autres masquaient simplement l'overlay (display:none) : on observe le retrait de la classe « open »
 // et on rejoue une courte animation de sortie, sans toucher à la logique d'ouverture/fermeture existante.
 (function () {
   const IDS = ['ab-overlay', 'nolang-overlay', 'nosource-overlay', 'recent-overlay', 'unreleased-overlay', 'wp-ext-warn-overlay'];
@@ -10083,7 +10387,7 @@ function toggleSubtitlesPanel() {
     document.getElementById('watchparty-scrim').classList.remove('open');
     document.getElementById('watchparty-btn').classList.remove('open');
     panel.classList.add('open'); scrim.classList.add('open'); btn.classList.add('open');
-    // Traduction en cours : le menu « Traduire vers une autre langue » s'ouvre tout seul
+    // Traduction en cours : le menu « Traduire vers une autre langue » s'ouvre tout seul
     // avec la progression (elle est à l'intérieur de ce menu déroulant).
     let hasPendingHere = false;
     try { const pd = JSON.parse(localStorage.getItem(SUB_TRANSLATE_PENDING_KEY) || 'null'); hasPendingHere = !!(pd && pd.key && pd.key === subTranslateContentKey()); } catch (e) {}
@@ -10286,7 +10590,7 @@ function maybeResumeSubTranslate() {
   // le menu par-dessus.
   waitForPopupsCleared(async () => {
     if (pending.key !== subTranslateContentKey() || !isNetfloxSourceActive() || subTranslateAbortToken) return;
-    // La progression de la traduction vit DANS le menu déroulant « Traduire » : on le
+    // La progression de la traduction vit DANS le menu déroulant « Traduire » : on le
     // déplie avant d'ouvrir le panneau, sinon il reste replié et on ne voit rien.
     subTranslateSectionOpen = true;
     subTranslateSearchQuery = '';
@@ -11301,7 +11605,7 @@ function dlCardHTML(item) {
     </a>`;
 }
 
-// Nettoie une URL renvoyée par l'API (espaces parasites, ex. « https: //… ») ; '' si ce n'est pas du http(s).
+// Nettoie une URL renvoyée par l'API (espaces parasites, ex. « https: //… ») ; '' si ce n'est pas du http(s).
 function dlCleanUrl(u) {
   if (typeof u !== 'string') return '';
   const c = u.replace(/\s+/g, '');
@@ -11386,7 +11690,7 @@ async function renderDownloadPanel() {
     const data = dlParseResponse(raw);
     if (!data || typeof data !== 'object') throw new Error('Réponse illisible');
 
-    // Ancien format (liste « resultats ») conservé en secours
+    // Ancien format (liste « resultats ») conservé en secours
     const legacy = Array.isArray(data.resultats) ? data.resultats : [];
     const hasNew = data.success !== false && (dlCleanUrl(data.url) || dlCleanUrl(data.movix_url) || dlCleanUrl(data.loadix_url) || data.loadix_id);
 
@@ -11775,7 +12079,7 @@ function startWatchParty() {
   // que ses invités doivent aussi avoir l'extension, sinon la lecture ne
   // fonctionnera pas pour eux, avant de démarrer réellement le salon.
   const curSrc = currentSources[currentSourceIndex];
-  if (!wpExtWarnAcknowledged && curSrc && curSrc.isDirect && wpIsFinepulfeUrl(curSrc.url)) {
+  if (!wpExtWarnAcknowledged && curSrc && curSrc.isDirect && (() => { try { return isExtRequiredHost(new URL(curSrc.url).hostname); } catch (e) { return false; } })()) {
     document.getElementById('wp-ext-warn-overlay').classList.add('open');
     return;
   }
@@ -11901,7 +12205,7 @@ function stopWatchParty() {
 async function wpCheckGuestExtensionRequirement() {
   if (!wpIsGuest) return;
   const src = currentSources && currentSources[currentSourceIndex];
-  if (!src || !src.isDirect || !isFinepulfeHost(src.hostname)) return;
+  if (!src || !src.isDirect || !isExtRequiredHost(src.hostname)) return;
   try {
     const res = await fetch(src.url, { method: 'HEAD', cache: 'no-store' });
     if (res.status === 403) handleFinepulfeExtensionRequired();
@@ -12721,13 +13025,13 @@ function wpPushChatSystem(text) {
 }
 
 // Anti-spam : au moins 1 s entre deux messages. Si on va plus vite, le message
-// n'est pas envoyé (le texte reste dans le champ) et « Spam interdit » s'affiche.
+// n'est pas envoyé (le texte reste dans le champ) et « Spam interdit » s'affiche.
 const WP_CHAT_MIN_INTERVAL_MS = 1000;
 let wpLastChatSentAt = 0;
 let wpSpamNoticeUntil = 0;
 let wpSpamNoticeTimer = null;
 
-// Message « Spam interdit » affiché DANS le chat, uniquement chez la personne
+// Message « Spam interdit » affiché DANS le chat, uniquement chez la personne
 // concernée (rien n'est écrit dans Firebase), puis retiré au bout de 2,5 s.
 function wpShowSpamNotice() {
   wpSpamNoticeUntil = Date.now() + 2500;
@@ -13363,7 +13667,7 @@ function wpConfirmJoinPrompt() {
 
 // On récupère la langue de l'hôte AVANT d'afficher le popup de pseudo, pour
 // que celui-ci s'affiche déjà dans la bonne langue (pas de flash FR → EN
-// après avoir cliqué sur « Rejoindre »).
+// après avoir cliqué sur « Rejoindre »).
 function wpPrefetchHostLangThenShowPrompt(code) {
   wpJoinViaLink = true;
   wpArrivedViaLink = true;
@@ -13423,7 +13727,7 @@ function wpPrefetchHostLangThenShowPrompt(code) {
         mcLastAction = null;
         wpMatureAckedKey = `${mType}-${roomMedia.id}`; // évite de le re-montrer une fois dans le film
         await showMatureContentPopup(age, mType, qTitle || (preferredLang === 'fr' ? 'ce contenu' : 'this title'));
-        if (mcLastAction === 'cancel') return; // « Annuler » : on quitte, pas de pseudo
+        if (mcLastAction === 'cancel') return; // « Annuler » : on quitte, pas de pseudo
         wpSetJoinBgLocked(false);                       // le fond se dévoile pendant le fondu du popup d'âge...
         await new Promise(r => setTimeout(r, 340));     // ...puis le pseudo arrive en douceur, pas d'un coup
       }
@@ -13475,7 +13779,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.settings-tabs').forEach(updateTabUnderline);
 });
 
-// ── PAGE 404 « ticket » : renvoie vers l'accueil du site (même rendu que sur l'accueil) ──
+// ── PAGE 404 « ticket » : renvoie vers l'accueil du site (même rendu que sur l'accueil) ──
 const NETFLOX_HOME_URL = 'https://netfloxxx.github.io';
 let nf404Shown = false;
 function showNotFoundPage(message) {
@@ -14158,7 +14462,7 @@ function goToNextSourceAfterError() {
     if (nextSource && !nextSource.isDirect) {
       sourceSubTab[nextSource.lang] = 'autres';
     } else if (nextSource && nextSource.lang === 'ml') {
-      // Arrivée sur un flux direct « Autres langues » : message « Contenu multilingue » (pas de lecteur tiers ni d'adblocker).
+      // Arrivée sur un flux direct « Autres langues » : message « Contenu multilingue » (pas de lecteur tiers ni d'adblocker).
       enqueuePopup(POPUP_PRIORITY.srcError, () => new Promise(resolve => {
         setTimeout(() => showMultiLangNotice(() => {
           resolve();
@@ -14173,8 +14477,8 @@ function goToNextSourceAfterError() {
     const prevLang = currentSources[currentSourceIndex] && currentSources[currentSourceIndex].lang;
     const crossesLang = !!(nextSource && prevLang && nextSource.lang !== prevLang);
     selectCloudflareSource(nextId, { bypassLock: true });
-    // Arrivée sur « Autres langues » (dernier recours) : pas de message « aucun lecteur dans cette langue »,
-    // le popup « Contenu multilingue » est enchaîné plus bas à la place.
+    // Arrivée sur « Autres langues » (dernier recours) : pas de message « aucun lecteur dans cette langue »,
+    // le popup « Contenu multilingue » est enchaîné plus bas à la place.
     const toMultiLang = !!(nextSource && nextSource.lang === 'ml');
     if (crossesLang && !toMultiLang) {
       enqueuePopup(POPUP_PRIORITY.unavailable, () => showNoSourceInLangPopup(prevLang, nextSource.lang, { fallback: true }));
@@ -14183,14 +14487,14 @@ function goToNextSourceAfterError() {
     // Source externe : on prévient tout de suite (popup "source externe + pubs",
     // même logique que le popup adblocker) au lieu d'attendre l'ouverture du panneau.
     if (nextSource && !nextSource.isDirect) {
-      // Ordre voulu : « Oups, petit problème technique » (déjà passé) -> popup
-      // « bascule vers un lecteur tiers » -> popup adblocker. On attend la fin du
+      // Ordre voulu : « Oups, petit problème technique » (déjà passé) -> popup
+      // « bascule vers un lecteur tiers » -> popup adblocker. On attend la fin du
       // fondu de la popup d'erreur pour ne pas les superposer.
       enqueuePopup(POPUP_PRIORITY.srcError, () => new Promise(resolve => {
         setTimeout(() => {
           showThirdPartyNotice(() => {
             if (toMultiLang) {
-              // « Autres langues » : changement de lecteur -> contenu multilingue -> adblocker.
+              // « Autres langues » : changement de lecteur -> contenu multilingue -> adblocker.
               // La file n'est libérée qu'à la fermeture du popup multilingue : le lecteur tiers ne démarre
               // donc (image + son) qu'une fois les popups fermés.
               setTimeout(() => showMultiLangNotice(() => {
@@ -14217,7 +14521,7 @@ function goToNextSourceAfterError() {
 // ── AJUSTEMENT AUTOMATIQUE DE TOUS LES POPUPS À LA TAILLE DE L'ÉCRAN ──
 // Un popup garde sa taille d'origine tant qu'il tient avec une marge de sécurité autour
 // (jamais collé aux bords) ; sinon il est réduit proportionnellement, jusqu'à un plancher
-// pour rester lisible. On utilise la propriété CSS « scale » (indépendante de « transform »),
+// pour rester lisible. On utilise la propriété CSS « scale » (indépendante de « transform »),
 // donc les animations d'ouverture/fermeture existantes ne sont pas touchées.
 const POPUP_FIT_MARGIN = 18;      // px minimum entre un popup et chaque bord de l'écran
 const POPUP_FIT_MIN_SCALE = 0.55; // jamais plus petit que 55 %
@@ -14280,10 +14584,10 @@ function closeThirdPartyNotice() {
   const overlay = document.getElementById('tp-overlay');
   overlay.classList.remove('in');
   setTimeout(() => overlay.classList.remove('open'), 250);
-  if (tpNoticeCallback) { const cb = tpNoticeCallback; tpNoticeCallback = null; cb(); }
+  if (tpNoticeCallback) { const cb = tpNoticeCallback; tpNoticeCallback = null; setTimeout(cb, 290); }
 }
 
-// ── POPUP « AUTRES LANGUES » (information) ──
+// ── POPUP « AUTRES LANGUES » (information) ──
 let mlNoticeCallback = null;
 function showMultiLangNotice(onClose) {
   mlNoticeCallback = typeof onClose === 'function' ? onClose : null;
@@ -14310,7 +14614,7 @@ function closeMultiLangNotice() {
   const overlay = document.getElementById('ml-overlay');
   overlay.classList.remove('in');
   setTimeout(() => overlay.classList.remove('open'), 250);
-  if (mlNoticeCallback) { const cb = mlNoticeCallback; mlNoticeCallback = null; cb(); }
+  if (mlNoticeCallback) { const cb = mlNoticeCallback; mlNoticeCallback = null; setTimeout(cb, 290); }
 }
 
 // ── POPUP AVERTISSEMENT "AUTRES LECTEURS" (pubs) ──
@@ -14499,7 +14803,7 @@ function refreshAdblockButtonsUI(detected) {
   const noteText = document.getElementById('ab-note-mobile-text');
   if (!installBtn || !noteText) return;
 
-  // Adblocker détecté : « J'ai compris » est le seul bouton restant → bouton rouge
+  // Adblocker détecté : « J'ai compris » est le seul bouton restant → bouton rouge
   // principal, comme les autres popups. Sinon il reste discret sous le bouton d'installation.
   const proceedBtn = document.getElementById('ab-proceed-btn');
   if (proceedBtn) {
@@ -14587,8 +14891,9 @@ function confirmAdblockAndProceed() {
   document.getElementById('ab-overlay').classList.remove('open');
   if (abVideoWasPlaying) { try { video.play().catch(() => {}); } catch (e) {} abVideoWasPlaying = false; }
   if (typeof abProceedCallback === 'function') {
-    abProceedCallback();
+    const abCb = abProceedCallback;
     abProceedCallback = null;
+    setTimeout(abCb, 290);
   }
 }
 
@@ -14702,7 +15007,7 @@ function refreshExtensionButtonsUI() {
   if (!installBtn || !noteText) return;
 
   // TV : aucune extension ne peut s'installer sur une TV. On affiche donc
-  // seulement « Changer de source », en rouge (bouton principal).
+  // seulement « Changer de source », en rouge (bouton principal).
   if (window.NF_IS_TV) {
     if (titleEl) { titleEl.setAttribute('data-i18n', 'ext_title_tv'); const v = tr('ext_title_tv'); if (v) titleEl.innerHTML = v; }
     if (textEl)  { textEl.setAttribute('data-i18n', 'ext_p1_tv');   const v = tr('ext_p1_tv');   if (v) textEl.innerHTML = v; }
@@ -14866,8 +15171,8 @@ function stopExtAutoRetryLoop() {
   extAutoRetryInterval = null;
 }
 
-// Nouvelles tentatives silencieuses avant d'afficher le popup « installer
-// l'extension » (voir le handler d'erreur HLS de loadMedia) : 2 maximum par
+// Nouvelles tentatives silencieuses avant d'afficher le popup « installer
+// l'extension » (voir le handler d'erreur HLS de loadMedia) : 2 maximum par
 // URL, remises à zéro au bout de 20 s ou dès qu'un segment passe.
 const extGraceRetries = new Map();
 function extGraceRetryAllowed(url) {
@@ -15131,7 +15436,7 @@ function exitExtRetryMode() {
 
 // ── POPUP "AUCUNE SOURCE DISPONIBLE" (ni française ni anglaise) ──
 // Affiché quand aucun lecteur n'existe pour ce contenu, dans aucune des deux langues.
-// Se résout à la fermeture ; l'appelant enchaîne ensuite sur la page « Séance annulée ».
+// Se résout à la fermeture ; l'appelant enchaîne ensuite sur la page « Séance annulée ».
 let noAnySourceResolve = null;
 function showNoAnySourcePopup() {
   const fr = preferredLang === 'fr';
@@ -15148,7 +15453,7 @@ function closeNoAnySourcePopup() {
   if (typeof noAnySourceResolve === 'function') {
     const r = noAnySourceResolve;
     noAnySourceResolve = null;
-    r();
+    setTimeout(r, 290);
   }
 }
 
@@ -15200,7 +15505,7 @@ let nolangResolve = null; // résout la file de popups quand ce popup (partagé 
 
 function showNoNetfloxPopup(lang, onClose) {
   const text = lang === 'fr'
-    ? "Aucun lecteur NETFLOX n'est disponible en français pour ce contenu. Vous allez être basculé sur l'onglet « Autres lecteurs »."
+    ? "Aucun lecteur NETFLOX n'est disponible en français pour ce contenu. Vous allez être basculé sur l'onglet « Autres lecteurs »."
     : "No NETFLOX player is available in English for this content. You will be switched to the \"Other players\" tab.";
   const title = lang === 'fr' ? 'Aucun lecteur NETFLOX en français' : 'No NETFLOX player in English';
   document.getElementById('nolang-icon').innerHTML = NX_ICON_PLAYER;
@@ -15217,12 +15522,12 @@ function closeNoLangPopup() {
   if (typeof nolangProceedCallback === 'function') {
     const cb = nolangProceedCallback;
     nolangProceedCallback = null;
-    cb();
+    setTimeout(cb, 290);
   }
   if (typeof nolangResolve === 'function') {
     const r = nolangResolve;
     nolangResolve = null;
-    r();
+    setTimeout(r, 290);
   }
 }
 
@@ -15286,7 +15591,7 @@ updateVolUI();
     // Entièrement hors de l'écran
     if (r.right <= 0 || r.bottom <= 0 || r.left >= window.innerWidth || r.top >= window.innerHeight) return false;
     // On remonte tous les parents : un parent transparent / masqué / qui rogne l'élément
-    // le rend invisible même si l'élément lui-même a opacity:1. Ces « boutons fantômes »
+    // le rend invisible même si l'élément lui-même a opacity:1. Ces « boutons fantômes »
     // faisaient perdre des appuis de flèche (il fallait appuyer plusieurs fois).
     for (let n = el; n && n.nodeType === 1 && n !== document.documentElement; n = n.parentElement) {
       const cs = getComputedStyle(n);
@@ -15394,7 +15699,7 @@ updateVolUI();
 
   document.addEventListener('keydown', e => {
     if (typeof playerLocked !== 'undefined' && playerLocked) return; // verrouillage : géré par le gestionnaire habituel
-    // Ce gestionnaire passe avant celui du clavier habituel et « avale » les touches :
+    // Ce gestionnaire passe avant celui du clavier habituel et « avale » les touches :
     // il doit donc lui-même remettre à zéro le minuteur du mode ambiance (sinon il se
     // lançait en pleine navigation à la télécommande).
     try { if (playerVisible()) resetIdleTimer(); } catch (err) {}
@@ -15406,6 +15711,7 @@ updateVolUI();
     const embed = pw.classList.contains('embed-mode');
 
     // 1) Touches média de la télécommande (lecteur direct uniquement)
+    if (window.nxPopupOpen && window.nxPopupOpen() && (/^Media/.test(k) || [10252,179,85,415,126,19,413,127,86,417,228,90,176,412,227,89,177].includes(kc))) { swallow(e); return; }
     if (playerVisible() && !embed) {
       if (k === 'MediaPlayPause' || kc === 10252 || kc === 179 || kc === 85) { swallow(e); keyboardAction = true; togglePlay(); showCtrls(); return; }
       if (k === 'MediaPlay' || kc === 415 || kc === 126)  { swallow(e); video.play().catch(() => {}); return; }
@@ -15419,7 +15725,7 @@ updateVolUI();
     if (isBack) {
       const sc = topScope();
       if (sc.kind === 'panel') { swallow(e); closeMenus(); if (ae && ae.blur) ae.blur(); return; }
-      if (sc.kind === 'overlay') return; // les popups demandent un choix : on ne les ferme pas d'un « Retour »
+      if (sc.kind === 'overlay') return; // les popups demandent un choix : on ne les ferme pas d'un « Retour »
       if (sc.kind === 'player' && pw.classList.contains('cv') && playerVisible() && !embed) {
         swallow(e); hideCtrls(); if (ae && ae.blur) ae.blur(); return;
       }
@@ -15464,7 +15770,7 @@ updateVolUI();
         return;                                                   // boutons : clic natif
       }
       if (sc.kind !== 'player') { swallow(e); move('Down', sc.el); return; } // rien de sélectionné : on sélectionne le bouton principal
-      if (playerVisible() && !embed) { swallow(e); keyboardAction = true; togglePlay(); showCtrls(); }
+      if (playerVisible() && !embed && !(window.nxPopupOpen && window.nxPopupOpen())) { swallow(e); keyboardAction = true; togglePlay(); showCtrls(); }
     }
   }, true);
 
